@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.GLPT</groupId>
-	<artifactId>Lesgo</artifactId>
+	<artifactId>BackEnd</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Lesgo</name>
+	<name>Backend</name>
 	<description>An application for tracking progress with rank</description>
 	<url/>
 	<licenses>
