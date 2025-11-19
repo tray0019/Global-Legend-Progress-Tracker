@@ -1,6 +1,5 @@
 package com.GLPT.Backend.Controller;
 
-
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Service.GoalService;
 import org.springframework.web.bind.annotation.*;
