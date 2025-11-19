@@ -5,9 +5,9 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GoalProcessDto {
+public class GoalResponseDto {
 
-    private long Id;
+    private long id;
     private String goalTitle;
 
 }

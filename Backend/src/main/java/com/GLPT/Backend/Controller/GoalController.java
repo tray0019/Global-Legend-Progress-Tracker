@@ -1,5 +1,7 @@
 package com.GLPT.Backend.Controller;
 
+import com.GLPT.Backend.DTO.GoalCreateDto;
+import com.GLPT.Backend.DTO.GoalResponseDto;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Service.GoalService;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,11 @@ public class GoalController {
     }
 
     @PostMapping("/goals")
-    public Goal createGoal(@RequestBody Goal goal){
-        return service.createNewGoal(goal);
+    public GoalResponseDto createGoal(@RequestBody GoalCreateDto dto){
+        Goal goal = new Goal();
+        goal.setGoalTitle(dto.getGoalTitle());
+        Goal save = service.createNewGoal(goal);
+        return new GoalResponseDto(save.getId(), save.getGoalTitle());
     }
 
     /**
