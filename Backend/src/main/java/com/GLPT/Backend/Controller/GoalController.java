@@ -6,6 +6,7 @@ import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Service.GoalService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,9 +30,18 @@ public class GoalController {
     /**
      * -- View All Goals
      */
-    @GetMapping("/goals")//set goalView
-    public List<Goal> getAllGoal(){
-        return service.viewAllGoal();
+    @GetMapping("/goals")
+    public List<GoalResponseDto> getAllGoal(){
+        List<Goal> goals =  service.viewAllGoal();
+        List<GoalResponseDto> dtoList = new ArrayList<>();
+
+        for(Goal goal: goals){
+            GoalResponseDto dto = new GoalResponseDto(goal.getId(), goal.getGoalTitle());
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+
     }
 
     /**
