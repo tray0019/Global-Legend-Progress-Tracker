@@ -31,7 +31,7 @@ public class GoalController {
      * -- View All Goals
      */
     @GetMapping("/goals")
-    public List<GoalResponseDto> getAllGoal(){
+    public List<GoalResponseDto> getAllGoals(){
         List<Goal> goals =  service.viewAllGoal();
         List<GoalResponseDto> dtoList = new ArrayList<>();
 
@@ -49,16 +49,18 @@ public class GoalController {
      */
 
     @GetMapping("/goals/{goalId}")
-    public Goal getGoal(@PathVariable long goalId){
-        return service.viewGoal(goalId);
+    public GoalResponseDto getGoal(@PathVariable long goalId){
+        Goal goal =  service.viewGoal(goalId);
+        return new GoalResponseDto(goal.getId(),goal.getGoalTitle());
     }
 
     /**
      *  -- Rename Goal title
      */
     @PutMapping("/goals/{goalId}")
-    public Goal renameGoal(@PathVariable long goalId, @RequestParam String newTitle){
-        return service.renameGoal(goalId,newTitle);
+    public GoalResponseDto renameGoal(@PathVariable long goalId, @RequestParam String newTitle){
+        Goal goal = service.renameGoal(goalId, newTitle);
+        return new GoalResponseDto(goal.getId(),goal.getGoalTitle());
     }
 
     /**
