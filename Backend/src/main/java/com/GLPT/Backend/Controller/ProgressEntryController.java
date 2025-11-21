@@ -6,6 +6,7 @@ import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Service.ProgressEntryService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,17 +27,33 @@ public class ProgressEntryController {
         ProgressEntry saved = service.addEntryToGoal(goalId,dto.getDescription());
         return new EntryResponseDto(saved.getId(), saved.getDescription());
     }
-g
+
+    /**
+     *  -- View all entries with ENtryResponseDto
+     */
     @GetMapping("/entries")
-    public List<ProgressEntry> viewAllEntries(){
-        return service.getAllEntries();
+    public List<EntryResponseDto> viewAllEntries(){
+        List<ProgressEntry> entries = service.getAllEntries();
+        List<EntryResponseDto> entryList = new ArrayList<>();
+
+        for(ProgressEntry entry: entries){
+            EntryResponseDto dto = new EntryResponseDto(entry.getId(),entry.getDescription());
+            entryList.add(dto);
+        }
+
+        return entryList;
     }
 
+    /**
+     * -- Take the id of entry and update the description
+     */
     @PutMapping("/entries/{entryId}")
-    public ProgressEntry renameEntry(
-            @PathVariable long entryId,
-                                     @RequestParam String newEntryDescription){
-        return service.updateDescription(entryId,newEntryDescription);
+    public EntryResponseDto renameEntry(@PathVariable long entryId,
+                                        @RequestBody EntryCreateDto dto){
+
+        ProgressEntry saved = service.updateDescription(entryId,dto.getDescription());
+
+        return new EntryResponseDto(saved.getId(), saved.getDescription());
     }
 
     @DeleteMapping("/entries/{entryId}")
