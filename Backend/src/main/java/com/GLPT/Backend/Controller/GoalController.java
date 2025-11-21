@@ -1,8 +1,11 @@
 package com.GLPT.Backend.Controller;
 
+import com.GLPT.Backend.DTO.EntryResponseDto;
 import com.GLPT.Backend.DTO.GoalCreateDto;
 import com.GLPT.Backend.DTO.GoalResponseDto;
+import com.GLPT.Backend.DTO.GoalWithEntriesDto;
 import com.GLPT.Backend.Entity.Goal;
+import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Service.GoalService;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,9 +52,16 @@ public class GoalController {
      */
 
     @GetMapping("/goals/{goalId}")
-    public GoalResponseDto getGoal(@PathVariable long goalId){
+    public GoalWithEntriesDto getGoal(@PathVariable long goalId){
         Goal goal =  service.viewGoal(goalId);
-        return new GoalResponseDto(goal.getId(),goal.getGoalTitle());
+
+        List<EntryResponseDto> entryDto = new ArrayList<>();
+
+        for(ProgressEntry entry: goal.getEntries()){
+            entryDto.add(new EntryResponseDto(entry.getId(),entry.getDescription()));
+        }
+
+        return new GoalWithEntriesDto(goal.getId(),goal.getGoalTitle(),entryDto);
     }
 
     /**
