@@ -19,7 +19,7 @@ public class ProgressEntryController {
     }
 
     /**
-     * -- Return goal id and entry description
+     * -- Add and Return goal id and entry description
      */
     @PostMapping("/goal/{goalId}/entries")
     public EntryResponseDto addEntry(@PathVariable long goalId,
