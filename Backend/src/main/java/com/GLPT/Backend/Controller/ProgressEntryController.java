@@ -1,5 +1,7 @@
 package com.GLPT.Backend.Controller;
 
+import com.GLPT.Backend.DTO.EntryCreateDto;
+import com.GLPT.Backend.DTO.EntryResponseDto;
 import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Service.ProgressEntryService;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +17,16 @@ public class ProgressEntryController {
         this.service = service;
     }
 
+    /**
+     * -- Return goal id and entry description
+     */
     @PostMapping("/goal/{goalId}/entries")
-    public ProgressEntry addEntry(
-            @PathVariable long goalId,
-                                  @RequestParam String description){
-        return service.addEntryToGoal(goalId, description);
+    public EntryResponseDto addEntry(@PathVariable long goalId,
+                                     @RequestBody EntryCreateDto dto) {
+        ProgressEntry saved = service.addEntryToGoal(goalId,dto.getDescription());
+        return new EntryResponseDto(saved.getId(), saved.getDescription());
     }
-
+g
     @GetMapping("/entries")
     public List<ProgressEntry> viewAllEntries(){
         return service.getAllEntries();
