@@ -18,7 +18,7 @@ This is a progress tracking application where user track their progress to reach
 
 ## Frontend
 - React
-
+- Visual Studio Code
 
 ## Steps Taken
 1. Focus on BackEnd development
