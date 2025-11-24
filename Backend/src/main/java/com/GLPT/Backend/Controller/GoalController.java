@@ -7,6 +7,7 @@ import com.GLPT.Backend.DTO.GoalWithEntriesDto;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Service.GoalService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class GoalController {
     }
 
     @PostMapping("/goals")
-    public GoalResponseDto createGoal(@RequestBody GoalCreateDto dto){
+    public GoalResponseDto createGoal(@Valid @RequestBody GoalCreateDto dto){
         Goal goal = new Goal();
         goal.setGoalTitle(dto.getGoalTitle());
         Goal save = service.createNewGoal(goal);
