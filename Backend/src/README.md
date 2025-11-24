@@ -8,3 +8,4 @@ Step Taken:
     - Goal Class: Represent the user goal 
     - Progress Entry: The options that tracks the progress of the Goal
 4. Added List of ProgressEntry in Goal and ProgressEntry class has a goal. I made sure theyre both joing with appropriate column. 
+--
