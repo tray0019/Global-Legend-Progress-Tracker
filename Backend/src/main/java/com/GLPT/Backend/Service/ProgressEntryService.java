@@ -4,7 +4,9 @@ import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Repository.GoalRepository;
 import com.GLPT.Backend.Repository.ProgressEntryRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +28,9 @@ public class ProgressEntryService {
     public ProgressEntry addEntryToGoal(long goalId, String description){
 
         Goal goal = goalRepo.findById(goalId)
-                .orElseThrow(() -> new RuntimeException("Goal not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,"Entry Id not found"
+                ));
 
         ProgressEntry entry = new ProgressEntry();
         entry.setDescription(description);
@@ -51,7 +55,9 @@ public class ProgressEntryService {
      */
     public ProgressEntry updateDescription(long entryId, String  newEntryDescription){
             ProgressEntry entry = repo.findById(entryId)
-                    .orElseThrow(() -> new RuntimeException("Entry not found"));
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,"Entry id not found"
+                    ));
 
             entry.setDescription(newEntryDescription);
             return repo.save(entry);
@@ -64,7 +70,9 @@ public class ProgressEntryService {
     public void deleteDescription(long entryId){
 
         if(!repo.existsById(entryId)){
-            throw new RuntimeException("Entry not found");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,"Entry id not found"
+            );
         }
         repo.deleteById(entryId);
     }
