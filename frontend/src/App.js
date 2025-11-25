@@ -163,6 +163,45 @@ function App(){
       });
 
   }
+
+  function handleRenameEntry(entryId, currentDescription){
+    if(!selectedGoal){
+      return;
+    }
+      var newDescription = window.prompt(
+      "Enter new description:",
+      currentDescription
+    );
+
+
+    // User clicked Cancel
+    if(newDescription === null){
+      return;
+    }
+
+    // Empty or space only
+    if(!newDescription.trim()){
+      alert("Description cannot be empty.");
+      return;
+    }
+
+    axios.put(
+      "http://localhost:8080/entries/"+entryId,
+      { description: newDescription}
+    )
+    .then(function (res){
+      console.log("Entry renamed:",res.data);
+
+      // Refresh goal details so List updates
+      handleView(selectedGoal.goalId);
+    
+    })
+    .catch(function (err){
+        console.error("Error renaming entry:", err); 
+    });
+  }
+
+  
   
 
 return (
@@ -266,6 +305,12 @@ return (
                   handleDeleteEntry(entry.id);}}
                 >Delete</button>
 
+                <button
+                 style={{ marginLeft: "8px" }}
+                 onClick={function () {handleRenameEntry(entry.id, entry.description);}}>
+                  Rename
+                </button>
+
               </li>
             );
           })}
@@ -290,10 +335,6 @@ return (
           </button>
 
           </div>
-
-
-  
-   
   {/** */}
   </div> 
 )};
