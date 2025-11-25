@@ -56,6 +56,45 @@ function App(){
         console.error("Error adding entry:", err)
     });
   }
+
+  function handleDeleteEntry(entryId){
+    if(!selectedGoal){
+      return;
+    }
+
+    axios.delete("http://localhost:8080/entries/"+entryId)
+    .then(function (){
+        console.log("Entry deleted:", entryId);
+
+        //Refresh goal details so the List updates
+        handleView(selectedGoal.goalId);
+    })
+    .catch(function (err){
+        console.console.log(("Error deleting entry:",err));
+    });
+  }
+
+  function handleDeleteGoal(goalId){
+    axios.delete("http://localhost:8080/goals/"+goalId)
+    .then(function(){
+        console.log("Goal deleted:", goalId);
+
+        // if the goal is currently selected, clear it
+        if(selectedGoal && selectedGoal.goalId === goalId){
+          setSelectedGoal(null);
+        }
+
+        // Refresh the goals List
+        axios.get("http://localhost:8080/goals")
+          .then(function (res){
+            setGoals(res.data);
+          })
+          .catch(function (err){
+            console.log("Error refreshing goals:", err);
+            
+          });
+    });
+  }
   
   
 
@@ -83,10 +122,17 @@ return (
             >
               View
             </button>
+
+
+            <button
+            style={{ marginTop: "10px"}}
+            onClick={function() {handleDeleteGoal(goal.id);}}
+            >Delete</button>
+
           </div>
 
         </li>
-      )
+      );
     })}
 
   </ul>
@@ -114,6 +160,12 @@ return (
             return (
               <li key={entry.id}>
                 {entry.description}
+
+                <button
+                style={{marginLeft: "8px"}}
+                onClick={function () { handleDeleteEntry(entry.id);}}
+                >Delete</button>
+
               </li>
             );
           })}
@@ -138,6 +190,10 @@ return (
           </button>
 
           </div>
+
+
+  
+   
   {/** */}
   </div> 
 )};
