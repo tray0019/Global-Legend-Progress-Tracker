@@ -6,8 +6,10 @@ function App(){
 
   const [goals, setGoals ] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
-  const [ newEntryDescription, setNewEntryDescription ] = useState("");
+  const [newEntryDescription, setNewEntryDescription ] = useState("");
   const [newGoalTitle, setNewGoalTitle ] = useState("");
+  const [renameGoalTitle, setRenameGoalTitle] = useState("");
+
 
   useEffect(function() {
     axios.get("http://localhost:8080/goals")
@@ -126,6 +128,41 @@ function App(){
       console.error("Error creating goal:", err);
     });
   }
+
+  function handleRenameGoal(goalId){
+    if(!renameGoalTitle.trim()){
+      alert("Please enter a new title.");
+      return;
+    }
+
+    axios.put("http://localhost:8080/goals/"
+      +goalId+"?newTitle="+renameGoalTitle)
+      .then(function (res){
+        console.log("Goal renamed:",res.data);
+        
+        // Refresh List
+        axios.get("http://localhost:8080/goals")
+          .then(function (res2){
+            setGoals(res2.data);
+          })
+          .catch(function (err2){
+              console.error(err2);
+          });
+
+          // If renamed goal is selected, refresh details
+          if(selectedGoal && selectedGoal.goalId === goalId){
+            handleView(goalId);
+          }
+
+          // Clear input
+          setRenameGoalTitle("");
+      })
+      .catch(function (err){
+          console.error("Error renaming goal:",err);
+          
+      });
+
+  }
   
 
 return (
@@ -138,7 +175,7 @@ return (
         type="text"
         value={newGoalTitle}
         onChange={function (e) {setNewGoalTitle(e.target.value);}}
-        placeHolder="Enter goal title..."
+        placeholder="Enter goal title..."
         style={{ width: "100%", padding: "8px", boxSizing: "border-box"}}/>
       
       <button
@@ -177,8 +214,22 @@ return (
               handleDeleteGoal(goal.id);}}
             >Delete</button>
 
-          </div>
+            <div style={{ marginTop: "10px"}}>
+            <input
+            type="text"
+            value={renameGoalTitle}
+            onChange={function (e){ setRenameGoalTitle(e.target.value);}}
+            placeholder="New Title..."
+            style={{ width: "70%", padding: "6px"}}   />
 
+            <button
+              style={{ marginLeft: "8px"}} 
+              onClick={function () {handleRenameGoal(goal.id);}} >
+                Rename
+            </button>
+
+            </div>
+          </div>
         </li>
       );
     })}
