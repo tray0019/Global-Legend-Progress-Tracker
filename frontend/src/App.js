@@ -126,7 +126,9 @@ return (
 
             <button
             style={{ marginTop: "10px"}}
-            onClick={function() {handleDeleteGoal(goal.id);}}
+            onClick={function() {
+              if(window.confirm("Are you sure you want to delete this goal?"))
+              handleDeleteGoal(goal.id);}}
             >Delete</button>
 
           </div>
@@ -163,7 +165,8 @@ return (
 
                 <button
                 style={{marginLeft: "8px"}}
-                onClick={function () { handleDeleteEntry(entry.id);}}
+                onClick={function () { 
+                  handleDeleteEntry(entry.id);}}
                 >Delete</button>
 
               </li>
