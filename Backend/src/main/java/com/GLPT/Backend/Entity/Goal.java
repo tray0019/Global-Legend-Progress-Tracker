@@ -16,7 +16,7 @@ public class Goal {
 
     private String goalTitle;
 
-    @OneToMany(mappedBy = "goal")
+    @OneToMany(mappedBy = "goal", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ProgressEntry> entries;
 
 }
