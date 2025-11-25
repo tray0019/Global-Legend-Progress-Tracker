@@ -7,6 +7,7 @@ function App(){
   const [goals, setGoals ] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [ newEntryDescription, setNewEntryDescription ] = useState("");
+  const [newGoalTitle, setNewGoalTitle ] = useState("");
 
   useEffect(function() {
     axios.get("http://localhost:8080/goals")
@@ -96,11 +97,56 @@ function App(){
     });
   }
   
+  function handleAddGoal(){
+    if(!newGoalTitle.trim()){
+      alert("Please enter a goal title.");
+      return;
+    }
+
+    axios.post("http://localhost:8080/goals", {
+        goalTitle: newGoalTitle  
+    })
+      .then(function (res){
+      console.log("Goal created:",res.data);
+
+      // Clear input
+      setNewGoalTitle("");
+
+      // Refresh goals list
+      axios.get("http://localhost:8080/goals")
+        .then(function (res2) {
+          setGoals(res2.data);
+        })
+        .catch(function (err2){
+          console.error("Error refreshing goals:",err2);
+        });
+      
+    })
+    .catch(function (err){
+      console.error("Error creating goal:", err);
+    });
+  }
   
 
 return (
   <div style={{ maxWidth: "600px", margin: "20px auto"}}>
     <h1>Goals</h1>
+
+    <div style={{ marginBottom: "20px"}}>
+      <h3>Add Goal</h3>
+      <input
+        type="text"
+        value={newGoalTitle}
+        onChange={function (e) {setNewGoalTitle(e.target.value);}}
+        placeHolder="Enter goal title..."
+        style={{ width: "100%", padding: "8px", boxSizing: "border-box"}}/>
+      
+      <button
+        onClick={handleAddGoal}
+        style={{ marginTop: "8px"}} >
+          Save Goal
+      </button>
+    </div>
 
     <ul style={{ listStyle: "none", padding: 0}}>
     {goals.map(function (goal){
