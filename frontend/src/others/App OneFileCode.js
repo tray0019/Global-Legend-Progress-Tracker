@@ -1,13 +1,13 @@
 
 import {useEffect, useState } from "react";
 import axios from "axios";
-import AddGoalForm from "../components/AddGoalForm"
 
-function Home(){
+function App(){
 
   const [goals, setGoals ] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [newEntryDescription, setNewEntryDescription ] = useState("");
+  const [newGoalTitle, setNewGoalTitle ] = useState("");
   const [renameGoalTitle, setRenameGoalTitle] = useState("");
 
 
@@ -99,29 +99,35 @@ function Home(){
     });
   }
   
-  function handleAddGoal(title){
+  function handleAddGoal(){
+    if(!newGoalTitle.trim()){
+      alert("Please enter a goal title.");
+      return;
+    }
 
     axios.post("http://localhost:8080/goals", {
-        goalTitle: title  
+        goalTitle: newGoalTitle  
     })
-    .then(function (res){ console.log("Goal created:",res.data); 
+      .then(function (res){
+      console.log("Goal created:",res.data);
+
+      // Clear input
+      setNewGoalTitle("");
+
+      // Refresh goals list
+      axios.get("http://localhost:8080/goals")
+        .then(function (res2) {
+          setGoals(res2.data);
+        })
+        .catch(function (err2){
+          console.error("Error refreshing goals:",err2);
+        });
       
-      // Refresh goals list 
-      axios.get("http://localhost:8080/goals") 
-      .then(function (res2) { 
-        setGoals(res2.data); 
-      }) 
-      .catch(function (err2){ 
-        console.error("Error refreshing goals:",err2); 
-      }); 
-    }) 
-        .catch(function (err){ 
-          console.error("Error creating goal:", err); });
-      
+    })
+    .catch(function (err){
+      console.error("Error creating goal:", err);
+    });
   }
-
-
-
 
   function handleRenameGoal(goalId){
     if(!renameGoalTitle.trim()){
@@ -199,12 +205,139 @@ function Home(){
   
 
 return (
-    <div>
-        <AddGoalForm onAdd={handleAddGoal}/>
+  <div style={{ maxWidth: "600px", margin: "20px auto"}}>
+    <h1>Goals</h1>
 
+    <div style={{ marginBottom: "20px"}}>
+      <h3>Add Goal</h3>
+      <input
+        type="text"
+        value={newGoalTitle}
+        onChange={function (e) {setNewGoalTitle(e.target.value);}}
+        placeholder="Enter goal title..."
+        style={{ width: "100%", padding: "8px", boxSizing: "border-box"}}/>
+      
+      <button
+        onClick={handleAddGoal}
+        style={{ marginTop: "8px"}} >
+          Save Goal
+      </button>
     </div>
-)
 
-}
+    <ul style={{ listStyle: "none", padding: 0}}>
+    {goals.map(function (goal){
 
-export default Home;
+      
+      return (
+        <li key={goal.id} style={{ marginBottom: "12px"}}>
+          <div style={{
+            border: "1px solid #ddd",
+            padding: "16px",
+            borderRadius: "8px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+            backgroundColor: "#fff"
+          }}>
+            <h3 style={{ margin: 0}}>{goal.goalTitle}</h3>
+
+            <button style={{ marginTop: "10px"}}
+              onClick={function() { handleView(goal.id);}}
+            >
+              View
+            </button>
+
+
+            <button
+            style={{ marginTop: "10px"}}
+            onClick={function() {
+              if(window.confirm("Are you sure you want to delete this goal?"))
+              handleDeleteGoal(goal.id);}}
+            >Delete</button>
+
+            <div style={{ marginTop: "10px"}}>
+            <input
+            type="text"
+            value={renameGoalTitle}
+            onChange={function (e){ setRenameGoalTitle(e.target.value);}}
+            placeholder="New Title..."
+            style={{ width: "70%", padding: "6px"}}   />
+
+            <button
+              style={{ marginLeft: "8px"}} 
+              onClick={function () {handleRenameGoal(goal.id);}} >
+                Rename
+            </button>
+
+            </div>
+          </div>
+        </li>
+      );
+    })}
+
+  </ul>
+
+  {/**
+   * Goal Detail
+   */}
+   
+   {selectedGoal && (
+    <div style={{
+      marginTop: "24px",
+      padding: "16px",
+      borderRadius: "8px",
+      border: "1px solid #ccc",
+      backGroundColor: "#f9f9f9"
+    }}>
+      <h2>{selectedGoal.goalTitle}</h2>
+      {(!selectedGoal.entries || selectedGoal.entries.length === 0) &&(
+        <p>No entries yet.</p>
+      )}
+
+      {selectedGoal.entries && selectedGoal.entries.length > 0 && (
+        <ul>
+          {selectedGoal.entries.map(function (entry){
+            return (
+              <li key={entry.id}>
+                {entry.description}
+
+                <button
+                style={{marginLeft: "8px"}}
+                onClick={function () { 
+                  handleDeleteEntry(entry.id);}}
+                >Delete</button>
+
+                <button
+                 style={{ marginLeft: "8px" }}
+                 onClick={function () {handleRenameEntry(entry.id, entry.description);}}>
+                  Rename
+                </button>
+
+
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+
+      </div> 
+   )}
+
+   {/**Add Entry Form */}
+      <div style={{marginTop: "16px"}}>
+        <h4>Add Entry</h4>
+        <input
+          type="text"
+          value={newEntryDescription}
+          onChange={function(e) {setNewEntryDescription(e.target.value);}}
+          placeHolder="Describe your progress..."
+          style={{ width: "100%", padding: "8px", boxSizing: "border-box"}}/>
+          <button onClick={handleAddEntry} style={{marginTop:"8px"}}>
+            Save Entry
+          </button>
+
+          </div>
+  {/** */}
+  </div> 
+)};
+
+export default App;
