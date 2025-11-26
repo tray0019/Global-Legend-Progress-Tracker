@@ -7,7 +7,7 @@
 ![Lombok](https://img.shields.io/badge/Lombok-Enabled-yellow)
 
 ## Description
-This is a progress tracking application where user track their progress to reach their goal. User gain rank for continuose streak just like the game mobile legend. 
+This is a progress tracking application where user track their progress to reach their goal. User gain rank for continuos streak just like the game mobile legend. 
 
 ## Technologies and Tools Backend
 - Spring Boot
@@ -19,6 +19,8 @@ This is a progress tracking application where user track their progress to reach
 ## Frontend
 - React
 - Visual Studio Code
+- JavaScript
+- Axios
 
 ## Steps Taken
 1. Focus on BackEnd development
@@ -44,3 +46,15 @@ This is a progress tracking application where user track their progress to reach
 15. Test in Postman with QA documents
 16. Updated code added validation dependcy to return @NotBlank for goalTitle with the use of ResponseStatusException
 17. Retest everything in postman and succesfully pass! ✅✅✅👌
+
+18. Focus on Backend. Coded UI and Progress functionalities in one file app.js to test all crud functions.
+19. Added Cross Origin for Goal and Progress Entry controller.
+20. Updated Goal Entity to cascade entries lists.
+21. Used Axios and JavaScript, coded all UI and functionalities
+      - List of Goals
+      - Add entry to Goal
+      - Deleting a Goal
+      - Deleting Entry
+      - Adding a Goal
+      - Renaming Entry 
+      - Renaming Goal
