@@ -50,7 +50,7 @@ This is a progress tracking application where user track their progress to reach
 18. Focus on Backend. Coded UI and Progress functionalities in one file app.js to test all crud functions.
 19. Added Cross Origin for Goal and Progress Entry controller.
 20. Updated Goal Entity to cascade entries lists.
-21. Used Axios and JavaScript, coded all UI and functionalities
+21. Used Axios and JavaScript, coded all UI and functionalities in app.js
       - List of Goals
       - Add entry to Goal
       - Deleting a Goal
