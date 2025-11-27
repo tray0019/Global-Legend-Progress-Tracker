@@ -1,7 +1,9 @@
 
 import {useEffect, useState } from "react";
 import axios from "axios";
+
 import AddGoalForm from "../components/AddGoalForm"
+import GoalCard from "../components/GoalCard"
 
 function Home(){
 
@@ -199,12 +201,31 @@ function Home(){
   
 
 return (
-    <div>
+    <div style={{ maxWidth: "600px", margin: "20px auto"}}>
+      <h1>Goals</h1>
+
         <AddGoalForm onAdd={handleAddGoal}/>
+
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {goals.map(function(goal){
+            return(
+              <GoalCard
+                key={goal.id}
+                goal={goal}
+                renameValue={setRenameGoalTitle}
+                onChangeRename={setRenameGoalTitle}
+                onView={handleView}
+                onDelete={handleDeleteGoal}
+                onRename={handleRenameGoal}
+                />
+            );
+          })}
+
+        </ul>
 
     </div>
 )
 
 }
-
+// , 
 export default Home;
