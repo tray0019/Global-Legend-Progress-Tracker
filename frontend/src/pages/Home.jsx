@@ -126,13 +126,23 @@ function Home(){
 
 
   function handleRenameGoal(goalId){
-    if(!renameGoalTitle.trim()){
-      alert("Please enter a new title.");
+    
+    var newTitle = window.prompt(
+        "Enter the new title for this goal:"
+    );
+
+    // User pressed cancel
+    if(newTitle === null){
+      return;
+    }
+    
+    // Empty string (spaces etc.)
+    if(!newTitle.trim()){
+      alert("Title cannot be empty.");
       return;
     }
 
-    axios.put("http://localhost:8080/goals/"
-      +goalId+"?newTitle="+renameGoalTitle)
+    axios.put("http://localhost:8080/goals/"+goalId+"?newTitle="+newTitle)
       .then(function (res){
         console.log("Goal renamed:",res.data);
         
@@ -150,8 +160,6 @@ function Home(){
             handleView(goalId);
           }
 
-          // Clear input
-          setRenameGoalTitle("");
       })
       .catch(function (err){
           console.error("Error renaming goal:",err);
