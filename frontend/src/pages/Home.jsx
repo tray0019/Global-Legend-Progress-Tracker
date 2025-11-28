@@ -4,13 +4,14 @@ import axios from "axios";
 
 import AddGoalForm from "../components/AddGoalForm"
 import GoalCard from "../components/GoalCard"
+import GoalDetails from "../components/GoalDetails"
 
 function Home(){
 
   const [goals, setGoals ] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [newEntryDescription, setNewEntryDescription ] = useState("");
-  const [renameGoalTitle, setRenameGoalTitle] = useState("");
+
 
 
   useEffect(function() {
@@ -75,7 +76,7 @@ function Home(){
         handleView(selectedGoal.goalId);
     })
     .catch(function (err){
-        console.console.log(("Error deleting entry:",err));
+        console.log(("Error deleting entry:",err));
     });
   }
 
@@ -216,21 +217,28 @@ return (
 
         <ul style={{ listStyle: "none", padding: 0 }}>
           {goals.map(function(goal){
+            var isSelected = 
+              selectedGoal && selectedGoal.goalId === goal.id; // goal.id vs goalId
             return(
               <GoalCard
                 key={goal.id}
                 goal={goal}
-                renameValue={setRenameGoalTitle}
-                onChangeRename={setRenameGoalTitle}
                 onView={handleView}
                 onDelete={handleDeleteGoal}
                 onRename={handleRenameGoal}
+
+                isSelected={isSelected}
+                selectedGoal={selectedGoal}
+                newEntryDescription={newEntryDescription}
+                onChangeNewEntry={setNewEntryDescription}
+                onAddEntry={handleAddEntry}
+                onDeleteEntry={handleDeleteEntry}
+                onRenameEntry={handleRenameEntry}
+
                 />
             );
           })}
-
         </ul>
-
     </div>
 )
 

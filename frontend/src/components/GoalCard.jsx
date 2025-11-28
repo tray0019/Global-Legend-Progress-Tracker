@@ -1,10 +1,12 @@
 import React from "react";
 
 function GoalCard(props){
-    const goal = props.goal;
+    var goal = props.goal;
+    var isSelected = props.isSelected;
+    var selectedGoal = props.selectedGoal;
 
     return (
-    <li style={{ marginBotton: "12px" }}>
+    <li style={{ marginBottom: "12px" }}>
         <div 
             style={{
                 border: "1px solid #ddd",
@@ -20,14 +22,14 @@ function GoalCard(props){
         <button style={{ marginTop: "10px", marginRight: "8px"}}
             onClick={function(){
                 props.onView(goal.id);
-            }}>
+                props.onView(goal.id)}}>
             View
         </button>
 
         {/**Delete Button */}
         <button
             style={{ marginTop: "10px", marginRight: "8px"}}
-            onClik={function(){
+            onClick={function(){
                 if(window.confirm("Are you sure you want to delete this goal?")){
                     props.onDelete(goal.id);
                 }
@@ -45,8 +47,40 @@ function GoalCard(props){
                 >
                 Rename
             </button>
-        
 
+        {isSelected && selectedGoal && (
+            <div
+                style={{
+                    marginTop: "16px",
+                    paddingTop: "12px",
+                    borderTop: "1px solid #eee",
+                }}>
+                <h4>Entries</h4>
+
+                {(!selectedGoal.entries || selectedGoal.entries.length === 0)&&(
+                    <p>No entries yet.</p>
+                )}
+
+                    {selectedGoal.entries &&
+                        selectedGoal.entries.length > 0 && (
+                        <ul>
+                            {selectedGoal.entries.map(function (entry){
+                                return (
+                                    <li key={entry.id}>
+                                        {entry.description}
+
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                        )}
+
+                
+
+            </div>
+        )}
+            
+        
         </div>
     </li>
     )
