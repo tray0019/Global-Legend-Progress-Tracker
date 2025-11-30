@@ -4,7 +4,11 @@ import axios from "axios";
 
 import AddGoalForm from "../components/AddGoalForm"
 import GoalCard from "../components/GoalCard"
-import GoalDetails from "../components/GoalDetails"
+import {
+  getAllGoals,getGoalById,createGoal,renameGoal,deleteGoal} from "../api/goalApi";
+import {
+  addEntry,renameEntry,deleteEntry } from "../api/entryApi";
+
 
 function Home(){
 
@@ -36,48 +40,18 @@ function Home(){
   }
 
   function handleAddEntry(){
-    if(!selectedGoal){
-      return;
-    }
-
-    if(!newEntryDescription.trim()){
-      alert("Please enter a description (or type something).");
-      return;
-    }
-
-    axios.post(
-      "http://localhost:8080/goal/" + selectedGoal.goalId+"/entries",
-      { description: newEntryDescription }
-    )
-    .then(function (res){
-      console.log("Entry added:",res.data);
-
-      // Clear input
-      setNewEntryDescription("");
-
-      // Refresh the selected goal so entries update
-      handleView(selectedGoal.goalId);
-    })
-    .catch(function (err){
-        console.error("Error adding entry:", err)
-    });
+    addEntry(selectedGoal.goalId, newEntryDescription)
+      .then(function(){
+        setNewEntryDescription("");
+        handleView(selectedGoal.goalId);
+      });
   }
 
   function handleDeleteEntry(entryId){
-    if(!selectedGoal){
-      return;
-    }
-
-    axios.delete("http://localhost:8080/entries/"+entryId)
-    .then(function (){
-        console.log("Entry deleted:", entryId);
-
-        //Refresh goal details so the List updates
-        handleView(selectedGoal.goalId);
-    })
-    .catch(function (err){
-        console.log(("Error deleting entry:",err));
-    });
+    deleteEntry(entryId)
+      .then(function(){
+          handleView(selectedGoal.goalId)
+      });
   }
 
   function handleDeleteGoal(goalId){
@@ -104,23 +78,19 @@ function Home(){
   
   function handleAddGoal(title){
 
-    axios.post("http://localhost:8080/goals", {
-        goalTitle: title  
-    })
-    .then(function (res){ console.log("Goal created:",res.data); 
-      
-      // Refresh goals list 
-      axios.get("http://localhost:8080/goals") 
-      .then(function (res2) { 
-        setGoals(res2.data); 
-      }) 
-      .catch(function (err2){ 
-        console.error("Error refreshing goals:",err2); 
-      }); 
-    }) 
-        .catch(function (err){ 
-          console.error("Error creating goal:", err); });
-      
+    createGoal(title)
+      .then(function(res){
+        console.log("Goal created:", res.data);
+        
+        getAllGoals()
+          .then(function(res2){
+            setGoals(res2.data)
+          });
+      })
+        .catch(function(err){
+          console.log("Error creating goal:",err);
+          
+        });
   }
 
 
