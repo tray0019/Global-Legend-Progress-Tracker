@@ -9,55 +9,29 @@ function GoalCard(props){
     var selectedGoal = props.selectedGoal;
 
     return (
-    <li style={{ marginBottom: "12px" }}>
-        <div 
-            style={{
-                border: "1px solid #ddd",
-                padding: "16px",
-                borderRadius: "8px",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                backgroundColor: "#fff",
-            }}>
+    <li className="goal-card">
+        <div className="goal-actions">
 
         <h3 style={{ margin: 0}}>{goal.goalTitle}</h3>
 
         {/**View Button */}
-        <button style={{ marginTop: "10px", marginRight: "8px"}}
-            onClick={function(){
+        <button onClick={function(){
                 props.onView(goal.id);
-                props.onView(goal.id)}}>
-            View
-        </button>
+                props.onView(goal.id)}}>View</button>
 
         {/**Delete Button */}
-        <button
-            style={{ marginTop: "10px", marginRight: "8px"}}
-            onClick={function(){
+        <button onClick={function(){
                 if(window.confirm("Are you sure you want to delete this goal?")){
                     props.onDelete(goal.id);
-                }
-            }}
-        >
-            Delete
-        </button>
+                }}}>Delete</button>
 
         {/**Rename Button*/}
-            <button
-                style={{ marginTop: "10px"}}
-                onClick={function(){
+            <button onClick={function(){
                     props.onRename(goal.id);
-                }}
-                >
-                Rename
-            </button>
+                }}>Rename</button>
 
         {isSelected && selectedGoal && (
-            <div
-                style={{
-                    marginTop: "16px",
-                    paddingTop: "12px",
-                    borderTop: "1px solid #eee",
-                }}>
+            <div className="entries-section">
                 <h4>Entries</h4>
 
                 <EntryList

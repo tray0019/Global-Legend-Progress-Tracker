@@ -6,7 +6,7 @@ function AddEntryForm(props){
     }
 
     return (
-        <div style={{ marginTop: "12px" }}>
+        <div className="add-entry-form">
             <h5>Add Entry</h5>
             <input
                 type="text"
@@ -14,16 +14,9 @@ function AddEntryForm(props){
                 onChange={function (e){
                     props.onChange(e.target.value);
                 }}
-                placeholder="Describe your  progress..."
-                style={{
-                    width: "100px",
-                    padding: "8px",
-                    boxSizing:"border-box",
-                }}/>
+                placeholder="Describe your  progress..."/>
 
-                <button
-                    style={{ marginTop: "8px"}}
-                    onClick={handleSubmit}>
+                <button onClick={handleSubmit}>
                     Save Entry
                 </button>
         </div>

@@ -180,12 +180,12 @@ function Home(){
   
 
 return (
-    <div style={{ maxWidth: "600px", margin: "20px auto"}}>
+    <div className="app-container">
       <h1>Goals</h1>
 
         <AddGoalForm onAdd={handleAddGoal}/>
 
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <ul className="goal-list">
           {goals.map(function(goal){
             var isSelected = 
               selectedGoal && selectedGoal.goalId === goal.id; // goal.id vs goalId
