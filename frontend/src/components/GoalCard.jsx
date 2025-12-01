@@ -1,5 +1,8 @@
 import React from "react";
 
+import EntryList from "./EntryList";
+import AddEntryForm from "./AddEntryForm"
+
 function GoalCard(props){
     var goal = props.goal;
     var isSelected = props.isSelected;
@@ -57,23 +60,18 @@ function GoalCard(props){
                 }}>
                 <h4>Entries</h4>
 
-                {(!selectedGoal.entries || selectedGoal.entries.length === 0)&&(
-                    <p>No entries yet.</p>
-                )}
+                <EntryList
+                    entries={props.selectedGoal.entries}
+                    onDeleteEntry={props.onDeleteEntry}
+                    onRenameEntry={props.onRenameEntry}
+                    />
 
-                    {selectedGoal.entries &&
-                        selectedGoal.entries.length > 0 && (
-                        <ul>
-                            {selectedGoal.entries.map(function (entry){
-                                return (
-                                    <li key={entry.id}>
-                                        {entry.description}
-
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                        )}
+                
+                <AddEntryForm
+                    value={props.newEntryDescription}
+                    onChange={props.onChangeNewEntry}
+                    onAddEntry={props.onAddEntry}
+                    />
 
                 
 
