@@ -8,13 +8,33 @@ import {
   getAllGoals,getGoalById,createGoal,renameGoal,deleteGoal} from "../api/goalApi";
 import {
   addEntry,renameEntry,deleteEntry } from "../api/entryApi";
-import { markGoalDoneToday } from "../api/goalCheckApi";
+import { getGoalChecks, markGoalDoneToday } from "../api/goalCheckApi";
+
+
+function pad2(number){
+  return number < 10 ? "0" + number: "" + number;
+}
+
+function getCurrentMonthRange(){
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+
+  var from = year+"-"+pad2(month+1)+"-01";
+  var lastDay = new Date(year,month + 1, 0).getDate();
+  var to = year + "-"+pad2(month+1)+"-"+pad2(lastDay);
+
+  return { from: from, to: to};
+}
+
 
 function Home(){
 
   const [goals, setGoals ] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [newEntryDescription, setNewEntryDescription ] = useState("");
+
+  const [ checkDates, setCheckDates ] = useState([]);
 
 
 
@@ -30,13 +50,30 @@ function Home(){
   },[]);
 
   function handleView(goalId){
-    axios.get("http://localhost:8080/goals/"+goalId)
-    .then(function (res){
-      console.log("Selected goal:",res.data);
-      setSelectedGoal(res.data);
-    }).catch(function (err){
-      console.error("Error fetching goal:", err);
-    });
+
+    getGoalById(goalId)
+      .then(function (res){
+        console.log("Selected goal:",res.data);
+        setSelectedGoal(res.data);
+      })
+      .catch(function(err){
+        console.error("Error fetching goal:", err);
+      });
+
+      var range = getCurrentMonthRange();
+      
+      getGoalChecks(goalId, range.from, range.to)
+        .then(function (res2){
+          var dates = [];
+          for(var i=0; i<res2.data.length; i++){
+            dates.push(res2.data[i].date);
+          }
+          setCheckDates(dates);
+        }).catch(function (err2){
+          console.error("Error fetch goal checks:", err2);
+        })
+
+
   }
 
   function handleAddEntry(){
@@ -55,25 +92,24 @@ function Home(){
   }
 
   function handleDeleteGoal(goalId){
-    axios.delete("http://localhost:8080/goals/"+goalId)
-    .then(function(){
-        console.log("Goal deleted:", goalId);
+    deleteGoal(goalId)
+      .then(function(){
+        console.log("Goal deleted:",goalId);
 
-        // if the goal is currently selected, clear it
         if(selectedGoal && selectedGoal.goalId === goalId){
           setSelectedGoal(null);
+          setCheckDates([]);
         }
 
-        // Refresh the goals List
-        axios.get("http://localhost:8080/goals")
-          .then(function (res){
-            setGoals(res.data);
-          })
-          .catch(function (err){
-            console.log("Error refreshing goals:", err);
-            
-          });
-    });
+        return getAllGoals();        
+      })
+      .then(function (res){
+        setGoals(res.data);
+      })
+      .catch(function(err){
+        console.error("Error deleting goal:",err);
+        alert("Could not delete goal. Check server logs for details");
+      });
   }
   
   function handleAddGoal(title){
@@ -206,7 +242,7 @@ return (
         <AddGoalForm onAdd={handleAddGoal}/>
 
         <ul className="goal-list">
-          {goals.map(function(goal){
+          {Array.isArray(goals) && goals.map(function(goal){
             var isSelected = 
               selectedGoal && selectedGoal.goalId === goal.id; // goal.id vs goalId
             return(
@@ -226,6 +262,7 @@ return (
                 onRenameEntry={handleRenameEntry}
 
                 onMarkDoneToday={handleMarkDoneToday}
+                checkDates={checkDates}
                 />
             );
           })}

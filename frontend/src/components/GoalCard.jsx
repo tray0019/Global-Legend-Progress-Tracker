@@ -2,6 +2,7 @@ import React from "react";
 
 import EntryList from "./EntryList";
 import AddEntryForm from "./AddEntryForm"
+import GoalCheckCalendar from "./GoalCheckCalendar"
 
 function GoalCard(props){
     var goal = props.goal;
@@ -41,6 +42,8 @@ function GoalCard(props){
         {isSelected && selectedGoal && (
             <div className="entries-section">
                 <h4>Entries</h4>
+
+                <GoalCheckCalendar checkDates={props.checkDates}/>
 
                 <EntryList
                     entries={props.selectedGoal.entries}
