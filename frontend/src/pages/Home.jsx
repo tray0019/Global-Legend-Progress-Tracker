@@ -215,12 +215,12 @@ function Home(){
   function handleMarkDoneToday(goalId){
     markGoalDoneToday(goalId)
       .then(function (res){
-        var createdNew = res.data;
+        var nowChecked = res.data;
 
-        if(createdNew){
-          alert("Marked as done for today!");
+        if(nowChecked){
+          console.log("Marked as done for today!");
         }else{
-          alert("This goal is already marked done for today.");
+          console.log("This goal is already marked done for today.");
         }
 
         if(selectedGoal && selectedGoal.goalId === goalId){
