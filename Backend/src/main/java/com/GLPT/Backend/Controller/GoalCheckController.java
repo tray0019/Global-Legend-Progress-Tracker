@@ -1,0 +1,48 @@
+package com.GLPT.Backend.Controller;
+
+import com.GLPT.Backend.DTO.GoalCheckDto;
+import com.GLPT.Backend.Entity.GoalCheck;
+import com.GLPT.Backend.Service.GoalCheckService;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000/")
+public class GoalCheckController {
+
+    private GoalCheckService goalService;
+
+    GoalCheckController(GoalCheckService goalService){
+        this.goalService = goalService;
+    }
+
+    @PostMapping("/goals/{goalId}/checks")
+    public boolean markGoalDoneToday(@PathVariable long goalId){
+        return goalService.markGoalDoneToday(goalId);
+    }
+
+    @GetMapping("/goals/{goalId}/checks")
+    public List<GoalCheckDto> getChecksForGoal(
+            @PathVariable long goalId,
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to) {
+
+        List<GoalCheck> checks =
+                goalService.getChecksForGoalBetween(goalId, from, to);
+
+        List<GoalCheckDto> result = new ArrayList<>();
+
+        for(GoalCheck check: checks){
+            GoalCheckDto dto = new GoalCheckDto(check.getCheckDate());
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+
+
+}
