@@ -38,6 +38,7 @@ public class GoalCheckService {
                 checkRepo.findByGoalAndCheckDate(goal, today);
 
         if(existing.isPresent()){
+            checkRepo.delete(existing.get());
             return false;
         }
 
