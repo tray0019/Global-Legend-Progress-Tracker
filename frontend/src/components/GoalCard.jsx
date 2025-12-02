@@ -30,6 +30,14 @@ function GoalCard(props){
                     props.onRename(goal.id);
                 }}>Rename</button>
 
+
+            <button
+                onClick={function(){
+                    props.onMarkDoneToday(goal.id);
+                }}>
+                Done today✅
+            </button>
+
         {isSelected && selectedGoal && (
             <div className="entries-section">
                 <h4>Entries</h4>

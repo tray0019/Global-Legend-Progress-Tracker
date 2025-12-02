@@ -8,7 +8,7 @@ import {
   getAllGoals,getGoalById,createGoal,renameGoal,deleteGoal} from "../api/goalApi";
 import {
   addEntry,renameEntry,deleteEntry } from "../api/entryApi";
-
+import { markGoalDoneToday } from "../api/goalCheckApi";
 
 function Home(){
 
@@ -176,6 +176,26 @@ function Home(){
     });
   }
 
+  function handleMarkDoneToday(goalId){
+    markGoalDoneToday(goalId)
+      .then(function (res){
+        var createdNew = res.data;
+
+        if(createdNew){
+          alert("Marked as done for today!");
+        }else{
+          alert("This goal is already marked done for today.");
+        }
+
+        if(selectedGoal && selectedGoal.goalId === goalId){
+            handleView(goalId);
+          }
+          
+      }).catch(function (err){
+          console.error("Error marking goal done today:",err);
+      });
+  }
+
   
   
 
@@ -205,6 +225,7 @@ return (
                 onDeleteEntry={handleDeleteEntry}
                 onRenameEntry={handleRenameEntry}
 
+                onMarkDoneToday={handleMarkDoneToday}
                 />
             );
           })}
