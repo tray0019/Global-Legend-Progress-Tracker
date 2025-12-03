@@ -17,3 +17,15 @@ export function getGoalChecks(goalId, from, to){
         }
     )
 }
+
+export function getGlobalContributions(from,to){
+    return axios.get(
+        BASE_URL+"/calendar/contributions",
+        {
+            params: {
+                from: from,
+                to: to
+            }
+        }
+    )
+}

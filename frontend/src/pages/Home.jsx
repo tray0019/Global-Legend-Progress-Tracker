@@ -8,11 +8,34 @@ import {
   getAllGoals,getGoalById,createGoal,renameGoal,deleteGoal} from "../api/goalApi";
 import {
   addEntry,renameEntry,deleteEntry } from "../api/entryApi";
-import { getGoalChecks, markGoalDoneToday } from "../api/goalCheckApi";
-
+import { getGoalChecks, markGoalDoneToday, getGlobalContributions } from "../api/goalCheckApi";
+import GlobalYearCalendar from "../components/GlobalYearCalendar";
 
 function pad2(number){
   return number < 10 ? "0" + number: "" + number;
+}
+
+function getLastYearRange(){
+  var today = new Date();
+
+  var to =
+    today.getFullYear()+
+    "-"+
+    pad2(today.getMonth()+1)+
+    "-"+
+    pad2(today.getDate());
+
+    var past = new Date();
+    past.setDate(past.getDate()-364);
+
+    var from = 
+      past.getFullYear() +
+      "-"+
+      pad2(past.getMonth()+1)+
+      "-"+
+      pad2(past.getDate());
+
+      return { from: from, to: to};
 }
 
 function getCurrentMonthRange(){
@@ -35,18 +58,20 @@ function Home(){
   const [newEntryDescription, setNewEntryDescription ] = useState("");
 
   const [ checkDates, setCheckDates ] = useState([]);
+  const [globalContributions, setGlobalContributions] = useState([]);
 
 
 
   useEffect(function() {
-    axios.get("http://localhost:8080/goals")
-    .then(res => {
-      console.log("API response:",res.data);// DEBUG
-      setGoals(res.data);
-    })
-      .catch(err => {
+    getAllGoals()
+      .then(function(res){
+        setGoals(res.data);
+      }).catch(function(err){
         console.error(err);
-      }); 
+      });
+
+      loadGlobalContributions();
+
   },[]);
 
   function handleView(goalId){
@@ -217,27 +242,36 @@ function Home(){
       .then(function (res){
         var nowChecked = res.data;
 
-        if(nowChecked){
-          console.log("Marked as done for today!");
-        }else{
-          console.log("This goal is already marked done for today.");
-        }
-
         if(selectedGoal && selectedGoal.goalId === goalId){
             handleView(goalId);
           }
           
+
+          loadGlobalContributions();
+
       }).catch(function (err){
           console.error("Error marking goal done today:",err);
       });
   }
 
-  
+  function loadGlobalContributions(){
+    var range = getLastYearRange();
+
+  getGlobalContributions(range.from, range.to)
+      .then(function (res){
+        setGlobalContributions(res.data);
+      }).catch(function(err){
+        console.error("Error loading global contributions:",err);
+        
+      });
+  }
   
 
 return (
     <div className="app-container">
       <h1>Goals</h1>
+
+      <GlobalYearCalendar contributions={globalContributions}/>
 
         <AddGoalForm onAdd={handleAddGoal}/>
 
