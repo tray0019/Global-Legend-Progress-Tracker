@@ -1,5 +1,6 @@
 package com.GLPT.Backend.Controller;
 
+import com.GLPT.Backend.DTO.GlobalContributionDto;
 import com.GLPT.Backend.DTO.GoalCheckDto;
 import com.GLPT.Backend.Entity.GoalCheck;
 import com.GLPT.Backend.Service.GoalCheckService;
@@ -41,6 +42,13 @@ public class GoalCheckController {
         }
 
         return result;
+    }
+
+    @GetMapping("/calendar/contributions")
+    public List<GlobalContributionDto> getGlobalContributions(
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to){
+        return goalService.getGlobalContribution(from,to);
     }
 
 
