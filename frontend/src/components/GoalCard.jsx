@@ -18,7 +18,7 @@ function GoalCard(props){
         {/**View Button */}
         <button onClick={function(){
                 props.onView(goal.id);
-                props.onView(goal.id)}}>View</button>
+                props.onView(goal.id)}}>{isSelected ? "Hide" : "View"}</button>
 
         {/**Delete Button */}
         <button onClick={function(){

@@ -76,6 +76,13 @@ function Home(){
 
   function handleView(goalId){
 
+
+    if(selectedGoal && selectedGoal.goalId === goalId){
+      setSelectedGoal(null);
+      setCheckDates([]);
+      return;
+    }
+
     getGoalById(goalId)
       .then(function (res){
         console.log("Selected goal:",res.data);
