@@ -1,37 +1,35 @@
+// src/components/AddGoalForm.jsx
 import React, { useState } from "react";
 
-function AddGoalForm(props){
-    const [title, setTitle] = useState("");
+function AddGoalForm({ onAdd }) {
+  const [title, setTitle] = useState("");
 
-    function handleSubmit(){
-        if(!title.trim()){
-            alert("Please enter a goal title.");
-            return;
-        }
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-        // Call the parent's function;
-        props.onAdd(title);
-
-        //Clear input
-        setTitle("");
+    if (!title.trim()) {
+      alert("Please enter a goal title.");
+      return;
     }
 
-    return (
-        <div className="add-goal-form">
-            <h3>Add Goal</h3>
+    onAdd(title.trim());
+    setTitle("");
+  };
 
-            <input 
-                type="text"
-                value={title}
-                onChange={function (e) {setTitle(e.target.value);}}
-                placeholder="Enter goal title..."/>
-
-                <button
-                onClick={handleSubmit}
-                >Save Goal</button>
-
-        </div>
-    );
+  return (
+    <div className="add-goal-form">
+      <h3>Add Goal</h3>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter goal title..."
+        />
+        <button type="submit">Save Goal</button>
+      </form>
+    </div>
+  );
 }
 
 export default AddGoalForm;

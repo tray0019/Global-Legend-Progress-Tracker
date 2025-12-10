@@ -1,26 +1,26 @@
+// src/components/AddEntryForm.jsx
 import React from "react";
 
-function AddEntryForm(props){
-    function handleSubmit(){
-        props.onAddEntry();
-    }
+function AddEntryForm({ value, onChange, onAddEntry }) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onAddEntry();
+  };
 
-    return (
-        <div className="add-entry-form">
-            <h5>Add Entry</h5>
-            <input
-                type="text"
-                value={props.value}
-                onChange={function (e){
-                    props.onChange(e.target.value);
-                }}
-                placeholder="Describe your  progress..."/>
-
-                <button onClick={handleSubmit}>
-                    Save Entry
-                </button>
-        </div>
-    )
+  return (
+    <div className="add-entry-form">
+      <h5>Add Entry</h5>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Describe your progress..."
+        />
+        <button type="submit">Save Entry</button>
+      </form>
+    </div>
+  );
 }
 
 export default AddEntryForm;

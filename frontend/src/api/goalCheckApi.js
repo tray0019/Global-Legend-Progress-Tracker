@@ -1,31 +1,23 @@
+// src/api/goalCheckApi.js
 import axios from "axios";
 
-var BASE_URL = "http://localhost:8080";
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const api = axios.create({
+  baseURL: BASE_URL,
+});
 
-export function markGoalDoneToday(goalId){
-    return axios.post(BASE_URL+"/goals/"+goalId+"/checks");
+export function markGoalDoneToday(goalId) {
+  return api.post(`/goals/${goalId}/checks`);
 }
 
-export function getGoalChecks(goalId, from, to){
-    return axios.get(
-        BASE_URL+"/goals/"+goalId+"/checks",
-        {
-            params: {
-                from: from,
-                to: to
-            }
-        }
-    )
+export function getGoalChecks(goalId, from, to) {
+  return api.get(`/goals/${goalId}/checks`, {
+    params: { from, to },
+  });
 }
 
-export function getGlobalContributions(from,to){
-    return axios.get(
-        BASE_URL+"/calendar/contributions",
-        {
-            params: {
-                from: from,
-                to: to
-            }
-        }
-    )
+export function getGlobalContributions(from, to) {
+  return api.get("/calendar/contributions", {
+    params: { from, to },
+  });
 }

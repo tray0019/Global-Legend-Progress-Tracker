@@ -1,74 +1,79 @@
+// src/components/GoalCard.jsx
 import React from "react";
-
 import EntryList from "./EntryList";
-import AddEntryForm from "./AddEntryForm"
-import GoalCheckCalendar from "./GoalCheckCalendar"
+import AddEntryForm from "./AddEntryForm";
+import GoalCheckCalendar from "./GoalCheckCalendar";
 
-function GoalCard(props){
-    var goal = props.goal;
-    var isSelected = props.isSelected;
-    var selectedGoal = props.selectedGoal;
+function GoalCard({
+  goal,
+  isSelected,
+  selectedGoal,
+  onView,
+  onDelete,
+  onRename,
+  onMarkDoneToday,
+  checkDates,
+  newEntryDescription,
+  onChangeNewEntry,
+  onAddEntry,
+  onDeleteEntry,
+  onRenameEntry,
+}) {
+  const handleViewClick = () => {
+    onView(goal.id);
+  };
 
-    return (
+  const handleDeleteClick = () => {
+    if (window.confirm("Are you sure you want to delete this goal?")) {
+      onDelete(goal.id);
+    }
+  };
+
+  const handleRenameClick = () => {
+    onRename(goal.id);
+  };
+
+  const handleDoneTodayClick = () => {
+    onMarkDoneToday(goal.id);
+  };
+
+  return (
     <li className="goal-card">
-        <div className="goal-actions">
+      <div className="goal-actions">
+        <h3 style={{ margin: 0 }}>{goal.goalTitle}</h3>
 
-        <h3 style={{ margin: 0}}>{goal.goalTitle}</h3>
+        <button onClick={handleViewClick}>
+          {isSelected ? "Hide" : "View"}
+        </button>
 
-        {/**View Button */}
-        <button onClick={function(){
-                props.onView(goal.id);
-                props.onView(goal.id)}}>View</button>
+        <button onClick={handleDeleteClick}>Delete</button>
 
-        {/**Delete Button */}
-        <button onClick={function(){
-                if(window.confirm("Are you sure you want to delete this goal?")){
-                    props.onDelete(goal.id);
-                }}}>Delete</button>
+        <button onClick={handleRenameClick}>Rename</button>
 
-        {/**Rename Button*/}
-            <button onClick={function(){
-                    props.onRename(goal.id);
-                }}>Rename</button>
-
-
-            <button
-                onClick={function(){
-                    props.onMarkDoneToday(goal.id);
-                }}>
-                Done today✅
-            </button>
+        <button onClick={handleDoneTodayClick}>Done today ✅</button>
 
         {isSelected && selectedGoal && (
-            <div className="entries-section">
-                <h4>Entries</h4>
+          <div className="entries-section">
+            <h4>Entries</h4>
 
-                <GoalCheckCalendar checkDates={props.checkDates}/>
+            <GoalCheckCalendar checkDates={checkDates} />
 
-                <EntryList
-                    entries={props.selectedGoal.entries}
-                    onDeleteEntry={props.onDeleteEntry}
-                    onRenameEntry={props.onRenameEntry}
-                    />
+            <EntryList
+              entries={selectedGoal.entries}
+              onDeleteEntry={onDeleteEntry}
+              onRenameEntry={onRenameEntry}
+            />
 
-                
-                <AddEntryForm
-                    value={props.newEntryDescription}
-                    onChange={props.onChangeNewEntry}
-                    onAddEntry={props.onAddEntry}
-                    />
-
-                
-
-            </div>
+            <AddEntryForm
+              value={newEntryDescription}
+              onChange={onChangeNewEntry}
+              onAddEntry={onAddEntry}
+            />
+          </div>
         )}
-            
-        
-        </div>
+      </div>
     </li>
-    )
+  );
 }
-
-
 
 export default GoalCard;
