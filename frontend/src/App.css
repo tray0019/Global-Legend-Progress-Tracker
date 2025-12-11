@@ -28,6 +28,19 @@
   color: #61dafb;
 }
 
+.goal-card span[style*="grab"]:active {
+  cursor: grabbing;
+}
+
+.goal-card-handle {
+  opacity: 0.4;
+}
+
+.goal-card-handle:hover {
+  opacity: 1;
+}
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

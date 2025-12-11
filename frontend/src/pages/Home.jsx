@@ -290,7 +290,6 @@ function Home() {
                         className="goal-card"
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
                       >
                         <GoalCard
                           goal={goal}
@@ -310,6 +309,7 @@ function Home() {
                           onRenameEntry={(entryId, text) =>
                             handleRenameEntry(goal.id, entryId, text)
                           }
+                          dragHandleProps={provided.dragHandleProps}
                         />
                       </li>
                     )}

@@ -35,7 +35,15 @@ function GoalCard({
               {isOpen ? "Hide" : "View"}
             </button>
 
-            <button onClick={() => onDelete(goal.id)}>Delete</button>
+            <button
+                onClick={() => {
+                    if (window.confirm("Are you sure you want to delete this goal?")) {
+                    onDelete(goal.id);
+                    }
+                }}>
+                Delete
+            </button>
+
 
             <button onClick={() => onRename(goal.id)}>Rename</button>
 
@@ -46,7 +54,7 @@ function GoalCard({
         </div>
 
         {/* RIGHT SIDE DRAG HANDLE */}
-        <span
+        <span className="goal-card-handle"
           {...(dragHandleProps || {})}
           style={{
             cursor: "grab",
