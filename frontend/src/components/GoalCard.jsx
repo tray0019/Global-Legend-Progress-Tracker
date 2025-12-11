@@ -1,12 +1,13 @@
 // src/components/GoalCard.jsx
 import React from "react";
+
 import EntryList from "./EntryList";
 import AddEntryForm from "./AddEntryForm";
 import GoalCheckCalendar from "./GoalCheckCalendar";
 
 function GoalCard({
   goal,
-  isSelected,
+  isOpen,
   selectedGoal,
   onView,
   onDelete,
@@ -43,7 +44,7 @@ function GoalCard({
         <h3 style={{ margin: 0 }}>{goal.goalTitle}</h3>
 
         <button onClick={handleViewClick}>
-          {isSelected ? "Hide" : "View"}
+          {isOpen ? "Hide" : "View"}
         </button>
 
         <button onClick={handleDeleteClick}>Delete</button>
@@ -52,7 +53,7 @@ function GoalCard({
 
         <button onClick={handleDoneTodayClick}>Done today ✅</button>
 
-        {isSelected && selectedGoal && (
+        {isOpen && selectedGoal && (
           <div className="entries-section">
             <h4>Entries</h4>
 

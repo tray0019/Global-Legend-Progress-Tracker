@@ -62,15 +62,18 @@ function getCurrentMonthRange() {
 
 function Home() {
   const [goals, setGoals] = useState([]);
-  const [selectedGoalId, setSelectedGoalId] = useState(null);
-  const [selectedGoal, setSelectedGoal] = useState(null);
+
+  // NEW: support multiple open cards
+  const [openGoals, setOpenGoals] = useState({});          // { [goalId]: true/false }
+  const [goalDetails, setGoalDetails] = useState({});      // { [goalId]: goalObject }
+  const [goalCheckDates, setGoalCheckDates] = useState({}); // { [goalId]: [dateStrings] }
+
   const [newEntryDescription, setNewEntryDescription] = useState("");
 
-  const [checkDates, setCheckDates] = useState([]);
   const [globalContributions, setGlobalContributions] = useState([]);
 
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
-  const [isLoadingSelectedGoal, setIsLoadingSelectedGoal] = useState(false);
+  const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
 
   useEffect(() => {
     loadGoals();
@@ -92,7 +95,7 @@ function Home() {
 
   const loadSelectedGoalAndChecks = async (goalId) => {
     try {
-      setIsLoadingSelectedGoal(true);
+      setIsLoadingGoalDetails(true);
       const monthRange = getCurrentMonthRange();
 
       const [goalRes, checksRes] = await Promise.all([
@@ -100,28 +103,39 @@ function Home() {
         getGoalChecks(goalId, monthRange.from, monthRange.to),
       ]);
 
-      setSelectedGoal(goalRes.data);
+      // Store details for this specific goal
+      setGoalDetails((prev) => ({
+        ...prev,
+        [goalId]: goalRes.data,
+      }));
 
+      // Store check dates for this specific goal
       const dates = checksRes.data.map((item) => item.date);
-      setCheckDates(dates);
+      setGoalCheckDates((prev) => ({
+        ...prev,
+        [goalId]: dates,
+      }));
     } catch (err) {
       console.error("Error loading goal details:", err);
     } finally {
-      setIsLoadingSelectedGoal(false);
+      setIsLoadingGoalDetails(false);
     }
   };
 
-  const handleView = (goalId) => {
-    if (selectedGoalId === goalId) {
-      // toggle off
-      setSelectedGoalId(null);
-      setSelectedGoal(null);
-      setCheckDates([]);
+  const handleView = async (goalId) => {
+    const currentlyOpen = openGoals[goalId] === true;
+
+    // Toggle off
+    if (currentlyOpen) {
+      setOpenGoals((prev) => ({ ...prev, [goalId]: false }));
       return;
     }
 
-    setSelectedGoalId(goalId);
-    loadSelectedGoalAndChecks(goalId);
+    // Toggle on
+    setOpenGoals((prev) => ({ ...prev, [goalId]: true }));
+
+    // Fetch goal details + checkmarks when expanding
+    await loadSelectedGoalAndChecks(goalId);
   };
 
   const handleAddGoal = async (title) => {
@@ -138,11 +152,24 @@ function Home() {
     try {
       await deleteGoal(goalId);
 
-      if (selectedGoalId === goalId) {
-        setSelectedGoalId(null);
-        setSelectedGoal(null);
-        setCheckDates([]);
-      }
+      // Clean up open/loaded data for this goal
+      setOpenGoals((prev) => {
+        const copy = { ...prev };
+        delete copy[goalId];
+        return copy;
+      });
+
+      setGoalDetails((prev) => {
+        const copy = { ...prev };
+        delete copy[goalId];
+        return copy;
+      });
+
+      setGoalCheckDates((prev) => {
+        const copy = { ...prev };
+        delete copy[goalId];
+        return copy;
+      });
 
       await loadGoals();
     } catch (err) {
@@ -164,7 +191,8 @@ function Home() {
       await renameGoal(goalId, newTitle.trim());
       await loadGoals();
 
-      if (selectedGoalId === goalId) {
+      // If this goal is open, refresh its details so UI is up-to-date
+      if (openGoals[goalId]) {
         await loadSelectedGoalAndChecks(goalId);
       }
     } catch (err) {
@@ -173,38 +201,33 @@ function Home() {
     }
   };
 
-  const handleAddEntry = async () => {
-    if (!selectedGoalId) return;
+  const handleAddEntry = async (goalId) => {
     if (!newEntryDescription.trim()) {
       alert("Entry description cannot be empty.");
       return;
     }
 
     try {
-      await addEntry(selectedGoalId, newEntryDescription.trim());
+      await addEntry(goalId, newEntryDescription.trim());
       setNewEntryDescription("");
-      await loadSelectedGoalAndChecks(selectedGoalId);
+      await loadSelectedGoalAndChecks(goalId);
     } catch (err) {
       console.error("Error adding entry:", err);
       alert("Could not add entry.");
     }
   };
 
-  const handleDeleteEntry = async (entryId) => {
-    if (!selectedGoalId) return;
-
+  const handleDeleteEntry = async (goalId, entryId) => {
     try {
       await deleteEntry(entryId);
-      await loadSelectedGoalAndChecks(selectedGoalId);
+      await loadSelectedGoalAndChecks(goalId);
     } catch (err) {
       console.error("Error deleting entry:", err);
       alert("Could not delete entry.");
     }
   };
 
-  const handleRenameEntry = async (entryId, currentDescription) => {
-    if (!selectedGoalId) return;
-
+  const handleRenameEntry = async (goalId, entryId, currentDescription) => {
     const newDescription = window.prompt(
       "Enter new description:",
       currentDescription
@@ -218,7 +241,7 @@ function Home() {
 
     try {
       await renameEntry(entryId, newDescription.trim());
-      await loadSelectedGoalAndChecks(selectedGoalId);
+      await loadSelectedGoalAndChecks(goalId);
     } catch (err) {
       console.error("Error renaming entry:", err);
       alert("Could not rename entry.");
@@ -229,10 +252,12 @@ function Home() {
     try {
       await markGoalDoneToday(goalId);
 
-      if (selectedGoalId === goalId) {
+      // If that goal is open, refresh its details/checks
+      if (openGoals[goalId]) {
         await loadSelectedGoalAndChecks(goalId);
       }
 
+      // Refresh global contributions
       await loadGlobalContributions();
     } catch (err) {
       console.error("Error marking goal done today:", err);
@@ -265,14 +290,16 @@ function Home() {
       <ul className="goal-list">
         {Array.isArray(goals) &&
           goals.map((goal) => {
-            const isSelected = selectedGoalId === goal.id;
+            const isOpen = openGoals[goal.id] === true;
+            const selectedGoal = goalDetails[goal.id];
+            const checkDates = goalCheckDates[goal.id] || [];
 
             return (
               <GoalCard
                 key={goal.id}
                 goal={goal}
-                isSelected={isSelected}
-                selectedGoal={isSelected ? selectedGoal : null}
+                isOpen={isOpen}
+                selectedGoal={selectedGoal}
                 onView={handleView}
                 onDelete={handleDeleteGoal}
                 onRename={handleRenameGoal}
@@ -280,17 +307,19 @@ function Home() {
                 checkDates={checkDates}
                 newEntryDescription={newEntryDescription}
                 onChangeNewEntry={setNewEntryDescription}
-                onAddEntry={handleAddEntry}
-                onDeleteEntry={handleDeleteEntry}
-                onRenameEntry={handleRenameEntry}
+                onAddEntry={() => handleAddEntry(goal.id)}
+                onDeleteEntry={(entryId) =>
+                  handleDeleteEntry(goal.id, entryId)
+                }
+                onRenameEntry={(entryId, currentDescription) =>
+                  handleRenameEntry(goal.id, entryId, currentDescription)
+                }
               />
             );
           })}
       </ul>
 
-      {isLoadingSelectedGoal && selectedGoalId && (
-        <p>Loading selected goal...</p>
-      )}
+      {isLoadingGoalDetails && <p>Loading goal details...</p>}
     </div>
   );
 }
