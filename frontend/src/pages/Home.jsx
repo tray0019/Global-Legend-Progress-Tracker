@@ -1,11 +1,10 @@
 // src/pages/Home.jsx
 import { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import AddGoalForm from "../components/AddGoalForm";
 import GoalCard from "../components/GoalCard";
 import GlobalYearCalendar from "../components/GlobalYearCalendar";
-// If you want month view too:
-// import GlobalContributionCalendar from "../components/GlobalContributionCalendar";
 
 import {
   getAllGoals,
@@ -21,6 +20,7 @@ import {
   getGlobalContributions,
 } from "../api/goalCheckApi";
 
+/* ---------- DATE HELPERS ---------- */
 function pad2(number) {
   return number < 10 ? "0" + number : String(number);
 }
@@ -28,22 +28,16 @@ function pad2(number) {
 function getLastYearRange() {
   const today = new Date();
 
-  const to =
-    today.getFullYear() +
-    "-" +
-    pad2(today.getMonth() + 1) +
-    "-" +
-    pad2(today.getDate());
+  const to = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(
+    today.getDate()
+  )}`;
 
   const past = new Date();
   past.setDate(past.getDate() - 364);
 
-  const from =
-    past.getFullYear() +
-    "-" +
-    pad2(past.getMonth() + 1) +
-    "-" +
-    pad2(past.getDate());
+  const from = `${past.getFullYear()}-${pad2(past.getMonth() + 1)}-${pad2(
+    past.getDate()
+  )}`;
 
   return { from, to };
 }
@@ -60,21 +54,22 @@ function getCurrentMonthRange() {
   return { from, to };
 }
 
+/* ---------- MAIN PAGE ---------- */
 function Home() {
   const [goals, setGoals] = useState([]);
 
-  // NEW: support multiple open cards
-  const [openGoals, setOpenGoals] = useState({});          // { [goalId]: true/false }
-  const [goalDetails, setGoalDetails] = useState({});      // { [goalId]: goalObject }
-  const [goalCheckDates, setGoalCheckDates] = useState({}); // { [goalId]: [dateStrings] }
+  // Multi-open system
+  const [openGoals, setOpenGoals] = useState({});
+  const [goalDetails, setGoalDetails] = useState({});
+  const [goalCheckDates, setGoalCheckDates] = useState({});
 
   const [newEntryDescription, setNewEntryDescription] = useState("");
-
   const [globalContributions, setGlobalContributions] = useState([]);
 
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
   const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
 
+  /* ---------- LOAD ALL GOALS ---------- */
   useEffect(() => {
     loadGoals();
     loadGlobalContributions();
@@ -87,12 +82,12 @@ function Home() {
       setGoals(res.data);
     } catch (err) {
       console.error("Error loading goals:", err);
-      alert("Could not load goals. Check server logs.");
     } finally {
       setIsLoadingGoals(false);
     }
   };
 
+  /* ---------- LOAD ONE GOAL DETAILS + CHECKMARKS ---------- */
   const loadSelectedGoalAndChecks = async (goalId) => {
     try {
       setIsLoadingGoalDetails(true);
@@ -103,17 +98,14 @@ function Home() {
         getGoalChecks(goalId, monthRange.from, monthRange.to),
       ]);
 
-      // Store details for this specific goal
       setGoalDetails((prev) => ({
         ...prev,
         [goalId]: goalRes.data,
       }));
 
-      // Store check dates for this specific goal
-      const dates = checksRes.data.map((item) => item.date);
       setGoalCheckDates((prev) => ({
         ...prev,
-        [goalId]: dates,
+        [goalId]: checksRes.data.map((item) => item.date),
       }));
     } catch (err) {
       console.error("Error loading goal details:", err);
@@ -122,29 +114,28 @@ function Home() {
     }
   };
 
+  /* ---------- VIEW / HIDE GOAL CARD ---------- */
   const handleView = async (goalId) => {
-    const currentlyOpen = openGoals[goalId] === true;
+    const open = openGoals[goalId] === true;
 
-    // Toggle off
-    if (currentlyOpen) {
+    if (open) {
+      // Hide
       setOpenGoals((prev) => ({ ...prev, [goalId]: false }));
       return;
     }
 
-    // Toggle on
+    // Show
     setOpenGoals((prev) => ({ ...prev, [goalId]: true }));
-
-    // Fetch goal details + checkmarks when expanding
     await loadSelectedGoalAndChecks(goalId);
   };
 
+  /* ---------- CRUD: GOALS ---------- */
   const handleAddGoal = async (title) => {
     try {
       await createGoal(title);
       await loadGoals();
     } catch (err) {
       console.error("Error creating goal:", err);
-      alert("Could not create goal.");
     }
   };
 
@@ -152,7 +143,7 @@ function Home() {
     try {
       await deleteGoal(goalId);
 
-      // Clean up open/loaded data for this goal
+      // Clean up states
       setOpenGoals((prev) => {
         const copy = { ...prev };
         delete copy[goalId];
@@ -174,38 +165,28 @@ function Home() {
       await loadGoals();
     } catch (err) {
       console.error("Error deleting goal:", err);
-      alert("Could not delete goal. Check server logs for details.");
     }
   };
 
   const handleRenameGoal = async (goalId) => {
-    const newTitle = window.prompt("Enter the new title for this goal:");
-
-    if (newTitle === null) return;
-    if (!newTitle.trim()) {
-      alert("Title cannot be empty.");
-      return;
-    }
+    const newTitle = window.prompt("Enter new title:");
+    if (!newTitle) return;
 
     try {
       await renameGoal(goalId, newTitle.trim());
       await loadGoals();
 
-      // If this goal is open, refresh its details so UI is up-to-date
       if (openGoals[goalId]) {
         await loadSelectedGoalAndChecks(goalId);
       }
     } catch (err) {
       console.error("Error renaming goal:", err);
-      alert("Could not rename goal.");
     }
   };
 
+  /* ---------- CRUD: ENTRIES ---------- */
   const handleAddEntry = async (goalId) => {
-    if (!newEntryDescription.trim()) {
-      alert("Entry description cannot be empty.");
-      return;
-    }
+    if (!newEntryDescription.trim()) return;
 
     try {
       await addEntry(goalId, newEntryDescription.trim());
@@ -213,7 +194,6 @@ function Home() {
       await loadSelectedGoalAndChecks(goalId);
     } catch (err) {
       console.error("Error adding entry:", err);
-      alert("Could not add entry.");
     }
   };
 
@@ -223,101 +203,125 @@ function Home() {
       await loadSelectedGoalAndChecks(goalId);
     } catch (err) {
       console.error("Error deleting entry:", err);
-      alert("Could not delete entry.");
     }
   };
 
-  const handleRenameEntry = async (goalId, entryId, currentDescription) => {
-    const newDescription = window.prompt(
-      "Enter new description:",
-      currentDescription
-    );
-
-    if (newDescription === null) return;
-    if (!newDescription.trim()) {
-      alert("Description cannot be empty.");
-      return;
-    }
+  const handleRenameEntry = async (goalId, entryId, currentDesc) => {
+    const newText = window.prompt("Edit entry:", currentDesc);
+    if (!newText) return;
 
     try {
-      await renameEntry(entryId, newDescription.trim());
+      await renameEntry(entryId, newText.trim());
       await loadSelectedGoalAndChecks(goalId);
     } catch (err) {
       console.error("Error renaming entry:", err);
-      alert("Could not rename entry.");
     }
   };
 
+  /* ---------- MARK DONE TODAY ---------- */
   const handleMarkDoneToday = async (goalId) => {
     try {
       await markGoalDoneToday(goalId);
 
-      // If that goal is open, refresh its details/checks
       if (openGoals[goalId]) {
         await loadSelectedGoalAndChecks(goalId);
       }
 
-      // Refresh global contributions
       await loadGlobalContributions();
     } catch (err) {
-      console.error("Error marking goal done today:", err);
-      alert("Could not mark goal done.");
+      console.error("Error marking done today:", err);
     }
   };
 
+  /* ---------- LOAD GLOBAL CONTRIBUTIONS ---------- */
   const loadGlobalContributions = async () => {
     try {
       const range = getLastYearRange();
       const res = await getGlobalContributions(range.from, range.to);
       setGlobalContributions(res.data);
     } catch (err) {
-      console.error("Error loading global contributions:", err);
+      console.error("Error loading contributions:", err);
     }
   };
 
+  /* ---------- DRAG AND DROP SORTING ---------- */
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const newOrder = Array.from(goals);
+    const [moved] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, moved);
+
+    setGoals(newOrder);
+  };
+
+  /* ---------- RENDER ---------- */
   return (
     <div className="app-container">
       <h1>Goals</h1>
 
       <GlobalYearCalendar contributions={globalContributions} />
-      {/* If you also want month heat map, uncomment:
-      <GlobalContributionCalendar contributions={globalContributions} /> */}
 
       <AddGoalForm onAdd={handleAddGoal} />
 
       {isLoadingGoals && <p>Loading goals...</p>}
 
-      <ul className="goal-list">
-        {Array.isArray(goals) &&
-          goals.map((goal) => {
-            const isOpen = openGoals[goal.id] === true;
-            const selectedGoal = goalDetails[goal.id];
-            const checkDates = goalCheckDates[goal.id] || [];
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="goals">
+          {(provided) => (
+            <ul
+              className="goal-list"
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {goals.map((goal, index) => {
+                const isOpen = openGoals[goal.id] === true;
+                const selectedGoal = goalDetails[goal.id];
+                const checkDates = goalCheckDates[goal.id] || [];
 
-            return (
-              <GoalCard
-                key={goal.id}
-                goal={goal}
-                isOpen={isOpen}
-                selectedGoal={selectedGoal}
-                onView={handleView}
-                onDelete={handleDeleteGoal}
-                onRename={handleRenameGoal}
-                onMarkDoneToday={handleMarkDoneToday}
-                checkDates={checkDates}
-                newEntryDescription={newEntryDescription}
-                onChangeNewEntry={setNewEntryDescription}
-                onAddEntry={() => handleAddEntry(goal.id)}
-                onDeleteEntry={(entryId) =>
-                  handleDeleteEntry(goal.id, entryId)
-                }
-                onRenameEntry={(entryId, currentDescription) =>
-                  handleRenameEntry(goal.id, entryId, currentDescription)
-                }
-              />
-            );
-          })}
-      </ul>
+                return (
+                  <Draggable
+                    key={goal.id}
+                    draggableId={String(goal.id)}
+                    index={index}
+                  >
+                    {(provided) => (
+                      <li
+                        className="goal-card"
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <GoalCard
+                          goal={goal}
+                          isOpen={isOpen}
+                          selectedGoal={selectedGoal}
+                          onView={handleView}
+                          onDelete={handleDeleteGoal}
+                          onRename={handleRenameGoal}
+                          onMarkDoneToday={handleMarkDoneToday}
+                          checkDates={checkDates}
+                          newEntryDescription={newEntryDescription}
+                          onChangeNewEntry={setNewEntryDescription}
+                          onAddEntry={() => handleAddEntry(goal.id)}
+                          onDeleteEntry={(entryId) =>
+                            handleDeleteEntry(goal.id, entryId)
+                          }
+                          onRenameEntry={(entryId, text) =>
+                            handleRenameEntry(goal.id, entryId, text)
+                          }
+                        />
+                      </li>
+                    )}
+                  </Draggable>
+                );
+              })}
+
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {isLoadingGoalDetails && <p>Loading goal details...</p>}
     </div>
