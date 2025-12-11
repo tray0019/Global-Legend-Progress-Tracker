@@ -63,7 +63,8 @@ function Home() {
   const [goalDetails, setGoalDetails] = useState({});
   const [goalCheckDates, setGoalCheckDates] = useState({});
 
-  const [newEntryDescription, setNewEntryDescription] = useState("");
+  const [entryInputs, setEntryInputs] = useState({});
+
   const [globalContributions, setGlobalContributions] = useState([]);
 
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
@@ -186,16 +187,30 @@ function Home() {
 
   /* ---------- CRUD: ENTRIES ---------- */
   const handleAddEntry = async (goalId) => {
-    if (!newEntryDescription.trim()) return;
+  const text = entryInputs[goalId]?.trim();
+  if (!text) return;
 
-    try {
-      await addEntry(goalId, newEntryDescription.trim());
-      setNewEntryDescription("");
-      await loadSelectedGoalAndChecks(goalId);
-    } catch (err) {
-      console.error("Error adding entry:", err);
-    }
-  };
+  try {
+    await addEntry(goalId, text);
+    
+    // clear only this goal’s input
+    setEntryInputs((prev) => ({
+      ...prev,
+      [goalId]: "",
+    }));
+
+    await loadSelectedGoalAndChecks(goalId);
+  } catch (err) {
+    console.error("Error adding entry:", err);
+  }
+};
+const handleChangeEntryInput = (goalId, text) => {
+  setEntryInputs((prev) => ({
+    ...prev,
+    [goalId]: text,
+  }));
+};
+
 
   const handleDeleteEntry = async (goalId, entryId) => {
     try {
@@ -290,6 +305,7 @@ function Home() {
                         className="goal-card"
                         ref={provided.innerRef}
                         {...provided.draggableProps}
+
                       >
                         <GoalCard
                           goal={goal}
@@ -300,9 +316,10 @@ function Home() {
                           onRename={handleRenameGoal}
                           onMarkDoneToday={handleMarkDoneToday}
                           checkDates={checkDates}
-                          newEntryDescription={newEntryDescription}
-                          onChangeNewEntry={setNewEntryDescription}
-                          onAddEntry={() => handleAddEntry(goal.id)}
+                        newEntryDescription={entryInputs[goal.id] || ""}
+                        onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
+                        onAddEntry={() => handleAddEntry(goal.id)}
+
                           onDeleteEntry={(entryId) =>
                             handleDeleteEntry(goal.id, entryId)
                           }
