@@ -14,7 +14,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000/")
 public class GoalCheckController {
 
-    private GoalCheckService goalService;
+    private final GoalCheckService goalService;
 
     GoalCheckController(GoalCheckService goalService){
         this.goalService = goalService;

@@ -21,4 +21,7 @@ public class Goal {
 
     @OneToMany(mappedBy = "goal", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<GoalCheck> checks;
+
+    @Column(nullable = false)
+    private Integer position;
 }

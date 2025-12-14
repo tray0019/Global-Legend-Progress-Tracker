@@ -1,8 +1,10 @@
 package com.GLPT.Backend.Service;
 
 
+import com.GLPT.Backend.DTO.GoalPositionDto;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Repository.GoalRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,7 +31,7 @@ public class GoalService {
     /** -- View All goal
      */
     public List<Goal> viewAllGoal(){
-        return repo.findAll();
+        return repo.findAllByOrderByPositionAsc();
     }
 
     /**
@@ -67,5 +69,14 @@ public class GoalService {
                     HttpStatus.NOT_FOUND, "Goal Id not foung");
         }
         repo.deleteById(goalId);
+    }
+
+    @Transactional
+    public void updatePositions(List<GoalPositionDto> positions){
+        for(GoalPositionDto dto: positions){
+            Goal goal = repo.findById(dto.getId())
+                    .orElseThrow();
+            goal.setPosition(dto.getPosition());
+        }
     }
 }
