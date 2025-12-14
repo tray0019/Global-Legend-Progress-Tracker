@@ -68,7 +68,10 @@ function GlobalYearCalendar({ contributions = [] }) {
 
     if (count <= 0) return "#e5e7eb";
     if (count === 1) return "#bbf7d0";
-    if (count === 2) return "#4ade80";
+    if (count === 2) return "#8ff8b4ff";
+    if (count === 3) return "#70fba1ff";
+    if (count === 4) return "#48e57fff";
+    if (count === 5) return "#40d978ff";
     return "#16a34a";
   };
 

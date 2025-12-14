@@ -29,3 +29,8 @@ export function renameGoal(goalId, newTitle) {
 export function deleteGoal(goalId) {
   return api.delete(`/goals/${goalId}`);
 }
+
+export function reorderGoals(positions) {
+  return api.put("/goals/reorder", positions);
+}
+

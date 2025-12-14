@@ -5,6 +5,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import AddGoalForm from "../components/AddGoalForm";
 import GoalCard from "../components/GoalCard";
 import GlobalYearCalendar from "../components/GlobalYearCalendar";
+import { reorderGoals } from "../api/goalApi";
+
 
 import {
   getAllGoals,
@@ -77,16 +79,36 @@ function Home() {
   }, []);
 
   const loadGoals = async () => {
-    try {
-      setIsLoadingGoals(true);
-      const res = await getAllGoals();
-      setGoals(res.data);
-    } catch (err) {
-      console.error("Error loading goals:", err);
-    } finally {
-      setIsLoadingGoals(false);
-    }
-  };
+  try {
+    setIsLoadingGoals(true);
+
+    const res = await getAllGoals();
+    const newGoals = res.data;
+
+    // preserve the order already in state
+    setGoals((prevGoals) => {
+      if (prevGoals.length === 0) return newGoals;
+
+      // create a map for quick lookup
+      const map = new Map(newGoals.map((g) => [g.id, g]));
+
+      // keep old ordering
+      const ordered = prevGoals
+        .map((g) => map.get(g.id))
+        .filter(Boolean);
+
+      // add any new goals at the end
+      const missing = newGoals.filter((g) => !prevGoals.find((p) => p.id === g.id));
+
+      return [...ordered, ...missing];
+    });
+  } catch (err) {
+    console.error("Error loading goals:", err);
+  } finally {
+    setIsLoadingGoals(false);
+  }
+};
+
 
   /* ---------- LOAD ONE GOAL DETAILS + CHECKMARKS ---------- */
   const loadSelectedGoalAndChecks = async (goalId) => {
@@ -260,15 +282,29 @@ const handleChangeEntryInput = (goalId, text) => {
   };
 
   /* ---------- DRAG AND DROP SORTING ---------- */
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
+  const handleDragEnd = async (result) => {
+  if (!result.destination) return;
 
-    const newOrder = Array.from(goals);
-    const [moved] = newOrder.splice(result.source.index, 1);
-    newOrder.splice(result.destination.index, 0, moved);
+  const newOrder = Array.from(goals);
+  const [moved] = newOrder.splice(result.source.index, 1);
+  newOrder.splice(result.destination.index, 0, moved);
 
-    setGoals(newOrder);
-  };
+  // 1️⃣ update UI immediately
+  setGoals(newOrder);
+
+  // 2️⃣ persist order
+  const payload = newOrder.map((goal, index) => ({
+    id: goal.id,
+    position: index,
+  }));
+
+  try {
+    await reorderGoals(payload);
+  } catch (err) {
+    console.error("Failed to persist goal order", err);
+  }
+};
+
 
   /* ---------- RENDER ---------- */
   return (
