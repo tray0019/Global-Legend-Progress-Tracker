@@ -21,3 +21,12 @@ export function getGlobalContributions(from, to) {
     params: { from, to },
   });
 }
+
+export function toggleGoalDoneToday(goalId){
+  return api.post(`/goals/${goalId}/checks/today/toggle`);
+}
+
+export function getGoalDoneToday(goalId) {
+  return api.get(`/goals/${goalId}/checks/today`);
+}
+

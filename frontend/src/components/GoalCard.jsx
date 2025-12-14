@@ -48,7 +48,7 @@ function GoalCard({
             <button onClick={() => onRename(goal.id)}>Rename</button>
 
             <button onClick={() => onMarkDoneToday(goal.id)}>
-              Done today ✅
+              {goal.doneToday ? "Done for today ✅" : "Mark done"}
             </button>
           </div>
         </div>

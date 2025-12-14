@@ -5,6 +5,7 @@ import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.GoalCheck;
 import com.GLPT.Backend.Repository.GoalCheckRepository;
 import com.GLPT.Backend.Repository.GoalRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -85,5 +86,27 @@ public class GoalCheckService {
             return result;
 
     }
+
+    @Transactional
+    public boolean toggleDoneToday(long goalId){
+        LocalDate today = LocalDate.now();
+
+        if(checkRepo.existsByGoalIdAndCheckDate(goalId, today)){
+            checkRepo.deleteByGoalIdAndCheckDate(goalId, today);
+            return false;
+        }else{
+            Goal goal = goalRepo.findById(goalId).orElseThrow();
+            GoalCheck check = new GoalCheck();
+            check.setGoal(goal);
+            check.setCheckDate(today);
+            checkRepo.save(check);
+            return true;
+        }
+    }
+
+    public boolean isDoneToday(long goalId) {
+        return checkRepo.existsByGoalIdAndCheckDate(goalId, LocalDate.now());
+    }
+
 
 }

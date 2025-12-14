@@ -6,6 +6,7 @@ import AddGoalForm from "../components/AddGoalForm";
 import GoalCard from "../components/GoalCard";
 import GlobalYearCalendar from "../components/GlobalYearCalendar";
 import { reorderGoals } from "../api/goalApi";
+import { getGoalDoneToday } from "../api/goalCheckApi";
 
 
 import {
@@ -18,7 +19,7 @@ import {
 import { addEntry, deleteEntry, renameEntry } from "../api/entryApi";
 import {
   getGoalChecks,
-  markGoalDoneToday,
+  markGoalDoneToday, toggleGoalDoneToday,
   getGlobalContributions,
 } from "../api/goalCheckApi";
 
@@ -72,6 +73,8 @@ function Home() {
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
   const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
 
+  const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
+
   /* ---------- LOAD ALL GOALS ---------- */
   useEffect(() => {
     loadGoals();
@@ -102,12 +105,30 @@ function Home() {
 
       return [...ordered, ...missing];
     });
+
+    loadDoneTodayStatuses(newGoals);
+
   } catch (err) {
     console.error("Error loading goals:", err);
   } finally {
     setIsLoadingGoals(false);
   }
 };
+
+  const loadDoneTodayStatuses = async (goals) => {
+    for (const goal of goals){
+      try{
+        const res = await getGoalDoneToday(goal.id);
+        setDoneTodayByGoal((prev) => ({
+          ...prev,
+          [goal.id]: res.data.doneToday,
+        }));
+      }catch (err){
+        console.error("Failed to load done-today status",err);
+        
+      }
+    }
+  }
 
 
   /* ---------- LOAD ONE GOAL DETAILS + CHECKMARKS ---------- */
@@ -257,18 +278,41 @@ const handleChangeEntryInput = (goalId, text) => {
 
   /* ---------- MARK DONE TODAY ---------- */
   const handleMarkDoneToday = async (goalId) => {
-    try {
-      await markGoalDoneToday(goalId);
+  try {
+    const res = await toggleGoalDoneToday(goalId);
 
-      if (openGoals[goalId]) {
-        await loadSelectedGoalAndChecks(goalId);
+    // update button
+    setDoneTodayByGoal((prev) => ({
+      ...prev,
+      [goalId]: res.data.doneToday,
+    }));
+
+    // optimistic calendar update
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+    setGoalCheckDates((prev) => {
+      const existing = Array.isArray(prev[goalId]) ? prev[goalId] : [];
+
+      if (res.data.doneToday && !existing.includes(todayStr)) {
+        return { ...prev, [goalId]: [...existing, todayStr] };
       }
 
-      await loadGlobalContributions();
-    } catch (err) {
-      console.error("Error marking done today:", err);
-    }
-  };
+      if (!res.data.doneToday) {
+        return { ...prev, [goalId]: existing.filter(d => d !== todayStr) };
+      }
+
+      return prev;
+    });
+
+    // update global calendar
+    await loadGlobalContributions();
+
+  } catch (err) {
+    console.error("Error toggle done today:", err);
+  }
+};
+
 
   /* ---------- LOAD GLOBAL CONTRIBUTIONS ---------- */
   const loadGlobalContributions = async () => {
@@ -326,6 +370,7 @@ const handleChangeEntryInput = (goalId, text) => {
               ref={provided.innerRef}
             >
               {goals.map((goal, index) => {
+                const doneToday = doneTodayByGoal[goal.id] === true;
                 const isOpen = openGoals[goal.id] === true;
                 const selectedGoal = goalDetails[goal.id];
                 const checkDates = goalCheckDates[goal.id] || [];
@@ -344,7 +389,7 @@ const handleChangeEntryInput = (goalId, text) => {
 
                       >
                         <GoalCard
-                          goal={goal}
+                          goal={{ ...goal, doneToday}}
                           isOpen={isOpen}
                           selectedGoal={selectedGoal}
                           onView={handleView}
