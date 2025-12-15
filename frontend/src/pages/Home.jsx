@@ -349,11 +349,33 @@ const handleChangeEntryInput = (goalId, text) => {
   }
 };
 
+const totalGoals = goals.length;
+const completedTodayCount = Object.values(doneTodayByGoal)
+  .filter(Boolean).length;
+
+  const summaryText = 
+    completedTodayCount === 0
+      ? ""
+      : completedTodayCount == totalGoals
+      ? "🎉 You completed all your goals today!"
+      : `You completed ${completedTodayCount} of your daily goals today! Great Job - keep going!`
 
   /* ---------- RENDER ---------- */
   return (
     <div className="app-container">
       <h1>Goals</h1>
+
+      {totalGoals > 0 && (
+        <div style={{
+          marginBottom: "16px",
+          padding: "12px",
+          background: "#f3f4f6",
+          borderRadius: "8px",
+          fontWeight: "500"
+        }}>
+          {summaryText}
+        </div>
+      )}
 
       <GlobalYearCalendar contributions={globalContributions} />
 
