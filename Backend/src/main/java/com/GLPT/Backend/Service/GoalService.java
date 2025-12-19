@@ -51,6 +51,10 @@ public class GoalService {
      * -- Create one goal
      */
     public Goal createNewGoal(Goal goal){
+        Integer maxPosition = repo.findMaxPosition();
+        if(maxPosition == null) maxPosition = 0;
+        goal.setPosition(maxPosition + 1);
+        goal.setArchived(false);
         return repo.save(goal);
     }
 
