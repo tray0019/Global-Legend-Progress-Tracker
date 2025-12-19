@@ -7,19 +7,20 @@ import GoalCard from "../components/GoalCard";
 import GlobalYearCalendar from "../components/GlobalYearCalendar";
 import { reorderGoals } from "../api/goalApi";
 import { getGoalDoneToday } from "../api/goalCheckApi";
-
+import "../styles.css"; 
+import { getActiveGoals } from "../api/goalApi";
 
 import {
   getAllGoals,
   getGoalById,
   createGoal,
   renameGoal,
-  deleteGoal,
+  deleteGoal,toggleArchiveGoal
 } from "../api/goalApi";
 import { addEntry, deleteEntry, renameEntry } from "../api/entryApi";
 import {
   getGoalChecks,
-  markGoalDoneToday, toggleGoalDoneToday,
+  toggleGoalDoneToday,
   getGlobalContributions,
 } from "../api/goalCheckApi";
 
@@ -75,6 +76,13 @@ function Home() {
 
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
 
+ const handleToggleArchive = async (goalId) => {
+  await toggleArchiveGoal(goalId);  // archive in backend
+  setGoals(prevGoals => prevGoals.filter(g => g.id !== goalId)); // remove from Home list
+};
+
+
+
   /* ---------- LOAD ALL GOALS ---------- */
   useEffect(() => {
     loadGoals();
@@ -84,36 +92,20 @@ function Home() {
   const loadGoals = async () => {
   try {
     setIsLoadingGoals(true);
-
-    const res = await getAllGoals();
+    
+    const res = await getActiveGoals();
     const newGoals = res.data;
-
-    // preserve the order already in state
-    setGoals((prevGoals) => {
-      if (prevGoals.length === 0) return newGoals;
-
-      // create a map for quick lookup
-      const map = new Map(newGoals.map((g) => [g.id, g]));
-
-      // keep old ordering
-      const ordered = prevGoals
-        .map((g) => map.get(g.id))
-        .filter(Boolean);
-
-      // add any new goals at the end
-      const missing = newGoals.filter((g) => !prevGoals.find((p) => p.id === g.id));
-
-      return [...ordered, ...missing];
-    });
-
-    loadDoneTodayStatuses(newGoals);
-
+    console.log("Active goals from backend:", res.data); // <--- check this
+    setGoals(res.data);
+    await loadDoneTodayStatuses(newGoals);
   } catch (err) {
     console.error("Error loading goals:", err);
   } finally {
     setIsLoadingGoals(false);
   }
 };
+
+
 
   const loadDoneTodayStatuses = async (goals) => {
     for (const goal of goals){
@@ -356,7 +348,7 @@ const completedTodayCount = Object.values(doneTodayByGoal)
   const summaryText = 
     completedTodayCount === 0
       ? ""
-      : completedTodayCount == totalGoals
+      : completedTodayCount === totalGoals
       ? "🎉 You completed all your goals today!"
       : `You completed ${completedTodayCount} of your daily goals today! Great Job - keep going!`
 
@@ -417,6 +409,7 @@ const completedTodayCount = Object.values(doneTodayByGoal)
                           onView={handleView}
                           onDelete={handleDeleteGoal}
                           onRename={handleRenameGoal}
+                          onToggleArchive={handleToggleArchive}
                           onMarkDoneToday={handleMarkDoneToday}
                           checkDates={checkDates}
                         newEntryDescription={entryInputs[goal.id] || ""}

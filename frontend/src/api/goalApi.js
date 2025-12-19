@@ -34,3 +34,15 @@ export function reorderGoals(positions) {
   return api.put("/goals/reorder", positions);
 }
 
+export function toggleArchiveGoal(goalId){
+  return api.put(`/goals/${goalId}/archived/toggle`);
+}
+
+export function getArchiveGoals(){
+  return api.get("/goals/archived")
+}
+
+export function getActiveGoals(){
+  return api.get("/goals/active")
+}
+
