@@ -21,6 +21,32 @@ public class GoalService {
         this.repo = repo;
     }
 
+    public List<Goal> getActiveGoals(){
+        return repo.findByArchivedFalseOrderByPositionAsc();
+    }
+
+    public List<Goal> getArchiveGoals(){
+        return repo.findByArchivedTrueOrderByPositionAsc();
+    }
+
+
+    public Goal getGoal(long goalId){
+        return repo.findById(goalId)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Goal Id not found"));
+    }
+
+
+    @Transactional
+    public boolean toggleArchive(long goalId) {
+        Goal goal = repo.findById(goalId)
+                .orElseThrow(() -> new RuntimeException("Goal not found"));
+        goal.setArchived(!goal.isArchived()); // toggle flag
+        repo.save(goal);
+        return goal.isArchived();
+    }
+
+
+
     /**
      * -- Create one goal
      */
@@ -79,4 +105,6 @@ public class GoalService {
             goal.setPosition(dto.getPosition());
         }
     }
+
+
 }

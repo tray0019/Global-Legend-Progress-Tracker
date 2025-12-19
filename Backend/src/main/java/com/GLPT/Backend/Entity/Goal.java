@@ -24,4 +24,7 @@ public class Goal {
 
     @Column(nullable = false)
     private Integer position;
+
+    @Column(nullable = false)
+    private boolean archived = false;
 }
