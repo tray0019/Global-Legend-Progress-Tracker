@@ -69,7 +69,9 @@ function GoalCard({
         </div>
 
         {/* RIGHT SIDE DRAG HANDLE */}
-        <span className="goal-card-handle"
+
+        {!isArchived &&(
+            <span className="goal-card-handle"
           {...(dragHandleProps || {})}
           style={{
             cursor: "grab",
@@ -81,6 +83,7 @@ function GoalCard({
         >
           ⠿
         </span>
+        )}
 
       </div>
 
