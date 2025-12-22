@@ -19,7 +19,8 @@ function GoalCard({
   onDeleteEntry,
   onRenameEntry,
   dragHandleProps,
-  onToggleArchive
+  onToggleArchive,
+  isArchived
 }) {
   console.log("typeof onToggleArchive:", typeof onToggleArchive, onToggleArchive);
 
@@ -34,6 +35,7 @@ function GoalCard({
           <h3 style={{ margin: "0 0 8px 0" }}>{goal.goalTitle}</h3>
 
           <div>
+            
             <button onClick={() => onView(goal.id)}>
               {isOpen ? "Hide" : "View"}
             </button>
@@ -52,12 +54,12 @@ function GoalCard({
 
             {onToggleArchive && (
               <button onClick={()=> onToggleArchive(goal.id)}>
-              {goal.archived ? "Restore" : "Archive"}
+              {isArchived ? "Restore" : "Archive"}
             </button>
 
             )}
 
-            {onMarkDoneToday && (
+            {!isArchived && onMarkDoneToday && (
               <button onClick={() => onMarkDoneToday(goal.id)}>
                 {goal.doneToday ? "Done today ✅" : "Mark done"}
               </button>
