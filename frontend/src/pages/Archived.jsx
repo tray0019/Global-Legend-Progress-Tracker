@@ -20,6 +20,37 @@ const [goalDetails, setGoalDetails] = useState({});
 const [goalCheckDates, setGoalCheckDates] = useState({});
 const [entryInputs, setEntryInputs] = useState({});
 
+useEffect(() => {
+  const fetchAndRestore = async () => {
+    try {
+      setIsLoading(true);
+      const res = await getArchiveGoals();
+      setArchivedGoals(res.data);
+
+      const saved = localStorage.getItem("archivedOpenGoals");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setOpenGoals(parsed);
+
+        // Load details only for goals that actually exist
+        for (const goalId of Object.keys(parsed)) {
+          if (parsed[goalId]) {
+            await reloadGoalDetails(goalId); // fetch details after goal exists
+          }
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchAndRestore();
+}, []);
+
+
+
 const reloadGoalDetails = async (goalId) => {
   try {
     const goalRes = await getGoalById(goalId);
@@ -92,7 +123,10 @@ function pad2(number) {
 
 const handleViewGoal = async (goalId) => {
   const isOpen = openGoals[goalId];
+  const newOpenGoals = { ...openGoals, [goalId]: !isOpen };
   setOpenGoals(prev => ({ ...prev, [goalId]: !isOpen }));
+
+  localStorage.setItem("archivedOpenGoals", JSON.stringify(newOpenGoals));
 
   if (!isOpen && !goalDetails[goalId]) {
     try {
@@ -151,12 +185,6 @@ const handleViewGoal = async (goalId) => {
       }
     }
   };
-
-
-  useEffect(() => {
-    loadArchivedGoals();
-  }, []);
-
   
 
   if (isLoading) return <p>Loading archived goals...</p>;

@@ -76,6 +76,8 @@ function Home() {
 
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
 
+  
+
  const handleToggleArchive = async (goalId) => {
   await toggleArchiveGoal(goalId);  // archive in backend
   setGoals(prevGoals => prevGoals.filter(g => g.id !== goalId)); // remove from Home list
@@ -85,9 +87,42 @@ function Home() {
 
   /* ---------- LOAD ALL GOALS ---------- */
   useEffect(() => {
-    loadGoals();
-    loadGlobalContributions();
-  }, []);
+  const fetchData = async () => {
+    try {
+      // 1️⃣ Load goals first
+      const res = await getActiveGoals();
+      const loadedGoals = res.data;
+      setGoals(loadedGoals);
+
+      // 2️⃣ Load done-today status
+      await loadDoneTodayStatuses(loadedGoals);
+
+      // 3️⃣ Restore openGoals from localStorage
+      const saved = localStorage.getItem("homeOpenGoals");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const validOpenGoals = {};
+        for (const goal of loadedGoals) {
+          if (parsed[goal.id]) validOpenGoals[goal.id] = true;
+        }
+        setOpenGoals(validOpenGoals);
+
+        // 4️⃣ Load details for already-open goals
+        for (const goalId of Object.keys(validOpenGoals)) {
+          if (validOpenGoals[goalId]) await loadSelectedGoalAndChecks(goalId);
+        }
+      }
+
+      // 5️⃣ Load global contributions
+      await loadGlobalContributions();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   const loadGoals = async () => {
   try {
@@ -151,19 +186,21 @@ function Home() {
   };
 
   /* ---------- VIEW / HIDE GOAL CARD ---------- */
-  const handleView = async (goalId) => {
-    const open = openGoals[goalId] === true;
+  /* ---------- VIEW / HIDE GOAL CARD ---------- */
+const handleView = async (goalId) => {
+  const isOpen = openGoals[goalId] === true;
+  const newOpenGoals = { ...openGoals, [goalId]: !isOpen };
+  setOpenGoals(newOpenGoals);
 
-    if (open) {
-      // Hide
-      setOpenGoals((prev) => ({ ...prev, [goalId]: false }));
-      return;
-    }
+  // Save to localStorage for persistence
+  localStorage.setItem("homeOpenGoals", JSON.stringify(newOpenGoals));
 
-    // Show
-    setOpenGoals((prev) => ({ ...prev, [goalId]: true }));
+  if (!isOpen) {
+    // If opening, load details
     await loadSelectedGoalAndChecks(goalId);
-  };
+  }
+};
+
 
   /* ---------- CRUD: GOALS ---------- */
   const handleAddGoal = async (title) => {
