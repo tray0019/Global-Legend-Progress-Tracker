@@ -7,6 +7,8 @@ import {
   toggleGoalDoneToday,
   getGlobalContributions,
 } from "../api/goalCheckApi";
+import { addEntry, deleteEntry, renameEntry } from "../api/entryApi";
+
 
 function Archived() {
   const [archivedGoals, setArchivedGoals] = useState([]);
@@ -16,6 +18,61 @@ function Archived() {
 const [openGoals, setOpenGoals] = useState({});
 const [goalDetails, setGoalDetails] = useState({});
 const [goalCheckDates, setGoalCheckDates] = useState({});
+const [entryInputs, setEntryInputs] = useState({});
+
+const reloadGoalDetails = async (goalId) => {
+  try {
+    const goalRes = await getGoalById(goalId);
+    setGoalDetails(prev => ({ ...prev, [goalId]: goalRes.data }));
+
+    const monthRange = getCurrentMonthRange();
+    const checksRes = await getGoalChecks(goalId, monthRange.from, monthRange.to);
+    setGoalCheckDates(prev => ({ ...prev, [goalId]: checksRes.data.map(c => c.date) }));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const handleAddEntry = async (goalId) => {
+  const text = entryInputs[goalId]?.trim();
+  if (!text) return;
+
+  try {
+    await addEntry(goalId, text);
+    setEntryInputs(prev => ({ ...prev, [goalId]: "" }));
+    await reloadGoalDetails(goalId); // always fetch fresh entries
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const handleDeleteEntry = async (goalId, entryId) => {
+  try {
+    await deleteEntry(entryId);
+    await reloadGoalDetails(goalId);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const handleRenameEntry = async (goalId, entryId, currentText) => {
+  const newText = prompt("Edit entry:", currentText);
+  if (!newText) return;
+
+  try {
+    await renameEntry(entryId, newText.trim());
+    await reloadGoalDetails(goalId);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const handleChangeEntryInput = (goalId, text) => {
+  setEntryInputs(prev => ({ ...prev, [goalId]: text }));
+};
+
 
 function getCurrentMonthRange() {
   const now = new Date();
@@ -123,7 +180,16 @@ const handleViewGoal = async (goalId) => {
                 onRename={handleRenameGoal}
                 onToggleArchive={handleRestoreGoal}
                 isArchived={true}
-              />
+                
+                newEntryDescription={entryInputs[goal.id] || ""}
+            onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
+            onAddEntry={() => handleAddEntry(goal.id)}
+            onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)}
+            onRenameEntry={(entryId, text) =>
+              handleRenameEntry(goal.id, entryId, text)
+  }
+                
+                            />
 
             </li>
           ))}

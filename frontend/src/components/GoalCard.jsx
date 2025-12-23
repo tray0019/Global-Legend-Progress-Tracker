@@ -93,7 +93,7 @@ function GoalCard({
           <GoalCheckCalendar checkDates={checkDates} />
 
           <EntryList
-            entries={selectedGoal.entries}
+            entries={selectedGoal.entries || []}
             onDeleteEntry={onDeleteEntry}
             onRenameEntry={onRenameEntry}
           />

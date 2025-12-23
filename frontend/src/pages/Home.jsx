@@ -404,6 +404,7 @@ const completedTodayCount = Object.values(doneTodayByGoal)
                       >
                         <GoalCard
                           goal={{ ...goal, doneToday}}
+                          isArchived={false}
                           isOpen={isOpen}
                           selectedGoal={selectedGoal}
                           onView={handleView}
