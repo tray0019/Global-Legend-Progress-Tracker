@@ -27,4 +27,8 @@ public class Goal {
 
     @Column(nullable = false)
     private boolean archived = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Difficulty difficulty = Difficulty.MEDIUM;
 }
