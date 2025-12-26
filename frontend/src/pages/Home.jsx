@@ -15,7 +15,7 @@ import {
   getGoalById,
   createGoal,
   renameGoal,
-  deleteGoal,toggleArchiveGoal
+  deleteGoal,toggleArchiveGoal,updateGoalDifficulty
 } from "../api/goalApi";
 import { addEntry, deleteEntry, renameEntry } from "../api/entryApi";
 import {
@@ -57,6 +57,7 @@ function getCurrentMonthRange() {
 
   return { from, to };
 }
+
 
 /* ---------- MAIN PAGE ---------- */
 function Home() {
@@ -122,6 +123,18 @@ function Home() {
 
   fetchData();
 }, []);
+
+const handleDiffcultyChange = async (goalId, newDifficulty) => {
+  try {
+    const res = await updateGoalDifficulty(goalId, newDifficulty);
+    setGoals(prev =>
+      prev.map(g => g.id === goalId ? { ...g, difficulty: newDifficulty } : g)
+    );
+  } catch (err) {
+    console.error("Failed to update difficulty", err);
+  }
+};
+
 
 
   const loadGoals = async () => {
@@ -434,12 +447,12 @@ const completedTodayCount = Object.values(doneTodayByGoal)
                   >
                     {(provided) => (
                       <li
-                        className="goal-card"
                         ref={provided.innerRef}
                         {...provided.draggableProps}
 
                       >
                         <GoalCard
+                        onDifficultyChange={handleDiffcultyChange}
                           goal={{ ...goal, doneToday}}
                           isArchived={false}
                           isOpen={isOpen}

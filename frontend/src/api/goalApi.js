@@ -20,6 +20,10 @@ export function createGoal(title) {
   });
 }
 
+export function updateGoalDifficulty(goalId, difficulty){
+  return api.patch(`/goals/${goalId}/difficulty`,{difficulty})
+}
+
 export function renameGoal(goalId, newTitle) {
   return api.put(`/goals/${goalId}`, null, {
     params: { newTitle },

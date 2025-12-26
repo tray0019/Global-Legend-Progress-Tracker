@@ -1,5 +1,5 @@
 // src/components/GoalCard.jsx
-import React from "react";
+import React, { useState } from "react";
 import EntryList from "./EntryList";
 import AddEntryForm from "./AddEntryForm";
 import GoalCheckCalendar from "./GoalCheckCalendar";
@@ -12,6 +12,8 @@ function GoalCard({
   onDelete,
   onRename,
   onMarkDoneToday,
+  onToggleArchive,
+  onDifficultyChange,
   checkDates,
   newEntryDescription,
   onChangeNewEntry,
@@ -19,28 +21,51 @@ function GoalCard({
   onDeleteEntry,
   onRenameEntry,
   dragHandleProps,
-  onToggleArchive,
-  isArchived
+  isArchived,
 }) {
-  console.log("typeof onToggleArchive:", typeof onToggleArchive, onToggleArchive);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleMenuToggle = () => setMenuOpen(prev => !prev);
 
   return (
-    <div>
-
-      {/* HEADER ROW: title + actions + DRAG HANDLE ON RIGHT */}
+    <div className="goal-card" style={{ border: "1px solid #ddd", padding: "12px", borderRadius: "8px", marginBottom: "12px" }}>
+      {/* HEADER ROW */}
       <div style={{ display: "flex", alignItems: "center" }}>
-
-        {/* LEFT SIDE: title + buttons */}
-        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+        <div style={{ flex: 1 }}>
           <h3 style={{ margin: "0 0 8px 0" }}>{goal.goalTitle}</h3>
-
-          <div>
-            
-            <button onClick={() => onView(goal.id)}>
+          <button onClick={() => onView(goal.id)}>
               {isOpen ? "Hide" : "View"}
             </button>
+            {!isArchived && onMarkDoneToday && (
+    <button style={{ marginLeft: "10px"}} onClick={() => { onMarkDoneToday(goal.id); setMenuOpen(false); }}>
+      {goal.doneToday ? "Done today ✅" : "Mark done"}
+    </button>
+  )}
+        </div>
+        
 
-            <button
+        {/* 3-DOT MENU */}
+        <div style={{ position: "relative" }}>
+          <button onClick={handleMenuToggle} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>
+            ⋮
+          </button>
+          {menuOpen && (
+            <div style={{
+              position: "absolute",
+              right: 0,
+              top: "100%",
+              background: "white",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              padding: "8px",
+              zIndex: 10,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            }}>
+              
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+  <button onClick={() => { onRename(goal.id); setMenuOpen(false); }}>Rename</button>
+  <button
                 onClick={() => {
                     if (window.confirm("Are you sure you want to delete this goal?")) {
                     onDelete(goal.id);
@@ -48,56 +73,51 @@ function GoalCard({
                 }}>
                 Delete
             </button>
+  {onToggleArchive && (
+    <button onClick={() => { onToggleArchive(goal.id); setMenuOpen(false); }}>
+      {isArchived ? "Restore" : "Archive"}
+    </button>
+  )}
+  
+  {!isArchived && onDifficultyChange && (
+    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      <label>Difficulty:</label>
+      <select
+        value={goal.difficulty}
+        onChange={(e) => { onDifficultyChange(goal.id, parseInt(e.target.value)); setMenuOpen(false); }}
+      >
+        <option value={1}>Easy</option>
+        <option value={2}>Medium</option>
+        <option value={3}>Hard</option>
+      </select>
+    </div>
+  )}
+</div>
 
-
-            <button onClick={() => onRename(goal.id)}>Rename</button>
-
-            {onToggleArchive && (
-              <button onClick={()=> onToggleArchive(goal.id)}>
-              {isArchived ? "Restore" : "Archive"}
-            </button>
-
-            )}
-
-            {!isArchived && onMarkDoneToday && (
-              <button onClick={() => onMarkDoneToday(goal.id)}>
-                {goal.doneToday ? "Done today ✅" : "Mark done"}
-              </button>
-            )}
-
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* RIGHT SIDE DRAG HANDLE */}
-
-        {!isArchived &&(
-            <span className="goal-card-handle"
-          {...(dragHandleProps || {})}
-          style={{
-            cursor: "grab",
-            padding: "6px 8px",
-            fontSize: "22px",
-            userSelect: "none",
-            marginLeft: "auto",
-          }}
-        >
-          ⠿
-        </span>
+        {/* DRAG HANDLE */}
+        {!isArchived && dragHandleProps && (
+          <span
+            {...dragHandleProps}
+            style={{ cursor: "grab", padding: "6px 8px", fontSize: "22px", userSelect: "none", marginLeft: "8px" }}
+          >
+            ⠿
+          </span>
         )}
-
       </div>
 
       {/* EXPANDED ENTRIES SECTION */}
       {isOpen && selectedGoal && (
-        <div className="entries-section">
+        <div className="entries-section" style={{ marginTop: "12px" }}>
           <GoalCheckCalendar checkDates={checkDates} />
-
           <EntryList
             entries={selectedGoal.entries || []}
             onDeleteEntry={onDeleteEntry}
             onRenameEntry={onRenameEntry}
           />
-
           <AddEntryForm
             value={newEntryDescription}
             onChange={onChangeNewEntry}
