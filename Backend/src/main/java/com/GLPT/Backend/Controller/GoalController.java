@@ -134,7 +134,9 @@ public class GoalController {
     public GoalResponseDto updateDifficulty(
             @PathVariable long goalId,
             @RequestBody GoalDifficultyDto dto){
-        Goal goal = service.updateDifficulty(goalId, dto.getDifficulty());
+
+        Difficulty difficultyEnum = Difficulty.fromValue(dto.getDifficulty());
+        Goal goal = service.updateDifficulty(goalId, (difficultyEnum));
 
         return new GoalResponseDto(
                 goal.getId(),

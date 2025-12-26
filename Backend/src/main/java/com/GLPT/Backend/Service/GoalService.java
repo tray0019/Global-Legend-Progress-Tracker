@@ -121,7 +121,7 @@ public class GoalService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,"Goal not found"));
         goal.setDifficulty(difficulty);
-        return goal;
+        return repo.save(goal);
     }
 
 

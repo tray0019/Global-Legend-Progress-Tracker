@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class GoalDifficultyDto {
-    private Difficulty difficulty;
+    private int difficulty;
 }
