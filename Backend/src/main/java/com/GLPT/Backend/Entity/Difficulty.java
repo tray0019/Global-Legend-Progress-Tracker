@@ -15,4 +15,11 @@ public enum Difficulty {
     public int getValue(){
         return value;
     }
+
+    public static Difficulty fromValue(int value){
+        for(Difficulty d: values()){
+            if(d.getValue()== value) return d;
+        }
+        throw new IllegalCallerException("Invalid difficulty:"+value);
+    }
 }

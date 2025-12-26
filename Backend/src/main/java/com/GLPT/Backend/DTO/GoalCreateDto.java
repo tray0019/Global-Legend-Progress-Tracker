@@ -9,4 +9,6 @@ public class GoalCreateDto {
     @NotBlank(message="Title is mandatory")
     private String goalTitle;
 
+    private Integer difficulty;
+
 }

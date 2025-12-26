@@ -1,6 +1,7 @@
 package com.GLPT.Backend.Controller;
 
 import com.GLPT.Backend.DTO.*;
+import com.GLPT.Backend.Entity.Difficulty;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Service.GoalService;
@@ -26,8 +27,16 @@ public class GoalController {
     public GoalResponseDto createGoal(@Valid @RequestBody GoalCreateDto dto){
         Goal goal = new Goal();
         goal.setGoalTitle(dto.getGoalTitle());
+
+        if (dto.getDifficulty() != null){
+            goal.setDifficulty(Difficulty.fromValue(dto.getDifficulty()));
+        }else{
+            goal.setDifficulty(Difficulty.MEDIUM);
+        }
+
         Goal save = service.createNewGoal(goal);
-        return new GoalResponseDto(save.getId(), save.getGoalTitle());
+        return new GoalResponseDto(save.getId(), save.getGoalTitle(),save.getDifficulty().getValue(),goal.isArchived(),
+                goal.getPosition());
     }
 
     /**
@@ -39,7 +48,9 @@ public class GoalController {
         List<GoalResponseDto> dtoList = new ArrayList<>();
 
         for(Goal goal: goals){
-            GoalResponseDto dto = new GoalResponseDto(goal.getId(), goal.getGoalTitle());
+            GoalResponseDto dto = new GoalResponseDto(goal.getId(), goal.getGoalTitle(),goal.getDifficulty().getValue()
+                    ,goal.isArchived(),
+                    goal.getPosition());
             dtoList.add(dto);
         }
 
@@ -70,7 +81,8 @@ public class GoalController {
     @PutMapping("/goals/{goalId}")
     public GoalResponseDto renameGoal(@PathVariable long goalId, @RequestParam String newTitle){
         Goal goal = service.renameGoal(goalId, newTitle);
-        return new GoalResponseDto(goal.getId(),goal.getGoalTitle());
+        return new GoalResponseDto(goal.getId(),goal.getGoalTitle(),goal.getDifficulty().getValue(),goal.isArchived(),
+                goal.getPosition());
     }
 
     /**
@@ -101,7 +113,8 @@ public class GoalController {
         List<Goal> archived = service.getArchiveGoals();
         List<GoalResponseDto> dtoList = new ArrayList<>();
         for (Goal g : archived) {
-            dtoList.add(new GoalResponseDto(g.getId(), g.getGoalTitle()));
+            dtoList.add(new GoalResponseDto(g.getId(), g.getGoalTitle(),g.getDifficulty().getValue(),g.isArchived(),
+                    g.getPosition()));
         }
         return dtoList;
     }
@@ -111,10 +124,28 @@ public class GoalController {
         List<Goal> active = service.getActiveGoals(); // only archived=false
         List<GoalResponseDto> dtoList = new ArrayList<>();
         for (Goal g : active) {
-            dtoList.add(new GoalResponseDto(g.getId(), g.getGoalTitle()));
+            dtoList.add(new GoalResponseDto(g.getId(), g.getGoalTitle(),g.getDifficulty().getValue(),g.isArchived(),
+                    g.getPosition()));
         }
         return dtoList;
     }
+
+    @PatchMapping("/goals/{goalId}/difficulty")
+    public GoalResponseDto updateDifficulty(
+            @PathVariable long goalId,
+            @RequestBody GoalDifficultyDto dto){
+        Goal goal = service.updateDifficulty(goalId, dto.getDifficulty());
+
+        return new GoalResponseDto(
+                goal.getId(),
+                goal.getGoalTitle(),
+                goal.getDifficulty().getValue(),
+                goal.isArchived(),
+                goal.getPosition()
+        );
+    }
+
+
 
 
 

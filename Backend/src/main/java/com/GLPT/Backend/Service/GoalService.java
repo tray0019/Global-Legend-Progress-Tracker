@@ -2,6 +2,7 @@ package com.GLPT.Backend.Service;
 
 
 import com.GLPT.Backend.DTO.GoalPositionDto;
+import com.GLPT.Backend.Entity.Difficulty;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Repository.GoalRepository;
 import jakarta.transaction.Transactional;
@@ -55,6 +56,11 @@ public class GoalService {
         if(maxPosition == null) maxPosition = 0;
         goal.setPosition(maxPosition + 1);
         goal.setArchived(false);
+
+        if(goal.getDifficulty()==null) {
+            goal.setDifficulty(Difficulty.MEDIUM);
+        }
+
         return repo.save(goal);
     }
 
@@ -109,6 +115,15 @@ public class GoalService {
             goal.setPosition(dto.getPosition());
         }
     }
+
+    public Goal updateDifficulty(long goalId, Difficulty difficulty){
+        Goal goal = repo.findById(goalId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,"Goal not found"));
+        goal.setDifficulty(difficulty);
+        return goal;
+    }
+
 
 
 }
