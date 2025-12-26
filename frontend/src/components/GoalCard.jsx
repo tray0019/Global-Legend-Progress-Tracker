@@ -32,7 +32,15 @@ function GoalCard({
       {/* HEADER ROW */}
       <div style={{ display: "flex", alignItems: "center" }}>
         <div style={{ flex: 1 }}>
-          <h3 style={{ margin: "0 0 8px 0" }}>{goal.goalTitle}</h3>
+          <h3 style={{ margin: "0 0 8px 0" }}>{goal.goalTitle}
+            {" "}
+  {!isArchived && goal.difficulty && (
+    <span style={{ fontSize: "0.85em", color: "#555" }}>
+      ({goal.difficulty === 1 ? "Easy" : goal.difficulty === 2 ? "Medium" : "Hard"})
+    </span>
+  )}
+
+          </h3>
           <button onClick={() => onView(goal.id)}>
               {isOpen ? "Hide" : "View"}
             </button>

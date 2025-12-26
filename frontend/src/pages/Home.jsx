@@ -126,7 +126,7 @@ function Home() {
 
 const handleDiffcultyChange = async (goalId, newDifficulty) => {
   try {
-    const res = await updateGoalDifficulty(goalId, newDifficulty);
+    await updateGoalDifficulty(goalId, newDifficulty);
     setGoals(prev =>
       prev.map(g => g.id === goalId ? { ...g, difficulty: newDifficulty } : g)
     );
