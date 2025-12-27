@@ -4,6 +4,7 @@ package com.GLPT.Backend.Service;
 import com.GLPT.Backend.DTO.GoalPositionDto;
 import com.GLPT.Backend.Entity.Difficulty;
 import com.GLPT.Backend.Entity.Goal;
+import com.GLPT.Backend.Entity.GoalStatus;
 import com.GLPT.Backend.Repository.GoalRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -23,13 +24,16 @@ public class GoalService {
     }
 
     public List<Goal> getActiveGoals(){
-        return repo.findByArchivedFalseOrderByPositionAsc();
+        return repo.findByStatusAndArchivedFalseOrderByPositionAsc(GoalStatus.ACTIVE);
     }
 
     public List<Goal> getArchiveGoals(){
         return repo.findByArchivedTrueOrderByPositionAsc();
     }
 
+    public List<Goal> getCompletedGoals() {
+        return repo.findByStatusOrderByPositionAsc(GoalStatus.COMPLETED);
+    }
 
     public Goal getGoal(long goalId){
         return repo.findById(goalId)
@@ -122,6 +126,16 @@ public class GoalService {
                         HttpStatus.NOT_FOUND,"Goal not found"));
         goal.setDifficulty(difficulty);
         return repo.save(goal);
+    }
+
+    @Transactional
+    public Goal completeGoal(long goalId) {
+        Goal goal = repo.findById(goalId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Goal not found"));
+
+        goal.setStatus(GoalStatus.COMPLETED);
+        return goal;
     }
 
 

@@ -1,6 +1,7 @@
 package com.GLPT.Backend.Repository;
 import com.GLPT.Backend.Entity.Goal;
 
+import com.GLPT.Backend.Entity.GoalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,5 +17,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     @Query("SELECT MAX(g.position) FROM Goal g")
     Integer findMaxPosition();
 
+    List<Goal> findByStatusOrderByPositionAsc(GoalStatus status);
+    List<Goal> findByStatusAndArchivedFalseOrderByPositionAsc(GoalStatus status);
 
 }

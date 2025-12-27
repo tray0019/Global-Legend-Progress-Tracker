@@ -31,4 +31,8 @@ public class Goal {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Difficulty difficulty = Difficulty.MEDIUM;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GoalStatus status;
 }
