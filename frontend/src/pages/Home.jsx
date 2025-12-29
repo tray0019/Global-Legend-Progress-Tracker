@@ -8,14 +8,14 @@ import GlobalYearCalendar from "../components/GlobalYearCalendar";
 import { reorderGoals } from "../api/goalApi";
 import { getGoalDoneToday } from "../api/goalCheckApi";
 import "../styles.css"; 
-import { getActiveGoals } from "../api/goalApi";
+import { getActiveGoals,completeGoal  } from "../api/goalApi";
 
 import {
   getAllGoals,
   getGoalById,
   createGoal,
   renameGoal,
-  deleteGoal,toggleArchiveGoal,updateGoalDifficulty
+  deleteGoal,toggleArchiveGoal,updateGoalDifficulty,toggleAchievementGoal 
 } from "../api/goalApi";
 import { addEntry, deleteEntry, renameEntry } from "../api/entryApi";
 import {
@@ -76,6 +76,7 @@ function Home() {
   const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
 
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
+  const [achievements, setAchievements] = useState([]);
 
   
 
@@ -391,6 +392,39 @@ const handleChangeEntryInput = (goalId, text) => {
   }
 };
 
+const handleCompleteGoal = async (goalId) => {
+  const confirmComplete = window.confirm("Mark this goal as completed?");
+  if (!confirmComplete) return;
+
+  try {
+    await completeGoal(goalId); // move to achievements
+    await loadGoals();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const handleToggleAchievement = async (goalId) => {
+  try {
+    const res = await toggleAchievementGoal(goalId); // backend updates
+
+    // 1️⃣ Remove from Home goals
+    setGoals(prev => prev.filter(g => g.id !== goalId));
+
+    // 2️⃣ Add to achievements (optional)
+    setAchievements(prev => [...prev, res.data]);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+
+
+
+
 const totalGoals = goals.length;
 const completedTodayCount = Object.values(doneTodayByGoal)
   .filter(Boolean).length;
@@ -467,6 +501,9 @@ const completedTodayCount = Object.values(doneTodayByGoal)
                         onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
                         onAddEntry={() => handleAddEntry(goal.id)}
 
+                        onComplete={handleCompleteGoal}
+                        onToggleAchievement={() => handleToggleAchievement(goal.id)}
+                        handleToggleAchievement={handleToggleAchievement}
                           onDeleteEntry={(entryId) =>
                             handleDeleteEntry(goal.id, entryId)
                           }

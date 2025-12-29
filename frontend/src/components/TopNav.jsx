@@ -11,6 +11,7 @@ function TopNav(){
     return (
         <div style={{ marginBottom: "20px" }}>
             <Link to="/" style={linkStyle("/")}>Goals</Link>
+            <Link to="/achievements" style={linkStyle("/achievements")}>Achievements</Link>
             <Link to="/archived" style={linkStyle("/archived")}>Archive</Link>
         </div>
     );

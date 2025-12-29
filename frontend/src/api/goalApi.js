@@ -50,3 +50,15 @@ export function getActiveGoals(){
   return api.get("/goals/active")
 }
 
+export function getAchievements(){
+  return api.get("/goals/achievements")
+}
+
+export function completeGoal(goalId) {
+  return api.put(`/goals/${goalId}/complete`);
+}
+
+export function toggleAchievementGoal(goalId) {
+  return api.put(`/goals/${goalId}/achievement/toggle`);
+}
+

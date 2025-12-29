@@ -21,7 +21,7 @@ function GoalCard({
   onDeleteEntry,
   onRenameEntry,
   dragHandleProps,
-  isArchived,
+  isArchived,handleToggleAchievement,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -51,9 +51,19 @@ function GoalCard({
   )}
         </div>
         
+        {/* ACHIEVEMENT TOGGLE BUTTON */}
+         <button onClick={() => handleToggleAchievement(goal.id)}>
+  {goal.archive ? "Mark Achievement" : "Unmark Achievement"}
+</button>
+
+
+
 
         {/* 3-DOT MENU */}
         <div style={{ position: "relative" }}>
+
+        
+
           <button onClick={handleMenuToggle} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>
             ⋮
           </button>
