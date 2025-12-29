@@ -189,6 +189,41 @@ public class GoalController {
         );
     }
 
+    @GetMapping("/goals/achievements")
+    public List<GoalResponseDto> getAchievements() {
+        List<Goal> goals = service.getAchievements();
+        List<GoalResponseDto> dtoList = new ArrayList<>();
+        for (Goal goal : goals) {
+            dtoList.add(new GoalResponseDto(
+                    goal.getId(),
+                    goal.getGoalTitle(),
+                    goal.getDifficulty().getValue(),
+                    goal.getPosition(),
+                    goal.getStatus(),
+                    goal.getStatus() == GoalStatus.ARCHIVED
+            ));
+        }
+        return dtoList;
+    }
+
+
+    @PutMapping("/goals/{goalId}/achievement/toggle")
+    public GoalResponseDto toggleAchievement(@PathVariable long goalId) {
+        Goal goal = service.toggleAchievement(goalId);
+
+        return new GoalResponseDto(
+                goal.getId(),
+                goal.getGoalTitle(),
+                goal.getDifficulty().getValue(),
+                goal.getPosition(),
+                goal.getStatus(),
+                goal.getStatus() == GoalStatus.ARCHIVED
+        );
+    }
+
+
+
+
 
 
 

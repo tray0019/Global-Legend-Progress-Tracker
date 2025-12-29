@@ -23,13 +23,21 @@ public class GoalService {
         this.repo = repo;
     }
 
-    public List<Goal> getActiveGoals(){
-        return repo.findByStatusAndArchivedFalseOrderByPositionAsc(GoalStatus.ACTIVE);
+    public List<Goal> getActiveGoals() {
+        // ACTIVE, not archived, not achievement
+        return repo.findByStatusAndArchivedFalseAndIsAchievementFalseOrderByPositionAsc(GoalStatus.ACTIVE);
     }
 
-    public List<Goal> getArchiveGoals(){
+    public List<Goal> getArchiveGoals() {
+        // archived (regardless of status)
         return repo.findByArchivedTrueOrderByPositionAsc();
     }
+
+    public List<Goal> getAchievements() {
+        // marked as achievement
+        return repo.findByIsAchievementTrueOrderByPositionAsc();
+    }
+
 
     public List<Goal> getCompletedGoals() {
         return repo.findByStatusOrderByPositionAsc(GoalStatus.COMPLETED);
@@ -137,6 +145,18 @@ public class GoalService {
         goal.setStatus(GoalStatus.COMPLETED);
         return goal;
     }
+
+    @Transactional
+    public Goal toggleAchievement(long goalId) {
+        Goal goal = repo.findById(goalId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Goal not found"));
+
+        goal.setAchievement(!goal.isAchievement());
+        return goal; // managed entity auto-saves
+    }
+
+
 
 
 

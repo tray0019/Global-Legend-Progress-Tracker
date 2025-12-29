@@ -19,5 +19,8 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     List<Goal> findByStatusOrderByPositionAsc(GoalStatus status);
     List<Goal> findByStatusAndArchivedFalseOrderByPositionAsc(GoalStatus status);
+    List<Goal> findByStatusAndArchivedFalseAndIsAchievementFalseOrderByPositionAsc(GoalStatus status);
+    List<Goal> findByIsAchievementTrueOrderByPositionAsc();
+
 
 }

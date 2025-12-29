@@ -34,5 +34,8 @@ public class Goal {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GoalStatus status;
+    private GoalStatus status = GoalStatus.ACTIVE;
+
+    @Column(nullable = false)
+    private boolean isAchievement;
 }
