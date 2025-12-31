@@ -15,14 +15,26 @@ public class UserProgressService {
     public UserProgressService(UserProgressRepository repository){
         this.repository = repository;
     }
+    private static final int DAILY_XP_CAP = 250;
 
     public void addXP(int difficulty){
         UserProgress progress = repository.findTopByOrderByIdAsc();
 
+        resetDailyXPIfNewDay(progress);
+
         int xpToAdd = calculateXP(difficulty);
-        int newTotalXP = progress.getTotalXP() + xpToAdd;
+        int remainingXP = DAILY_XP_CAP - progress.getDailyXP();
+
+        if(remainingXP <= 0){
+            return;
+        }
+
+        int finalXP = Math.min(xpToAdd, remainingXP);
+
+        int newTotalXP = progress.getTotalXP() + finalXP;
 
         progress.setTotalXP(newTotalXP);
+        progress.setDailyXP(progress.getDailyXP()+finalXP);
         progress.setLastActivityDate(LocalDate.now());
 
         Rank newRank = calculateRankFromXP(newTotalXP);
