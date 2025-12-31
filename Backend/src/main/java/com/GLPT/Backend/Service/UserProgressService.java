@@ -20,9 +20,16 @@ public class UserProgressService {
         UserProgress progress = repository.findTopByOrderByIdAsc();
 
         int xpToAdd = calculateXP(difficulty);
+        int newTotalXP = progress.getTotalXP() + xpToAdd;
 
-        progress.setTotalXP(progress.getTotalXP()+xpToAdd);
+        progress.setTotalXP(newTotalXP);
         progress.setLastActivityDate(LocalDate.now());
+
+        Rank newRank = calculateRankFromXP(newTotalXP);
+
+        if(newRank.ordinal() > progress.getCurrentRank().ordinal()){
+            progress.setCurrentRank(newRank);
+        }
 
         repository.save(progress);
 
