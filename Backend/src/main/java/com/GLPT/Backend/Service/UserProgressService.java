@@ -1,5 +1,6 @@
 package com.GLPT.Backend.Service;
 
+import com.GLPT.Backend.Entity.Rank;
 import com.GLPT.Backend.Entity.UserProgress;
 import com.GLPT.Backend.Repository.UserProgressRepository;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,15 @@ public class UserProgressService {
             case 3 -> 50;
             default -> throw new IllegalArgumentException("Invalid difficulty: "+difficulty);
         };
+    }
+
+    private Rank calculateRankFromXP(int totalXP){
+        if(totalXP >= 6000) return Rank.CHALLENGER;
+        if(totalXP >= 3500) return Rank.MASTER;
+        if(totalXP >= 2000) return Rank.DIAMOND;
+        if(totalXP >= 1200) return Rank.PLATINUM;
+        if(totalXP >= 600) return Rank.GOLD;
+        if(totalXP >= 200) return Rank.SILVER;
+        return Rank.BRONZE;
     }
 }
