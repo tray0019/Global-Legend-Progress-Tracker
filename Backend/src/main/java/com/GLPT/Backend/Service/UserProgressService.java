@@ -53,4 +53,11 @@ public class UserProgressService {
         if(totalXP >= 200) return Rank.SILVER;
         return Rank.BRONZE;
     }
+
+    private void resetDailyXPIfNewDay(UserProgress progress){
+        if(!LocalDate.now().equals(progress.getLastActivityDate())){
+            progress.setDailyXP(0);
+        }
+    }
+
 }

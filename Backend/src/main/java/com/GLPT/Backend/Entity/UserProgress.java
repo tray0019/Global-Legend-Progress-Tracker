@@ -30,6 +30,9 @@ public class UserProgress {
 
     private LocalDateTime updateAt;
 
+    @Column(nullable = false)
+    private int dailyXP;
+
     @PrePersist
     protected void onCreate(){
         this.createdAt = LocalDateTime.now();
