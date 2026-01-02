@@ -108,4 +108,9 @@ public class UserProgressService {
         }
     }
 
+    public UserProgress getProgressWithDecayCheck(){
+        applyRankDecayIfNeeded();
+        return repository.findTopByOrderByIdAsc();
+    }
+
 }
