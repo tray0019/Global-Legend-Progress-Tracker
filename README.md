@@ -59,3 +59,5 @@ This is a progress tracking application where user track their progress to reach
       - Renaming Entry 
       - Renaming Goal
 22. Miminum Viable Product created GLTP Version 1!✅✅✅
+
+Copyright (c) 2025 Rustom Trayvilla. All rights reserved.
