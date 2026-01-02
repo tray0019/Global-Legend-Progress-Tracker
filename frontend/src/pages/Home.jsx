@@ -9,6 +9,7 @@ import { reorderGoals } from "../api/goalApi";
 import { getGoalDoneToday } from "../api/goalCheckApi";
 import "../styles.css"; 
 import { getActiveGoals,completeGoal  } from "../api/goalApi";
+import { getProgress } from "../api/rankApi";
 
 import {
   getAllGoals,
@@ -78,6 +79,8 @@ function Home() {
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
   const [achievements, setAchievements] = useState([]);
 
+  const [progress, setProgress] = useState(null);
+
   
 
  const handleToggleArchive = async (goalId) => {
@@ -95,6 +98,9 @@ function Home() {
       const res = await getActiveGoals();
       const loadedGoals = res.data;
       setGoals(loadedGoals);
+
+      const progressRes = await getProgress();
+      setProgress(progressRes.data);
 
       // 2️⃣ Load done-today status
       await loadDoneTodayStatuses(loadedGoals);
