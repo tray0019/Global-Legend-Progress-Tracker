@@ -83,4 +83,20 @@ public class UserProgressService {
         );
     }
 
+    private Rank calculateDecayedRank(UserProgress progress){
+        int inactiveDays = daysInactive(progress);
+
+        if(inactiveDays < DECAY_START_DAYS){
+            return progress.getCurrentRank();
+        }
+
+        int decaySteps = 1 +(inactiveDays - DECAY_START_DAYS) /DECAY_INTERVAL_DAYS;
+
+        int currentOrdinal = progress.getCurrentRank().ordinal();
+        int newOrdinal = Math.max(0, currentOrdinal -decaySteps);
+
+        return Rank.values()[newOrdinal];
+
+    }
+
 }
