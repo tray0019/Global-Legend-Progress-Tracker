@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProgress } from "../api/rankApi"; // your API
+import { getProgress } from "../../api/rankApi";
 import RankBadge from "./RankBadge";
 import RankProgressBar from "./RankProgressBar";
 

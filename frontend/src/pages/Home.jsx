@@ -11,6 +11,10 @@ import "../styles.css";
 import { getActiveGoals,completeGoal  } from "../api/goalApi";
 import { getProgress } from "../api/rankApi";
 
+// At the top of your file
+import RankPanel from "../components/rank/RankPanel"; // adjust path if needed
+
+
 import {
   getAllGoals,
   getGoalById,
@@ -99,9 +103,7 @@ function Home() {
       const loadedGoals = res.data;
       setGoals(loadedGoals);
 
-      const progressRes = await getProgress();
-      setProgress(progressRes.data);
-
+      
       // 2️⃣ Load done-today status
       await loadDoneTodayStatuses(loadedGoals);
 
@@ -123,6 +125,11 @@ function Home() {
 
       // 5️⃣ Load global contributions
       await loadGlobalContributions();
+
+
+      const progressRes = await getProgress();
+    setProgress(progressRes.data);
+
     } catch (err) {
       console.error(err);
     }
@@ -447,6 +454,8 @@ const completedTodayCount = Object.values(doneTodayByGoal)
     <div className="app-container">
       <h1>Goals</h1>
 
+      <RankPanel />
+
       {totalGoals > 0 && (
         <div style={{
           marginBottom: "16px",
@@ -461,6 +470,7 @@ const completedTodayCount = Object.values(doneTodayByGoal)
 
       <GlobalYearCalendar contributions={globalContributions} />
 
+      
       <AddGoalForm onAdd={handleAddGoal} />
 
       {isLoadingGoals && <p>Loading goals...</p>}

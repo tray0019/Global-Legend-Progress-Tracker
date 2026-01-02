@@ -1,4 +1,5 @@
-import { getProgressToNextRank } from "../utils/rankUtils";
+import { getProgressToNextRank } from "../../utils/rankUtils";
+
 
 function RankProgressBar({ rank, totalXP }) {
   const percentage = getProgressToNextRank(rank, totalXP);
