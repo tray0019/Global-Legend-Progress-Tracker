@@ -6,6 +6,7 @@ import com.GLPT.Backend.Repository.UserProgressRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class UserProgressService {
@@ -15,7 +16,10 @@ public class UserProgressService {
     public UserProgressService(UserProgressRepository repository){
         this.repository = repository;
     }
+
     private static final int DAILY_XP_CAP = 250;
+    private static final int DECAY_START_DAYS = 25;
+    private static final int DECAY_INTERVAL_DAYS = 14;
 
     public void addXP(int difficulty){
         UserProgress progress = repository.findTopByOrderByIdAsc();
@@ -70,6 +74,13 @@ public class UserProgressService {
         if(!LocalDate.now().equals(progress.getLastActivityDate())){
             progress.setDailyXP(0);
         }
+    }
+
+    private int daysInactive(UserProgress progress){
+        return (int) ChronoUnit.DAYS.between(
+                progress.getLastActivityDate(),
+                LocalDate.now()
+        );
     }
 
 }
