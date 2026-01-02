@@ -96,7 +96,16 @@ public class UserProgressService {
         int newOrdinal = Math.max(0, currentOrdinal -decaySteps);
 
         return Rank.values()[newOrdinal];
+    }
 
+    public void applyRankDecayIfNeeded(){
+        UserProgress progress = repository.findTopByOrderByIdAsc();
+        Rank decayedRank = calculateDecayedRank(progress);
+
+        if(decayedRank != calculateDecayedRank(progress)){
+            progress.setCurrentRank(decayedRank);
+            repository.save(progress);
+        }
     }
 
 }
