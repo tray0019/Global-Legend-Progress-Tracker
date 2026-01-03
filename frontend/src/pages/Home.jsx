@@ -9,7 +9,7 @@ import { reorderGoals } from "../api/goalApi";
 import { getGoalDoneToday } from "../api/goalCheckApi";
 import "../styles.css"; 
 import { getActiveGoals,completeGoal  } from "../api/goalApi";
-import { getProgress } from "../api/rankApi";
+import { getProgress,addXP } from "../api/rankApi";
 
 // At the top of your file
 import RankPanel from "../components/rank/RankPanel"; // adjust path if needed
@@ -332,15 +332,26 @@ const handleChangeEntryInput = (goalId, text) => {
     }
   };
 
+  function calculateXP(difficulty){
+  switch(difficulty){
+    case 1: return 10;
+    case 2: return 25;
+    case 3: return 50;
+    default: return 10;
+  }
+}
+
+
   /* ---------- MARK DONE TODAY ---------- */
-  const handleMarkDoneToday = async (goalId) => {
+  const handleMarkDoneToday = async (goalId, difficulty) => {
   try {
     const res = await toggleGoalDoneToday(goalId);
+    const doneToday = res.data.doneToday;
 
     // update button
     setDoneTodayByGoal((prev) => ({
       ...prev,
-      [goalId]: res.data.doneToday,
+      [goalId]: doneToday,
     }));
 
     // optimistic calendar update
@@ -350,16 +361,33 @@ const handleChangeEntryInput = (goalId, text) => {
     setGoalCheckDates((prev) => {
       const existing = Array.isArray(prev[goalId]) ? prev[goalId] : [];
 
-      if (res.data.doneToday && !existing.includes(todayStr)) {
+      if (doneToday && !existing.includes(todayStr)) {
         return { ...prev, [goalId]: [...existing, todayStr] };
       }
 
-      if (!res.data.doneToday) {
+      if (!doneToday) {
         return { ...prev, [goalId]: existing.filter(d => d !== todayStr) };
       }
 
       return prev;
     });
+
+    // 🔥 XP ONLY WHEN MARKING DONE
+    if (doneToday) {
+  // 🔥 Optimistic frontend update
+  setProgress(prev => ({
+    ...prev,
+    totalXP: prev.totalXP + calculateXP(difficulty),
+    dailyXP: prev.dailyXP + calculateXP(difficulty),
+  }));
+
+  // Send to backend
+  await addXP(difficulty);
+
+  // Sync backend response (optional)
+  const progressRes = await getProgress();
+  setProgress(progressRes.data);
+}
 
     // update global calendar
     await loadGlobalContributions();
@@ -368,6 +396,7 @@ const handleChangeEntryInput = (goalId, text) => {
     console.error("Error toggle done today:", err);
   }
 };
+
 
 
   /* ---------- LOAD GLOBAL CONTRIBUTIONS ---------- */
@@ -405,13 +434,14 @@ const handleChangeEntryInput = (goalId, text) => {
   }
 };
 
-const handleCompleteGoal = async (goalId) => {
+const handleCompleteGoal = async (goalId,difficulty) => {
   const confirmComplete = window.confirm("Mark this goal as completed?");
   if (!confirmComplete) return;
 
   try {
     await completeGoal(goalId); // move to achievements
     await loadGoals();
+
   } catch (err) {
     console.error(err);
   }
@@ -454,7 +484,7 @@ const completedTodayCount = Object.values(doneTodayByGoal)
     <div className="app-container">
       <h1>Goals</h1>
 
-      <RankPanel />
+      <RankPanel progress={progress} />
 
       {totalGoals > 0 && (
         <div style={{

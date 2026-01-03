@@ -45,7 +45,7 @@ function GoalCard({
               {isOpen ? "Hide" : "View"}
             </button>
             {!isArchived && onMarkDoneToday && (
-    <button style={{ marginLeft: "10px"}} onClick={() => { onMarkDoneToday(goal.id); setMenuOpen(false); }}>
+    <button style={{ marginLeft: "10px"}} onClick={() => { onMarkDoneToday(goal.id,goal.difficulty); setMenuOpen(false); }}>
       {goal.doneToday ? "Done today ✅" : "Mark done"}
     </button>
   )}

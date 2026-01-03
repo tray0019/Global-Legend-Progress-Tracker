@@ -9,6 +9,6 @@ export function getProgress(){
     return api.get("/progress");
 }
 
-export function addXP(amount) {
-  return api.post("/progress/xp", { amount });
+export function addXP(difficulty) {
+  return api.post(`/progress/xp?difficulty=${difficulty}`);
 }
