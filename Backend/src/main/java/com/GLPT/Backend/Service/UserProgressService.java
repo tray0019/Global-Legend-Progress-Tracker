@@ -115,23 +115,22 @@ public class UserProgressService {
         return progress;
     }
 
-    public void removeXP(int difficulty) {
+    public void removeXP(int difficulty){
         UserProgress progress = repository.findTopByOrderByIdAsc();
 
-        // Make sure we reset daily XP if a new day
-        resetDailyXPIfNewDay(progress);
+        int xpToSubtract = calculateXP(difficulty);
 
-        int xpToRemove = calculateXP(difficulty);
+        // Subtract XP but never go below 0
+        progress.setTotalXP(Math.max(0, progress.getTotalXP() - xpToSubtract));
+        progress.setDailyXP(Math.max(0, progress.getDailyXP() - xpToSubtract));
+        progress.setLastActivityDate(LocalDate.now());
 
-        // Subtract XP safely, never go below 0
-        progress.setTotalXP(Math.max(0, progress.getTotalXP() - xpToRemove));
-        progress.setDailyXP(Math.max(0, progress.getDailyXP() - xpToRemove));
-
-        // Recalculate rank based on new totalXP
+        // Update rank based on new totalXP
         Rank newRank = calculateRankFromXP(progress.getTotalXP());
         progress.setCurrentRank(newRank);
 
         repository.save(progress);
     }
+
 
 }

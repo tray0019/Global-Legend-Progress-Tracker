@@ -30,15 +30,17 @@ public class UserProgressController {
     }
 
     @PostMapping("/xp")
-    public void addXP(@RequestParam int difficulty){
-        System.out.println("addXP called with difficulty: " + difficulty);
+    public ResponseEntity<UserProgress> addXP(@RequestParam int difficulty) {
         progressService.addXP(difficulty);
+        UserProgress updated = progressService.getProgressWithDecayCheck();
+        return ResponseEntity.ok(updated);  // ✅ return updated progress as JSON
     }
 
-    @PostMapping("/user/remove-xp")
+    @PostMapping("/xp/remove")
     public ResponseEntity<UserProgress> removeXP(@RequestParam int difficulty) {
         progressService.removeXP(difficulty);
-        return ResponseEntity.ok(progressService.getProgressWithDecayCheck());
+        UserProgress updated = progressService.getProgressWithDecayCheck();
+        return ResponseEntity.ok(updated);  // ✅ return updated progress as JSON
     }
 
 }
