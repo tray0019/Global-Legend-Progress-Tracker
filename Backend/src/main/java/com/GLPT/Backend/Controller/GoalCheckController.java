@@ -4,7 +4,9 @@ import com.GLPT.Backend.DTO.GlobalContributionDto;
 import com.GLPT.Backend.DTO.GoalCheckDto;
 import com.GLPT.Backend.DTO.GoalTodayStatusDto;
 import com.GLPT.Backend.Entity.GoalCheck;
+import com.GLPT.Backend.Entity.UserProgress;
 import com.GLPT.Backend.Service.GoalCheckService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -63,6 +65,8 @@ public class GoalCheckController {
         boolean done = goalService.isDoneToday(goalId);
         return new GoalTodayStatusDto(goalId, done);
     }
+
+
 
 
 
