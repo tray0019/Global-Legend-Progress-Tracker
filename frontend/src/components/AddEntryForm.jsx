@@ -1,5 +1,5 @@
 // src/components/AddEntryForm.jsx
-import React from "react";
+import React from 'react';
 
 function AddEntryForm({ value, onChange, onAddEntry }) {
   const handleSubmit = (e) => {

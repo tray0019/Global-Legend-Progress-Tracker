@@ -1,9 +1,9 @@
 // src/pages/Achievements.jsx
-import { useEffect, useState } from "react";
-import GoalCard from "../components/GoalCard";
-import { getAchievements, toggleAchievementGoal, getGoalById } from "../api/goalApi";
-import { getGoalChecks } from "../api/goalCheckApi";
-import { addEntry, deleteEntry, renameEntry } from "../api/entryApi";
+import { useEffect, useState } from 'react';
+import GoalCard from '../components/GoalCard';
+import { getAchievements, toggleAchievementGoal, getGoalById } from '../api/goalApi';
+import { getGoalChecks } from '../api/goalCheckApi';
+import { addEntry, deleteEntry, renameEntry } from '../api/entryApi';
 
 function Achievements() {
   const [achievements, setAchievements] = useState([]);
@@ -14,19 +14,19 @@ function Achievements() {
   const [entryInputs, setEntryInputs] = useState({});
 
   useEffect(() => {
-  getAchievements().then(res => {
-    setAchievements(Array.isArray(res.data) ? res.data : []);
-  });
-}, []);
+    getAchievements().then((res) => {
+      setAchievements(Array.isArray(res.data) ? res.data : []);
+    });
+  }, []);
 
   const reloadGoalDetails = async (goalId) => {
     try {
       const goalRes = await getGoalById(goalId);
-      setGoalDetails(prev => ({ ...prev, [goalId]: goalRes.data }));
+      setGoalDetails((prev) => ({ ...prev, [goalId]: goalRes.data }));
 
       const monthRange = getCurrentMonthRange();
       const checksRes = await getGoalChecks(goalId, monthRange.from, monthRange.to);
-      setGoalCheckDates(prev => ({ ...prev, [goalId]: checksRes.data.map(c => c.date) }));
+      setGoalCheckDates((prev) => ({ ...prev, [goalId]: checksRes.data.map((c) => c.date) }));
     } catch (err) {
       console.error(err);
     }
@@ -38,7 +38,7 @@ function Achievements() {
 
     try {
       await addEntry(goalId, text);
-      setEntryInputs(prev => ({ ...prev, [goalId]: "" }));
+      setEntryInputs((prev) => ({ ...prev, [goalId]: '' }));
       await reloadGoalDetails(goalId);
     } catch (err) {
       console.error(err);
@@ -55,7 +55,7 @@ function Achievements() {
   };
 
   const handleRenameEntry = async (goalId, entryId, currentText) => {
-    const newText = prompt("Edit entry:", currentText);
+    const newText = prompt('Edit entry:', currentText);
     if (!newText) return;
 
     try {
@@ -67,7 +67,7 @@ function Achievements() {
   };
 
   const handleChangeEntryInput = (goalId, text) => {
-    setEntryInputs(prev => ({ ...prev, [goalId]: text }));
+    setEntryInputs((prev) => ({ ...prev, [goalId]: text }));
   };
 
   const getCurrentMonthRange = () => {
@@ -82,13 +82,13 @@ function Achievements() {
     return { from, to };
   };
 
-  const pad2 = (number) => (number < 10 ? "0" + number : String(number));
+  const pad2 = (number) => (number < 10 ? '0' + number : String(number));
 
   const handleViewGoal = async (goalId) => {
     const isOpen = openGoals[goalId];
     const newOpenGoals = { ...openGoals, [goalId]: !isOpen };
     setOpenGoals(newOpenGoals);
-    localStorage.setItem("achievementOpenGoals", JSON.stringify(newOpenGoals));
+    localStorage.setItem('achievementOpenGoals', JSON.stringify(newOpenGoals));
 
     if (!isOpen && !goalDetails[goalId]) {
       await reloadGoalDetails(goalId);
@@ -107,31 +107,29 @@ function Achievements() {
           {achievements.map((goal) => (
             <li key={goal.id} className="goal-card">
               <GoalCard
-  goal={goal}
-  onView={handleViewGoal}
-  isOpen={openGoals[goal.id]}
-  selectedGoal={goalDetails[goal.id]}
-  checkDates={goalCheckDates[goal.id] || []}
-  isArchived={false}
-  newEntryDescription={entryInputs[goal.id] || ""}
-  onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
-  onAddEntry={() => handleAddEntry(goal.id)}
-  onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)}
-  onRenameEntry={(entryId, text) => handleRenameEntry(goal.id, entryId, text)}
-  handleToggleAchievement={async (goalId) => {
-    try {
-      // call backend toggle
-      await toggleAchievementGoal(goalId);
+                goal={goal}
+                onView={handleViewGoal}
+                isOpen={openGoals[goal.id]}
+                selectedGoal={goalDetails[goal.id]}
+                checkDates={goalCheckDates[goal.id] || []}
+                isArchived={false}
+                newEntryDescription={entryInputs[goal.id] || ''}
+                onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
+                onAddEntry={() => handleAddEntry(goal.id)}
+                onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)}
+                onRenameEntry={(entryId, text) => handleRenameEntry(goal.id, entryId, text)}
+                handleToggleAchievement={async (goalId) => {
+                  try {
+                    // call backend toggle
+                    await toggleAchievementGoal(goalId);
 
-      // remove from achievements list in UI
-      setAchievements(prev => prev.filter(g => g.id !== goalId));
-    } catch (err) {
-      console.error(err);
-    }
-  }}
-/>
-
-
+                    // remove from achievements list in UI
+                    setAchievements((prev) => prev.filter((g) => g.id !== goalId));
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+              />
             </li>
           ))}
         </ul>

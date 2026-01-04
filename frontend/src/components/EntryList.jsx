@@ -1,5 +1,5 @@
 // src/components/EntryList.jsx
-import React from "react";
+import React from 'react';
 
 function EntryList({ entries, onDeleteEntry, onRenameEntry }) {
   if (!entries || entries.length === 0) {
@@ -11,14 +11,11 @@ function EntryList({ entries, onDeleteEntry, onRenameEntry }) {
       {entries.map((entry) => (
         <li key={entry.id}>
           {entry.description}
-          <button
-            style={{ marginLeft: "8px" }}
-            onClick={() => onDeleteEntry(entry.id)}
-          >
+          <button style={{ marginLeft: '8px' }} onClick={() => onDeleteEntry(entry.id)}>
             Delete
           </button>
           <button
-            style={{ marginLeft: "8px" }}
+            style={{ marginLeft: '8px' }}
             onClick={() => onRenameEntry(entry.id, entry.description)}
           >
             Rename

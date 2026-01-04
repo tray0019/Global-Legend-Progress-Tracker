@@ -1,18 +1,12 @@
 // src/components/GlobalYearCalendar.jsx
-import React from "react";
+import React from 'react';
 
 function pad2(number) {
-  return number < 10 ? "0" + number : String(number);
+  return number < 10 ? '0' + number : String(number);
 }
 
 function formatDate(dateObj) {
-  return (
-    dateObj.getFullYear() +
-    "-" +
-    pad2(dateObj.getMonth() + 1) +
-    "-" +
-    pad2(dateObj.getDate())
-  );
+  return dateObj.getFullYear() + '-' + pad2(dateObj.getMonth() + 1) + '-' + pad2(dateObj.getDate());
 }
 
 function GlobalYearCalendar({ contributions = [] }) {
@@ -61,18 +55,18 @@ function GlobalYearCalendar({ contributions = [] }) {
 
   const getColor = (cell) => {
     if (!cell.inRange) {
-      return "transparent";
+      return 'transparent';
     }
 
     const { count } = cell;
 
-    if (count <= 0) return "#e5e7eb";
-    if (count === 1) return "#bbf7d0";
-    if (count === 2) return "#8ff8b4ff";
-    if (count === 3) return "#70fba1ff";
-    if (count === 4) return "#48e57fff";
-    if (count === 5) return "#40d978ff";
-    return "#16a34a";
+    if (count <= 0) return '#e5e7eb';
+    if (count === 1) return '#bbf7d0';
+    if (count === 2) return '#8ff8b4ff';
+    if (count === 3) return '#70fba1ff';
+    if (count === 4) return '#48e57fff';
+    if (count === 5) return '#40d978ff';
+    return '#16a34a';
   };
 
   const firstYear = start.getFullYear();
@@ -80,16 +74,16 @@ function GlobalYearCalendar({ contributions = [] }) {
   const label = `Overall - Last 12 months (${firstYear}-${lastYear})`;
 
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <div style={{ marginBottom: "4px", fontSize: "0.9rem" }}>{label}</div>
-      <div style={{ display: "flex" }}>
+    <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: '4px', fontSize: '0.9rem' }}>{label}</div>
+      <div style={{ display: 'flex' }}>
         {weeks.map((week, weekIndex) => (
           <div
             key={`week-${weekIndex}`}
             style={{
-              display: "flex",
-              flexDirection: "column",
-              marginRight: "2px",
+              display: 'flex',
+              flexDirection: 'column',
+              marginRight: '2px',
             }}
           >
             {week.map((cell, dayIndex) => (
@@ -97,10 +91,10 @@ function GlobalYearCalendar({ contributions = [] }) {
                 key={`day-${weekIndex}-${dayIndex}`}
                 title={`${cell.dateString} - ${cell.count} goal(s)`}
                 style={{
-                  width: "12px",
-                  height: "12px",
-                  marginBottom: "2px",
-                  borderRadius: "2px",
+                  width: '12px',
+                  height: '12px',
+                  marginBottom: '2px',
+                  borderRadius: '2px',
                   backgroundColor: getColor(cell),
                 }}
               />

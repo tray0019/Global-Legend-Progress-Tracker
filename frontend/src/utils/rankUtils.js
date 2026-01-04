@@ -1,11 +1,11 @@
 export const RANK_THRESHOLDS = {
   BRONZE: 0,
-  SILVER: 200,
-  GOLD: 600,
-  PLATINUM: 1200,
-  DIAMOND: 2000,
-  MASTER: 3500,
-  CHALLENGER: 6000,
+  SILVER: 400,
+  GOLD: 1200,
+  PLATINUM: 2400,
+  DIAMOND: 4000,
+  MASTER: 7000,
+  CHALLENGER: 12000,
 };
 
 export function getProgressToNextRank(rank, totalXP) {
@@ -19,8 +19,5 @@ export function getProgressToNextRank(rank, totalXP) {
   const currentXP = RANK_THRESHOLDS[rank];
   const nextXP = RANK_THRESHOLDS[ranks[currentIndex + 1]];
 
-  return Math.min(
-    100,
-    ((totalXP - currentXP) / (nextXP - currentXP)) * 100
-  );
+  return Math.min(100, ((totalXP - currentXP) / (nextXP - currentXP)) * 100);
 }

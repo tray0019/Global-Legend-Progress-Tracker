@@ -1,19 +1,19 @@
 // src/components/AddGoalForm.jsx
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 function AddGoalForm({ onAdd }) {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      alert("Please enter a goal title.");
+      alert('Please enter a goal title.');
       return;
     }
 
     onAdd(title.trim());
-    setTitle("");
+    setTitle('');
   };
 
   return (

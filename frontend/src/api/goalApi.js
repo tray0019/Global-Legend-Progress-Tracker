@@ -1,13 +1,13 @@
 // src/api/goalApi.js
-import axios from "axios";
+import axios from 'axios';
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 const api = axios.create({
   baseURL: BASE_URL,
 });
 
 export function getAllGoals() {
-  return api.get("/goals");
+  return api.get('/goals');
 }
 
 export function getGoalById(goalId) {
@@ -15,13 +15,13 @@ export function getGoalById(goalId) {
 }
 
 export function createGoal(title) {
-  return api.post("/goals", {
+  return api.post('/goals', {
     goalTitle: title,
   });
 }
 
-export function updateGoalDifficulty(goalId, difficulty){
-  return api.patch(`/goals/${goalId}/difficulty`,{difficulty})
+export function updateGoalDifficulty(goalId, difficulty) {
+  return api.patch(`/goals/${goalId}/difficulty`, { difficulty });
 }
 
 export function renameGoal(goalId, newTitle) {
@@ -35,23 +35,23 @@ export function deleteGoal(goalId) {
 }
 
 export function reorderGoals(positions) {
-  return api.put("/goals/reorder", positions);
+  return api.put('/goals/reorder', positions);
 }
 
-export function toggleArchiveGoal(goalId){
+export function toggleArchiveGoal(goalId) {
   return api.put(`/goals/${goalId}/archived/toggle`);
 }
 
-export function getArchiveGoals(){
-  return api.get("/goals/archived")
+export function getArchiveGoals() {
+  return api.get('/goals/archived');
 }
 
-export function getActiveGoals(){
-  return api.get("/goals/active")
+export function getActiveGoals() {
+  return api.get('/goals/active');
 }
 
-export function getAchievements(){
-  return api.get("/goals/achievements")
+export function getAchievements() {
+  return api.get('/goals/achievements');
 }
 
 export function completeGoal(goalId) {
@@ -61,4 +61,3 @@ export function completeGoal(goalId) {
 export function toggleAchievementGoal(goalId) {
   return api.put(`/goals/${goalId}/achievement/toggle`);
 }
-

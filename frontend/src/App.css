@@ -28,7 +28,7 @@
   color: #61dafb;
 }
 
-.goal-card span[style*="grab"]:active {
+.goal-card span[style*='grab']:active {
   cursor: grabbing;
 }
 
@@ -39,7 +39,6 @@
 .goal-card-handle:hover {
   opacity: 1;
 }
-
 
 @keyframes App-logo-spin {
   from {
