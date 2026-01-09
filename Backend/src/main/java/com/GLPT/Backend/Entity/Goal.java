@@ -38,4 +38,9 @@ public class Goal {
 
     @Column(nullable = false)
     private boolean isAchievement;
+
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
 }
