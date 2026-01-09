@@ -203,11 +203,13 @@ function GoalCard({
             onDeleteEntry={onDeleteEntry}
             onRenameEntry={onRenameEntry}
           />
-          <AddEntryForm
-            value={newEntryDescription}
-            onChange={onChangeNewEntry}
-            onAddEntry={onAddEntry}
-          />
+          {!isAchievementPage && (
+            <AddEntryForm
+              value={newEntryDescription}
+              onChange={onChangeNewEntry}
+              onAddEntry={onAddEntry}
+            />
+          )}
         </div>
       )}
     </div>
