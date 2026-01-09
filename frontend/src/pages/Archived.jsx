@@ -190,7 +190,7 @@ function Archived() {
       ) : (
         <ul className="goal-list">
           {archivedGoals.map((goal) => (
-            <li key={goal.id} className="goal-card">
+            <li key={goal.id}>
               <GoalCard
                 goal={goal}
                 onView={handleViewGoal}

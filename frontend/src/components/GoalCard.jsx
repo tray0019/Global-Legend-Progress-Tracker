@@ -109,9 +109,12 @@ function GoalCard({
                   Delete
                 </button>
                 {/* ACHIEVEMENT TOGGLE BUTTON */}
-                <button onClick={() => handleToggleAchievement(goal.id)}>
-                  {goal.archive ? 'Mark Achievement' : 'Unmark Achievement'}
-                </button>
+                {!isArchived && (
+                  <button onClick={() => handleToggleAchievement(goal.id)}>
+                    {goal.archive ? 'Mark Achievement' : 'Unmark Achievement'}
+                  </button>
+                )}
+
                 {onToggleArchive && (
                   <button
                     onClick={() => {

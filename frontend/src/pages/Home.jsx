@@ -529,9 +529,7 @@ function Home() {
   return (
     <div className="app-container">
       <h1>Goals</h1>
-
       <RankPanel progress={progress} />
-
       {totalGoals > 0 && (
         <div
           style={{
