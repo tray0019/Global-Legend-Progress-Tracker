@@ -9,7 +9,7 @@ import { reorderGoals } from '../api/goalApi';
 import { getGoalDoneToday } from '../api/goalCheckApi';
 import '../styles.css';
 import { getActiveGoals, completeGoal } from '../api/goalApi';
-import { getProgress, addXP } from '../api/rankApi';
+import { getProgress, addXP, removeXP } from '../api/rankApi';
 
 // At the top of your file
 import RankPanel from '../components/rank/RankPanel'; // adjust path if needed
@@ -223,17 +223,12 @@ function Home() {
   };
 
   const loadDoneTodayStatuses = async (goals) => {
+    const result = {};
     for (const goal of goals) {
-      try {
-        const res = await getGoalDoneToday(goal.id);
-        setDoneTodayByGoal((prev) => ({
-          ...prev,
-          [goal.id]: res.data.doneToday,
-        }));
-      } catch (err) {
-        console.error('Failed to load done-today status', err);
-      }
+      const res = await getGoalDoneToday(goal.id);
+      result[goal.id] = res.data.doneToday;
     }
+    setDoneTodayByGoal(result);
   };
 
   /* ---------- LOAD ONE GOAL DETAILS + CHECKMARKS ---------- */
@@ -414,13 +409,15 @@ function Home() {
       const res = await toggleGoalDoneToday(goalId);
       const doneToday = res.data.doneToday;
 
-      // update button
+      const wasDone = doneTodayByGoal[goalId] === true;
+
+      // Update button state
       setDoneTodayByGoal((prev) => ({
         ...prev,
         [goalId]: doneToday,
       }));
 
-      // optimistic calendar update
+      // Optimistic calendar update
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
 
@@ -438,24 +435,19 @@ function Home() {
         return prev;
       });
 
-      // 🔥 XP ONLY WHEN MARKING DONE
-      if (doneToday) {
-        // 🔥 Optimistic frontend update
-        setProgress((prev) => ({
-          ...prev,
-          totalXP: prev.totalXP + calculateXP(difficulty),
-          dailyXP: prev.dailyXP + calculateXP(difficulty),
-        }));
+      console.log('doneTodayByGoal:', doneTodayByGoal);
+      console.log('goal.doneToday:', doneToday);
 
-        // Send to backend
-        await addXP(difficulty);
+      // Backend XP update and live progress refresh
+      if ((doneToday && !wasDone) || (!doneToday && wasDone)) {
+        if (doneToday) await addXP(difficulty);
+        else await removeXP(difficulty);
 
-        // Sync backend response (optional)
         const progressRes = await getProgress();
         setProgress(progressRes.data);
       }
 
-      // update global calendar
+      // Update global calendar
       await loadGlobalContributions();
     } catch (err) {
       console.error('Error toggle done today:', err);
@@ -565,7 +557,11 @@ function Home() {
           {(provided) => (
             <ul className="goal-list" {...provided.droppableProps} ref={provided.innerRef}>
               {goals.map((goal, index) => {
+                //const doneToday = goal.doneToday ?? doneTodayByGoal[goal.id] === true;
                 const doneToday = doneTodayByGoal[goal.id] === true;
+
+                console.log('RENDER', goal.id, doneToday);
+
                 const isOpen = openGoals[goal.id] === true;
                 const selectedGoal = goalDetails[goal.id];
                 const checkDates = goalCheckDates[goal.id] || [];
@@ -576,7 +572,8 @@ function Home() {
                       <li ref={provided.innerRef} {...provided.draggableProps}>
                         <GoalCard
                           onDifficultyChange={handleDiffcultyChange}
-                          goal={{ ...goal, doneToday }}
+                          goal={goal}
+                          doneToday={doneToday}
                           isArchived={false}
                           isOpen={isOpen}
                           selectedGoal={selectedGoal}

@@ -12,3 +12,7 @@ export function getProgress() {
 export function addXP(difficulty) {
   return api.post(`/progress/xp?difficulty=${difficulty}`);
 }
+
+export function removeXP(difficulty) {
+  return api.post(`/progress/xp/remove?difficulty=${difficulty}`);
+}

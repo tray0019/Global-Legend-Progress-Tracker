@@ -3,6 +3,7 @@ import Archived from './pages/Archived';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Achievements from './pages/Achievements';
+import RankTest from './components/RankTest';
 
 function App() {
   return (
@@ -14,6 +15,10 @@ function App() {
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/archived" element={<Archived />} />
         </Routes>
+      </div>
+      <div className="App">
+        <h1>Rank XP Test</h1>
+        <RankTest />
       </div>
     </BrowserRouter>
   );

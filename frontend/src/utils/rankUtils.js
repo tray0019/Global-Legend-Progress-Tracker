@@ -1,23 +1,32 @@
 export const RANK_THRESHOLDS = {
-  BRONZE: 0,
-  SILVER: 400,
-  GOLD: 1200,
-  PLATINUM: 2400,
-  DIAMOND: 4000,
-  MASTER: 7000,
-  CHALLENGER: 12000,
+  BRONZE: 200,
+  SILVER: 800,
+  GOLD: 2400,
+  PLATINUM: 4800,
+  DIAMOND: 8000,
+  MASTER: 14000,
+  CHALLENGER: 24000,
 };
 
 export function getProgressToNextRank(rank, totalXP) {
-  const ranks = Object.keys(RANK_THRESHOLDS);
-  const currentIndex = ranks.indexOf(rank);
+  if (!rank || !RANK_THRESHOLDS[rank.toUpperCase()]) {
+    // rank is null, undefined, or invalid → assume starting progress
+    return 0;
+  }
 
-  if (currentIndex === -1 || currentIndex === ranks.length - 1) {
+  const normalizedRank = rank.toUpperCase();
+  const ranks = Object.keys(RANK_THRESHOLDS);
+  const currentIndex = ranks.indexOf(normalizedRank);
+
+  if (currentIndex === ranks.length - 1) {
     return 100; // max rank
   }
 
-  const currentXP = RANK_THRESHOLDS[rank];
+  const currentXP = RANK_THRESHOLDS[normalizedRank];
   const nextXP = RANK_THRESHOLDS[ranks[currentIndex + 1]];
+
+  // If totalXP is below first threshold, return 0%
+  if (totalXP < currentXP) return 0;
 
   return Math.min(100, ((totalXP - currentXP) / (nextXP - currentXP)) * 100);
 }

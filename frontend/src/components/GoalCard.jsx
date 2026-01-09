@@ -26,10 +26,12 @@ function GoalCard({
   viewedMonth,
   onPrevMonth,
   onNextMonth,
+  doneToday,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleMenuToggle = () => setMenuOpen((prev) => !prev);
+  const isDoneToday = doneToday === true;
 
   return (
     <div
@@ -61,15 +63,10 @@ function GoalCard({
                 setMenuOpen(false);
               }}
             >
-              {goal.doneToday ? 'Done today ✅' : 'Mark done'}
+              {isDoneToday ? 'Done today ✅' : 'Mark done'}
             </button>
           )}
         </div>
-
-        {/* ACHIEVEMENT TOGGLE BUTTON */}
-        <button onClick={() => handleToggleAchievement(goal.id)}>
-          {goal.archive ? 'Mark Achievement' : 'Unmark Achievement'}
-        </button>
 
         {/* 3-DOT MENU */}
         <div style={{ position: 'relative' }}>
@@ -110,6 +107,10 @@ function GoalCard({
                   }}
                 >
                   Delete
+                </button>
+                {/* ACHIEVEMENT TOGGLE BUTTON */}
+                <button onClick={() => handleToggleAchievement(goal.id)}>
+                  {goal.archive ? 'Mark Achievement' : 'Unmark Achievement'}
                 </button>
                 {onToggleArchive && (
                   <button

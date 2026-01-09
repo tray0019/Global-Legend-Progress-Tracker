@@ -3,27 +3,7 @@ import { getProgress } from '../../api/rankApi';
 import RankBadge from './RankBadge';
 import RankProgressBar from './RankProgressBar';
 
-function RankPanel() {
-  const [progress, setProgress] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchProgress = async () => {
-    try {
-      setLoading(true);
-      const res = await getProgress();
-      setProgress(res.data);
-    } catch (err) {
-      console.error('Failed to load progress', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProgress();
-  }, []);
-
-  if (loading) return <div>Loading rank...</div>;
+function RankPanel({ progress }) {
   if (!progress) return <div>No progress found.</div>;
 
   return (
