@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserRegistrationRequest {
     private String email;
-    private String password;
     private String provider; //GOOGLE, APPLE, FACEBOOK
     private String providerUserId; //OAuth "sub" or user ID
 }
