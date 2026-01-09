@@ -26,6 +26,12 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String provider;
+
+    @Column(nullable = false, unique = true)
+    private String providerUserId;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Goal> goals;
 
