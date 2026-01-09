@@ -573,6 +573,7 @@ function Home() {
                           goal={goal}
                           doneToday={doneToday}
                           isArchived={false}
+                          isAchievementPage={false}
                           isOpen={isOpen}
                           selectedGoal={selectedGoal}
                           onView={handleView}

@@ -23,6 +23,7 @@ function GoalCard({
   dragHandleProps,
   isArchived,
   handleToggleAchievement,
+  isAchievementPage,
   viewedMonth,
   onPrevMonth,
   onNextMonth,
@@ -91,29 +92,41 @@ function GoalCard({
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <button
-                  onClick={() => {
-                    onRename(goal.id);
-                    setMenuOpen(false);
-                  }}
-                >
-                  Rename
-                </button>
-                <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to delete this goal?')) {
-                      onDelete(goal.id);
-                    }
-                  }}
-                >
-                  Delete
-                </button>
-                {/* ACHIEVEMENT TOGGLE BUTTON */}
-                {!isArchived && (
-                  <button onClick={() => handleToggleAchievement(goal.id)}>
-                    {goal.archive ? 'Mark Achievement' : 'Unmark Achievement'}
+                {!isAchievementPage && (
+                  <button
+                    onClick={() => {
+                      onRename(goal.id);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Rename
                   </button>
                 )}
+
+                {!isAchievementPage && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this goal?')) {
+                        onDelete(goal.id);
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
+                {/* ACHIEVEMENT TOGGLE BUTTON */}
+                {!isArchived &&
+                  (!isAchievementPage ? (
+                    // Home page: show Mark/Unmark based on goal.achievement
+                    <button onClick={() => handleToggleAchievement(goal.id)}>
+                      {goal.achievement ? 'Unmark Achievement' : 'Mark Achievement'}
+                    </button>
+                  ) : (
+                    // Achievements page: show only Unmark Achievement
+                    <button onClick={() => handleToggleAchievement(goal.id)}>
+                      Unmark Achievement
+                    </button>
+                  ))}
 
                 {onToggleArchive && (
                   <button

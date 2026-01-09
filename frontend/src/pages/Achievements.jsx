@@ -113,6 +113,7 @@ function Achievements() {
                 selectedGoal={goalDetails[goal.id]}
                 checkDates={goalCheckDates[goal.id] || []}
                 isArchived={false}
+                isAchievementPage={true}
                 newEntryDescription={entryInputs[goal.id] || ''}
                 onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
                 onAddEntry={() => handleAddEntry(goal.id)}
