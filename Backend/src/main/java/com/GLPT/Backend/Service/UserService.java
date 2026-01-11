@@ -5,7 +5,7 @@ import com.GLPT.Backend.DTO.UserRegistrationRequest;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,7 +16,8 @@ public class UserService {
 
     private UserRepository userRepository;
 
-    private static final int MIN_AGE = 13;
+    @Value("${app.minAge:13}")//This allows changing it without recompiling.
+    private int MIN_AGE;
 
     @Autowired
     public UserService(UserRepository userRepository){

@@ -5,9 +5,9 @@ import com.GLPT.Backend.DTO.UserRegistrationRequest;
 import com.GLPT.Backend.DTO.UserResponse;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,9 +17,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
+
     @PostMapping("/oauth-register")
-    public UserResponse register(@RequestBody UserRegistrationRequest request){
+    public UserResponse register(@RequestBody UserRegistrationRequest request,
+                                 HttpSession session){
         User user = userService.registerOAuthUser(request);
+
+        // store user in session
+        session.setAttribute("currentUser", user);
+
         return new UserResponse(
                 user.getId(),
                 user.getFirstName(),
