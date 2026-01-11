@@ -43,18 +43,25 @@ public class UserController {
     @PostMapping("/complete-profile/{userId}")
     public UserResponse completeProfile(
             @PathVariable Long userId,
-            @Valid @RequestBody CompleteProfileRequest request){
+            @Valid @RequestBody CompleteProfileRequest request,
+            HttpSession session){
 
-        User user = userService.completeProfile(userId, request);
+        User currentUser = (User) session.getAttribute("currentUser");
+
+        if(currentUser == null){
+            throw new RuntimeException("Not logged in");
+        }
+
+        User updateUser = userService.completeProfile(currentUser.getId(), request);
 
         return new UserResponse(
-          user.getId(),
-          user.getFirstName(),
-          user.getLastName(),
-          user.getEmail(),
-          user.getBirthDate(),
-          user.getGender(),
-          user.isProfileCompleted()
+                updateUser.getId(),
+                updateUser.getFirstName(),
+                updateUser.getLastName(),
+                updateUser.getEmail(),
+                updateUser.getBirthDate(),
+                updateUser.getGender(),
+                updateUser.isProfileCompleted()
         );
 
     }
