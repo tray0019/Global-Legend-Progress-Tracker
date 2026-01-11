@@ -1,5 +1,6 @@
 package com.GLPT.Backend.Service;
 
+import com.GLPT.Backend.DTO.CompleteProfileRequest;
 import com.GLPT.Backend.DTO.UserRegistrationRequest;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.UserRepository;
@@ -43,6 +44,21 @@ public class UserService {
         if(age < MIN_AGE){
             throw new IllegalArgumentException("You must be at least 13 years old to sign up.");
         }
+    }
+
+    public User completeProfile(Long userId, CompleteProfileRequest request){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new RuntimeException("User not found"));
+
+        validateAge(request.getBirthDate());
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setBirthDate(request.getBirthDate());
+        user.setGender(request.getGender());
+        user.setProfileCompleted(true);
+
+        return userRepository.save(user);
     }
 
     
