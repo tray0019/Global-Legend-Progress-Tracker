@@ -14,6 +14,7 @@ import java.time.Period;
 public class UserService {
 
     private UserRepository userRepository;
+
     private static final int MIN_AGE = 13;
 
     @Autowired
@@ -22,9 +23,10 @@ public class UserService {
     }
 
     public User registerOAuthUser(UserRegistrationRequest request){
-        userRepository.findByEmail(request.getEmail()).ifPresent(u->{
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
-        });
+        }
+
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -42,5 +44,7 @@ public class UserService {
             throw new IllegalArgumentException("You must be at least 13 years old to sign up.");
         }
     }
+
+    
 
 }

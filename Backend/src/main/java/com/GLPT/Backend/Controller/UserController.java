@@ -17,14 +17,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping("/oauth-register")
     public UserResponse register(@RequestBody UserRegistrationRequest request){
-        User user = userService.register(request);
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setFirstName(user.getFirstName());
-        response.setEmail(user.getEmail());
-        return response;
+        User user = userService.registerOAuthUser(request);
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getBirthDate(),
+                user.getGender(),
+                user.isProfileCompleted()
+        );
     }
 
 }
