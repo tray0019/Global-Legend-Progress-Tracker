@@ -164,6 +164,10 @@ public class GoalService {
         return repo.save(goal);
     }
 
+    public List<Goal> getGoalsForUser(User currentUser){
+        return repo.findByUser(currentUser);
+    }
+
 
 
 

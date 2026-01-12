@@ -2,6 +2,7 @@ package com.GLPT.Backend.Repository;
 import com.GLPT.Backend.Entity.Goal;
 
 import com.GLPT.Backend.Entity.GoalStatus;
+import com.GLPT.Backend.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,4 +24,5 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     List<Goal> findByIsAchievementTrueOrderByPositionAsc();
 
 
+    List<Goal> findByUser(User user);
 }
