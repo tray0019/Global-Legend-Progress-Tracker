@@ -5,6 +5,7 @@ import com.GLPT.Backend.DTO.GoalPositionDto;
 import com.GLPT.Backend.Entity.Difficulty;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.GoalStatus;
+import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.GoalRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -154,6 +155,13 @@ public class GoalService {
 
         goal.setAchievement(!goal.isAchievement());
         return goal; // managed entity auto-saves
+    }
+
+    public Goal createGoalForUser(String title, User currentUser){
+        Goal goal = new Goal();
+        goal.setGoalTitle(title);
+        goal.setUser(currentUser);
+        return repo.save(goal);
     }
 
 
