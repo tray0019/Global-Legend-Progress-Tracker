@@ -8,12 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GoalRepository extends JpaRepository<Goal, Long> {
-
-    List<Goal> findByStatusAndArchivedFalseOrderByPositionAsc(GoalStatus status);
-    List<Goal> findByArchivedFalseOrderByPositionAsc();
 
     List<Goal> findAllByOrderByPositionAsc();
     List<Goal> findByArchivedTrueOrderByPositionAsc();
@@ -25,9 +23,10 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     // === Phase 2 ==
 
+    Optional<Goal> findByIdAndUser(Long id, User user);
     List<Goal> findByUserOrderByPositionAsc(User user);
     List<Goal> findByUserAndArchivedTrueOrderByPositionAsc(User user);
-    List<Goal> findByUserAndIsAchievementTrueOrderByPositionAsc();
+    List<Goal> findByUserAndIsAchievementTrueOrderByPositionAsc(User user);
 
     List<Goal> findByUserAndStatusAndArchivedFalseAndIsAchievementFalseOrderByPositionAsc(
             User user,

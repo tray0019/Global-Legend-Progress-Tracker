@@ -42,10 +42,22 @@ public class GoalService {
         return repo.findByArchivedTrueOrderByPositionAsc();
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public List<Goal> getArchiveGoalsForUser(User user) {
+        // archived (regardless of status)
+        return repo.findByUserAndArchivedTrueOrderByPositionAsc(user);
+    }
+
     // ==== LEGACY (Phase 1) ===
     public List<Goal> getAchievements() {
         // marked as achievement
         return repo.findByIsAchievementTrueOrderByPositionAsc();
+    }
+
+    // ==== USER-SCOPE (Phase 2+) ====
+    public List<Goal> getAchievementsForUser(User user) {
+        // marked as achievement
+        return repo.findByUserAndIsAchievementTrueOrderByPositionAsc(user);
     }
 
 
@@ -71,6 +83,15 @@ public class GoalService {
         return goal.isArchived();
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    @Transactional
+    public Goal toggleArchiveForUser(long goalId, User user) {
+        Goal goal = repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+        goal.setArchived(!goal.isArchived());
+        return goal;
+    }
 
 
     // ==== LEGACY (Phase 1) ===
@@ -106,6 +127,14 @@ public class GoalService {
         }
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public Goal viewGoalForUser(long goalId, User user) {
+        return repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+    }
+
+
     // ==== LEGACY (Phase 1) ===
     public Goal renameGoal(long goalId, String newTitle){
             Goal goal = repo.findById(goalId)
@@ -115,6 +144,17 @@ public class GoalService {
             return repo.save(goal);
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public Goal renameGoalForUser(long goalId, String newTitle, User user) {
+        Goal goal = repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+
+        goal.setGoalTitle(newTitle);
+        return repo.save(goal);
+    }
+
+
     // ==== LEGACY (Phase 1) ===
     public void deleteGoal(long goalId){
         if(!repo.existsById(goalId)){
@@ -123,6 +163,16 @@ public class GoalService {
         }
         repo.deleteById(goalId);
     }
+
+    // ==== USER-SCOPE (Phase 2+) ====
+    public void deleteGoalForUser(long goalId, User user) {
+        Goal goal = repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+
+        repo.delete(goal);
+    }
+
 
     // ==== LEGACY (Phase 1) ===
     @Transactional
@@ -134,6 +184,19 @@ public class GoalService {
         }
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    @Transactional
+    public void updatePositionsForUser(List<GoalPositionDto> positions, User user) {
+        for (GoalPositionDto dto : positions) {
+            Goal goal = repo.findByIdAndUser(dto.getId(), user)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.FORBIDDEN, "Not your goal"));
+
+            goal.setPosition(dto.getPosition());
+        }
+    }
+
+
     // ==== LEGACY (Phase 1) ===
     public Goal updateDifficulty(long goalId, Difficulty difficulty){
         Goal goal = repo.findById(goalId)
@@ -142,6 +205,17 @@ public class GoalService {
         goal.setDifficulty(difficulty);
         return repo.save(goal);
     }
+
+    // ==== USER-SCOPE (Phase 2+) ====
+    public Goal updateDifficultyForUser(long goalId, Difficulty difficulty, User user) {
+        Goal goal = repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+
+        goal.setDifficulty(difficulty);
+        return repo.save(goal);
+    }
+
 
     // ==== LEGACY (Phase 1) ===
     @Transactional
@@ -154,6 +228,18 @@ public class GoalService {
         return goal;
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    @Transactional
+    public Goal completeGoalForUser(long goalId, User user) {
+        Goal goal = repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+
+        goal.setStatus(GoalStatus.COMPLETED);
+        return goal;
+    }
+
+
     // ==== LEGACY (Phase 1) ===
     @Transactional
     public Goal toggleAchievement(long goalId) {
@@ -165,12 +251,32 @@ public class GoalService {
         return goal; // managed entity auto-saves
     }
 
-    public Goal createGoalForUser(String title, User currentUser){
+    // ==== USER-SCOPE (Phase 2+) ====
+    @Transactional
+    public Goal toggleAchievementForUser(long goalId, User user) {
+        Goal goal = repo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+
+        goal.setAchievement(!goal.isAchievement());
+        return goal;
+    }
+
+
+    public Goal createGoalForUser(String title, User user){
+        Integer max = repo.findMaxPositionByUser(user);
+        if(max == null) max = 0;
+
         Goal goal = new Goal();
         goal.setGoalTitle(title);
-        goal.setUser(currentUser);
+        goal.setUser(user);
+        goal.setPosition(max + 1);
+        goal.setArchived(false);
+        goal.setDifficulty(Difficulty.MEDIUM);
+
         return repo.save(goal);
     }
+
 
 
 
