@@ -40,7 +40,7 @@ public class Goal {
     private boolean isAchievement;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name="user_id", nullable = true) //the problem for one user
     private User user;
 
 }

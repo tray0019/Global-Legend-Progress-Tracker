@@ -24,32 +24,44 @@ public class GoalService {
         this.repo = repo;
     }
 
+    // ==== LEGACY (Phase 1) ===
     public List<Goal> getActiveGoals() {
         // ACTIVE, not archived, not achievement
         return repo.findByStatusAndArchivedFalseAndIsAchievementFalseOrderByPositionAsc(GoalStatus.ACTIVE);
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public List<Goal> getActiveGoalsForUser(User user) {
+        // ACTIVE, not archived, not achievement
+        return repo.findByUserAndStatusAndArchivedFalseAndIsAchievementFalseOrderByPositionAsc(user,GoalStatus.ACTIVE);
+    }
+
+    // ==== LEGACY (Phase 1) ===
     public List<Goal> getArchiveGoals() {
         // archived (regardless of status)
         return repo.findByArchivedTrueOrderByPositionAsc();
     }
 
+    // ==== LEGACY (Phase 1) ===
     public List<Goal> getAchievements() {
         // marked as achievement
         return repo.findByIsAchievementTrueOrderByPositionAsc();
     }
 
 
+    // ==== LEGACY (Phase 1) ===
     public List<Goal> getCompletedGoals() {
         return repo.findByStatusOrderByPositionAsc(GoalStatus.COMPLETED);
     }
 
+    // ==== LEGACY (Phase 1) ===
     public Goal getGoal(long goalId){
         return repo.findById(goalId)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Goal Id not found"));
     }
 
 
+    // ==== LEGACY (Phase 1) ===
     @Transactional
     public boolean toggleArchive(long goalId) {
         Goal goal = repo.findById(goalId)
@@ -61,9 +73,7 @@ public class GoalService {
 
 
 
-    /**
-     * -- Create one goal
-     */
+    // ==== LEGACY (Phase 1) ===
     public Goal createNewGoal(Goal goal){
         Integer maxPosition = repo.findMaxPosition();
         if(maxPosition == null) maxPosition = 0;
@@ -77,16 +87,13 @@ public class GoalService {
         return repo.save(goal);
     }
 
-    /** -- View All goal
-     */
+    // ==== LEGACY (Phase 1) ===
     public List<Goal> viewAllGoal(){
         return repo.findAllByOrderByPositionAsc();
     }
 
-    /**
-     * -- View one goal by Id
-     * Throw exception if not
-     */
+
+    // ==== LEGACY (Phase 1) ===
     public Goal viewGoal(long goalId){
 
         Optional<Goal> boxGoal = repo.findById(goalId);
@@ -99,9 +106,7 @@ public class GoalService {
         }
     }
 
-    /**
-     * -- Rename Goal title
-     */
+    // ==== LEGACY (Phase 1) ===
     public Goal renameGoal(long goalId, String newTitle){
             Goal goal = repo.findById(goalId)
                     .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -110,8 +115,7 @@ public class GoalService {
             return repo.save(goal);
     }
 
-    /** -- Delete a goal
-     */
+    // ==== LEGACY (Phase 1) ===
     public void deleteGoal(long goalId){
         if(!repo.existsById(goalId)){
             throw new ResponseStatusException(
@@ -120,6 +124,7 @@ public class GoalService {
         repo.deleteById(goalId);
     }
 
+    // ==== LEGACY (Phase 1) ===
     @Transactional
     public void updatePositions(List<GoalPositionDto> positions){
         for(GoalPositionDto dto: positions){
@@ -129,6 +134,7 @@ public class GoalService {
         }
     }
 
+    // ==== LEGACY (Phase 1) ===
     public Goal updateDifficulty(long goalId, Difficulty difficulty){
         Goal goal = repo.findById(goalId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -137,6 +143,7 @@ public class GoalService {
         return repo.save(goal);
     }
 
+    // ==== LEGACY (Phase 1) ===
     @Transactional
     public Goal completeGoal(long goalId) {
         Goal goal = repo.findById(goalId)
@@ -147,6 +154,7 @@ public class GoalService {
         return goal;
     }
 
+    // ==== LEGACY (Phase 1) ===
     @Transactional
     public Goal toggleAchievement(long goalId) {
         Goal goal = repo.findById(goalId)
@@ -164,9 +172,7 @@ public class GoalService {
         return repo.save(goal);
     }
 
-    public List<Goal> getGoalsForUser(User currentUser){
-        return repo.findByUser(currentUser);
-    }
+
 
 
 
