@@ -85,13 +85,15 @@ public class GoalService {
 
     // ==== USER-SCOPE (Phase 2+) ====
     @Transactional
-    public Goal toggleArchiveForUser(long goalId, User user) {
+    public boolean toggleArchiveForUser(long goalId, User user) {
         Goal goal = repo.findByIdAndUser(goalId, user)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.FORBIDDEN, "Not your goal"));
+
         goal.setArchived(!goal.isArchived());
-        return goal;
+        return goal.isArchived();
     }
+
 
 
     // ==== LEGACY (Phase 1) ===
