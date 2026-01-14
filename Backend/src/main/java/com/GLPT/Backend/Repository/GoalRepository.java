@@ -27,6 +27,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     List<Goal> findByUserOrderByPositionAsc(User user);
     List<Goal> findByUserAndArchivedTrueOrderByPositionAsc(User user);
     List<Goal> findByUserAndIsAchievementTrueOrderByPositionAsc(User user);
+    List<Goal> findAllByUserOrderByPositionAsc(User user);
 
     List<Goal> findByUserAndStatusAndArchivedFalseAndIsAchievementFalseOrderByPositionAsc(
             User user,

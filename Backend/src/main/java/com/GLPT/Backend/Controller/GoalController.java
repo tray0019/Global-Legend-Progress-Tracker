@@ -118,7 +118,7 @@ public class GoalController {
 
     /**
      * -- View All Goals
-     */
+
     @GetMapping("/goals")
     public List<GoalResponseDto> getAllGoals(){
         List<Goal> goals =  service.viewAllGoal();
@@ -137,9 +137,30 @@ public class GoalController {
 
         return dtoList;
 
-    }
+    }*/
 
     // ==== USER-SCOPE (Phase 2+) ====
+    @GetMapping("/goals")
+    public List<GoalResponseDto> getAllGoals(HttpSession session) {
+        User user = requireUser(session);
+
+        List<Goal> goals = service.viewAllGoalsForUser(user);
+        List<GoalResponseDto> dtoList = new ArrayList<>();
+
+        for (Goal goal : goals) {
+            dtoList.add(new GoalResponseDto(
+                    goal.getId(),
+                    goal.getGoalTitle(),
+                    goal.getDifficulty().getValue(),
+                    goal.getPosition(),
+                    goal.getStatus(),
+                    goal.getStatus() == GoalStatus.ARCHIVED
+            ));
+        }
+
+        return dtoList;
+    }
+
 
     /**
      *  -- View One Goal and its Progress EntryService

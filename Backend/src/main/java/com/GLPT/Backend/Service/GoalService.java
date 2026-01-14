@@ -115,6 +115,11 @@ public class GoalService {
         return repo.findAllByOrderByPositionAsc();
     }
 
+    public List<Goal> viewAllGoalsForUser(User user) {
+        return repo.findAllByUserOrderByPositionAsc(user);
+    }
+
+
 
     // ==== LEGACY (Phase 1) ===
     public Goal viewGoal(long goalId){
