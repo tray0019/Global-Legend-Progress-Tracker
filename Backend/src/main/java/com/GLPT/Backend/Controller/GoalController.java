@@ -42,6 +42,36 @@ public class GoalController {
 
 
     @PostMapping("/goals")
+    public GoalResponseDto createGoal(
+            @Valid @RequestBody GoalCreateDto dto,
+            HttpSession session
+    ) {
+        User user = requireUser(session);
+
+        Goal goal = service.createGoalForUser(
+                dto.getGoalTitle(),
+                user
+        );
+
+        // difficulty override (optional)
+        if (dto.getDifficulty() != null) {
+            goal.setDifficulty(Difficulty.fromValue(dto.getDifficulty()));
+        }
+
+        return new GoalResponseDto(
+                goal.getId(),
+                goal.getGoalTitle(),
+                goal.getDifficulty().getValue(),
+                goal.getPosition(),
+                goal.getStatus(),
+                goal.getStatus() == GoalStatus.ARCHIVED
+        );
+    }
+
+
+
+    /*
+    @PostMapping("/goals")
     public GoalResponseDto createGoal(@Valid @RequestBody GoalCreateDto dto){
         Goal goal = new Goal();
         goal.setGoalTitle(dto.getGoalTitle());
@@ -61,7 +91,7 @@ public class GoalController {
                 goal.getStatus(),
                 goal.getStatus() == GoalStatus.ARCHIVED
         );
-    }
+    }*/
 
     // ==== USER-SCOPE (Phase 2+) ====
     @PostMapping("/users/goals")
