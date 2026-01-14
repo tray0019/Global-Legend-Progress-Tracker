@@ -45,4 +45,6 @@ public class UserProgress {
         this.updateAt = LocalDateTime.now();
     }
 
+    @OneToOne
+    User user;
 }
