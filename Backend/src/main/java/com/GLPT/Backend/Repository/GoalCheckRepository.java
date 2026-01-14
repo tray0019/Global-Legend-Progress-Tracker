@@ -2,6 +2,7 @@ package com.GLPT.Backend.Repository;
 
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.GoalCheck;
+import com.GLPT.Backend.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,5 +20,11 @@ public interface GoalCheckRepository extends JpaRepository<GoalCheck, Long> {
 
         boolean existsByGoalIdAndCheckDate(Long goalId, LocalDate checkDate);
         void deleteByGoalIdAndCheckDate(Long goalId, LocalDate checkDate);
+
+        Optional<GoalCheck> findByGoalAndCheckDateAndGoal_User(
+                Goal goal,
+                LocalDate date,
+                User user
+        );
 
 }
