@@ -464,6 +464,32 @@ public class GoalController {
 
 
 
+    // Get goals
+    @GetMapping("/goals/{goalId}")
+    public GoalWithEntriesDto getGoal(
+            @PathVariable long goalId,
+            HttpSession session
+    ) {
+        User user = requireUser(session);
+
+        Goal goal = service.viewGoalForUser(goalId, user);
+
+        List<EntryResponseDto> entryDto = new ArrayList<>();
+        for (ProgressEntry entry : goal.getEntries()) {
+            entryDto.add(new EntryResponseDto(
+                    entry.getId(),
+                    entry.getDescription()
+            ));
+        }
+
+        return new GoalWithEntriesDto(
+                goal.getId(),
+                goal.getGoalTitle(),
+                entryDto
+        );
+    }
+
+
 
 
 
