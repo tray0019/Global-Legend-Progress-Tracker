@@ -13,6 +13,5 @@ import java.util.Optional;
 public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Long> {
 
     Optional<ProgressEntry> findByIdAndGoal_User(Long entryId, User user);
-    List<ProgressEntry> findByGoalAndGoal_User(Goal goal, User user);
-
+    List<ProgressEntry> findByGoal(Goal goal);
 }
