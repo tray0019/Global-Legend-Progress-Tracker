@@ -2,6 +2,7 @@ package com.GLPT.Backend.Service;
 
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.ProgressEntry;
+import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.GoalRepository;
 import com.GLPT.Backend.Repository.ProgressEntryRepository;
 import org.springframework.http.HttpStatus;
@@ -40,12 +41,44 @@ public class ProgressEntryService {
         return repo.save(entry);
     }
 
+// ==== USER-SCOPE (Phase 2+) ====
+public ProgressEntry addEntryToGoalForUser(
+        long goalId,
+        String description,
+        User user
+) {
+    Goal goal = goalRepo.findByIdAndUser(goalId, user)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Not your goal"
+            ));
+
+    ProgressEntry entry = new ProgressEntry();
+    entry.setDescription(description);
+    entry.setGoal(goal);
+
+    return repo.save(entry);
+}
+
+
     /**
      * -- View all progress description
      *  for a Goal
      */
     public List<ProgressEntry> getAllEntries(){
         return repo.findAll();
+    }
+
+    // ==== USER-SCOPE (Phase 2+) ====
+    public List<ProgressEntry> getEntriesForUser(
+            long goalId,
+            User user
+    ) {
+        Goal goal = goalRepo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"
+                ));
+
+        return repo.findByGoal(goal);
     }
 
 
@@ -64,6 +97,23 @@ public class ProgressEntryService {
 
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public ProgressEntry updateDescriptionForUser(
+            long entryId,
+            String newDescription,
+            User user
+    ) {
+        ProgressEntry entry =
+                repo.findByIdAndGoal_User(entryId, user)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.FORBIDDEN, "Not your entry"
+                        ));
+
+        entry.setDescription(newDescription);
+        return repo.save(entry);
+    }
+
+
     /**
      * -- Delete an entry by id
      */
@@ -77,7 +127,19 @@ public class ProgressEntryService {
         repo.deleteById(entryId);
     }
 
+// ==== USER-SCOPE (Phase 2+) ====
+public void deleteDescriptionForUser(
+        long entryId,
+        User user
+) {
+    ProgressEntry entry =
+            repo.findByIdAndGoal_User(entryId, user)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.FORBIDDEN, "Not your entry"
+                    ));
 
+    repo.delete(entry);
+}
 
 
 
