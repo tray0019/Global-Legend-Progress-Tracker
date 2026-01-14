@@ -139,6 +139,22 @@ public class ProgressEntryController {
         service.deleteDescriptionForUser(entryId, user);
     }
 
+    @GetMapping("/users/goals/{goalId}/entries")
+    public List<EntryResponseDto> getEntriesForUserGoal(
+            @PathVariable long goalId,
+            HttpSession session
+    ) {
+        User user = requireUser(session);
+
+        List<ProgressEntry> entries =
+                service.getEntriesForGoalForUser(goalId, user);
+
+        return entries.stream()
+                .map(e -> new EntryResponseDto(e.getId(), e.getDescription()))
+                .toList();
+    }
+
+
 
 
 

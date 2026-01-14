@@ -14,4 +14,6 @@ public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Lo
 
     Optional<ProgressEntry> findByIdAndGoal_User(Long entryId, User user);
     List<ProgressEntry> findByGoal(Goal goal);
+    List<ProgressEntry> findByGoalAndGoal_User(Goal goal, User user);
+
 }

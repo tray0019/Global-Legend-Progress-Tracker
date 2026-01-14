@@ -141,6 +141,18 @@ public void deleteDescriptionForUser(
     repo.delete(entry);
 }
 
+    public List<ProgressEntry> getEntriesForGoalForUser(
+            long goalId,
+            User user
+    ) {
+        Goal goal = goalRepo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
+
+        return repo.findByGoalAndGoal_User(goal, user);
+    }
+
+
 
 
 }
