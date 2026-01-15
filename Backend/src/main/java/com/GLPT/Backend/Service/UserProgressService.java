@@ -1,6 +1,7 @@
 package com.GLPT.Backend.Service;
 
 import com.GLPT.Backend.Entity.Rank;
+import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Entity.UserProgress;
 import com.GLPT.Backend.Repository.UserProgressRepository;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,31 @@ public class UserProgressService {
         repository.save(progress);
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public void addXPForUser(int difficulty, User user) {
+        UserProgress progress = repository.findByUser(user)
+                .orElseThrow(() -> new IllegalStateException("UserProgress not found"));
+
+        resetDailyXPIfNewDay(progress);
+
+        int xpToAdd = calculateXP(difficulty);
+        int remainingXP = DAILY_XP_CAP - progress.getDailyXP();
+
+        if (remainingXP <= 0) return;
+
+        int finalXP = Math.min(xpToAdd, remainingXP);
+
+        progress.setTotalXP(progress.getTotalXP() + finalXP);
+        progress.setDailyXP(progress.getDailyXP() + finalXP);
+        progress.setLastActivityDate(LocalDate.now());
+
+        Rank newRank = calculateRankFromXP(progress.getTotalXP());
+        progress.setCurrentRank(newRank);
+
+        repository.save(progress);
+    }
+
+
     private int calculateXP(int difficulty){
         return switch (difficulty){
             case 1 -> 10;
@@ -54,6 +80,7 @@ public class UserProgressService {
             default -> throw new IllegalArgumentException("Invalid difficulty: " + difficulty);
         };
     }
+
 
     private Rank calculateRankFromXP(int totalXP){
         if(totalXP >= 24000) return Rank.CHALLENGER;
@@ -76,9 +103,13 @@ public class UserProgressService {
         }
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+
     private int daysInactive(UserProgress progress){
         return (int) ChronoUnit.DAYS.between(progress.getLastActivityDate(), LocalDate.now());
     }
+
+    // ==== USER-SCOPE (Phase 2+) ====
 
     private Rank calculateDecayedRank(UserProgress progress){
         int inactiveDays = daysInactive(progress);
@@ -93,6 +124,9 @@ public class UserProgressService {
         return Rank.values()[newOrdinal];
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+
+
     public void applyRankDecayIfNeeded(){
         UserProgress progress = repository.findTopByOrderByIdAsc();
         Rank decayedRank = calculateDecayedRank(progress);
@@ -102,6 +136,18 @@ public class UserProgressService {
             repository.save(progress);
         }
     }
+
+    private void applyRankDecayIfNeeded(UserProgress progress) {
+        Rank decayedRank = calculateDecayedRank(progress);
+
+        if (decayedRank != progress.getCurrentRank()) {
+            progress.setCurrentRank(decayedRank);
+            repository.save(progress);
+        }
+    }
+
+
+    // ==== USER-SCOPE (Phase 2+) ====
 
     public UserProgress getProgressWithDecayCheck(){
         UserProgress progress = repository.findTopByOrderByIdAsc();
@@ -115,6 +161,18 @@ public class UserProgressService {
         return progress;
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public UserProgress getProgressWithDecayCheckForUser(User user) {
+        UserProgress progress = repository.findByUser(user)
+                .orElseThrow(() -> new IllegalStateException("UserProgress not found"));
+
+        resetDailyXPIfNewDay(progress);
+        applyRankDecayIfNeeded(progress);
+
+        return progress;
+    }
+
+
     public void removeXP(int difficulty){
         UserProgress progress = repository.findTopByOrderByIdAsc();
 
@@ -126,6 +184,23 @@ public class UserProgressService {
         progress.setLastActivityDate(LocalDate.now());
 
         // Update rank based on new totalXP
+        Rank newRank = calculateRankFromXP(progress.getTotalXP());
+        progress.setCurrentRank(newRank);
+
+        repository.save(progress);
+    }
+
+    // ==== USER-SCOPE (Phase 2+) ====
+    public void removeXPForUser(int difficulty, User user) {
+        UserProgress progress = repository.findByUser(user)
+                .orElseThrow(() -> new IllegalStateException("UserProgress not found"));
+
+        int xpToSubtract = calculateXP(difficulty);
+
+        progress.setTotalXP(Math.max(0, progress.getTotalXP() - xpToSubtract));
+        progress.setDailyXP(Math.max(0, progress.getDailyXP() - xpToSubtract));
+        progress.setLastActivityDate(LocalDate.now());
+
         Rank newRank = calculateRankFromXP(progress.getTotalXP());
         progress.setCurrentRank(newRank);
 
