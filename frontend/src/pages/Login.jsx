@@ -1,34 +1,22 @@
 import React from 'react';
+import { oauthRegister } from '../api/userApi';
+import { useNavigate } from 'react-router-dom';
 
 function Login({ setCurrentUser }) {
+  const navigate = useNavigate();
+
   const handleGoogleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:8080/users/oauth-register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: 'tray0019@gmail.com',
-          provider: 'GOOGLE',
-          providerUserId: 'local-test-123',
-        }),
-      });
+      const user = await oauthRegister('tray0019@gmail.com', 'GOOGLE', 'local-test-123');
+      setCurrentUser(user);
 
-      if (!response.ok) throw new Error('Login failed');
-
-      const data = await response.json();
-      console.log('Logged in user:', data);
-
-      // Update the app state
-      setCurrentUser(data);
-
-      // redirect if profile not completed
-      if (!data.profileCompleted) {
-        window.location.href = '/complete-profile';
+      if (!user.profileCompleted) {
+        navigate('/complete-profile');
       } else {
-        window.location.href = '/';
+        navigate('/'); // home page
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error('Login failed:', error);
     }
   };
 
