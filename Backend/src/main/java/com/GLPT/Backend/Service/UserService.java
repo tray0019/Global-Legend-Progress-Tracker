@@ -1,6 +1,8 @@
 package com.GLPT.Backend.Service;
 
 import com.GLPT.Backend.DTO.CompleteProfileRequest;
+import com.GLPT.Backend.DTO.EntryResponseDto;
+import com.GLPT.Backend.DTO.GoalWithEntriesDto;
 import com.GLPT.Backend.DTO.UserRegistrationRequest;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.UserRepository;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -67,5 +70,29 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public List<GoalWithEntriesDto> getUserGoalsWithEntries(Long userId) {
+
+        return userRepository.findGoalsWithEntriesByUserId(userId)
+                .stream()
+                .map(goal -> {
+
+                    List<EntryResponseDto> entryDtos =
+                            goal.getEntries().stream()
+                                    .map(entry ->
+                                            new EntryResponseDto(
+                                                    entry.getId(),
+                                                    entry.getDescription()
+                                            )
+                                    )
+                                    .toList();
+
+                    return new GoalWithEntriesDto(
+                            goal.getId(),
+                            goal.getGoalTitle(),
+                            entryDtos
+                    );
+                })
+                .toList();
+    }
 
 }

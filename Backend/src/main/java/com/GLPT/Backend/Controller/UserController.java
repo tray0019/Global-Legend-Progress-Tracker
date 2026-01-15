@@ -1,6 +1,7 @@
 package com.GLPT.Backend.Controller;
 
 import com.GLPT.Backend.DTO.CompleteProfileRequest;
+import com.GLPT.Backend.DTO.GoalWithEntriesDto;
 import com.GLPT.Backend.DTO.UserRegistrationRequest;
 import com.GLPT.Backend.DTO.UserResponse;
 import com.GLPT.Backend.Entity.Goal;
@@ -84,11 +85,11 @@ public class UserController {
         );
     }
 
-    @GetMapping("/{id}/goals")
-    public List<Goal> getUserGoals(@PathVariable Long id) {
-        User user = userService.findById(id); // we'll add this method
-        return user.getGoals();
+    @GetMapping("/{userId}/goals")
+    public List<GoalWithEntriesDto> getUserGoals(@PathVariable Long userId) {
+        return userService.getUserGoalsWithEntries(userId);
     }
+
 
 
 
