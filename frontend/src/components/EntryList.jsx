@@ -11,7 +11,14 @@ function EntryList({ entries, onDeleteEntry, onRenameEntry }) {
       {entries.map((entry) => (
         <li key={entry.id}>
           {entry.description}
-          <button style={{ marginLeft: '8px' }} onClick={() => onDeleteEntry(entry.id)}>
+          <button
+            style={{ marginLeft: '8px' }}
+            onClick={() => {
+              if (window.confirm('Are you sure you want to delete this entry?')) {
+                onDeleteEntry(entry.id);
+              }
+            }}
+          >
             Delete
           </button>
           <button
