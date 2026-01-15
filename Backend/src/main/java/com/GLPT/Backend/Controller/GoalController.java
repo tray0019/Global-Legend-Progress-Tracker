@@ -195,12 +195,24 @@ public class GoalController {
                     entry.getDescription()
             ));
         }
+        // map checks
+        List<GoalCheckDto> checkDtos = goal.getChecks().stream()
+                .map(check -> new GoalCheckDto(check.getCheckDate()))
+                .toList();
+
+        // map user info
+        long uId = goal.getUser().getId();
+        String uName = (goal.getUser().getFirstName() != null ? goal.getUser().getFirstName() : "") +
+                " " +
+                (goal.getUser().getLastName() != null ? goal.getUser().getLastName() : "");
 
         return new GoalWithEntriesDto(
                 goal.getId(),
                 goal.getGoalTitle(),
-                entryDto,goal.getUser().getId(),
-                goal.getUser().getFirstName() + " " + goal.getUser().getLastName()
+                entryDto,
+                checkDtos,
+                uId,
+                uName.trim()
         );
     }
 

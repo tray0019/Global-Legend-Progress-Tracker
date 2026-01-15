@@ -1,9 +1,6 @@
 package com.GLPT.Backend.Service;
 
-import com.GLPT.Backend.DTO.CompleteProfileRequest;
-import com.GLPT.Backend.DTO.EntryResponseDto;
-import com.GLPT.Backend.DTO.GoalWithEntriesDto;
-import com.GLPT.Backend.DTO.UserRegistrationRequest;
+import com.GLPT.Backend.DTO.*;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,33 +73,38 @@ public class UserService {
                 .stream()
                 .map(goal -> {
 
-                    List<EntryResponseDto> entryDtos =
-                            goal.getEntries().stream()
-                                    .map(entry ->
-                                            new EntryResponseDto(
-                                                    entry.getId(),
-                                                    entry.getDescription()
-                                            )
-                                    )
-                                    .toList();
+                    // map entries
+                    List<EntryResponseDto> entryDtos = goal.getEntries().stream()
+                            .map(entry -> new EntryResponseDto(
+                                    entry.getId(),
+                                    entry.getDescription()
+                            ))
+                            .toList();
 
-                    GoalWithEntriesDto dto = new GoalWithEntriesDto(
+                    // map checks
+                    List<GoalCheckDto> checkDtos = goal.getChecks().stream()
+                            .map(check -> new GoalCheckDto(check.getCheckDate()))
+                            .toList();
+
+                    // map user info
+                    long uId = goal.getUser().getId();
+                    String uName = (goal.getUser().getFirstName() != null ? goal.getUser().getFirstName() : "") +
+                            " " +
+                            (goal.getUser().getLastName() != null ? goal.getUser().getLastName() : "");
+
+                    return new GoalWithEntriesDto(
                             goal.getId(),
                             goal.getGoalTitle(),
                             entryDtos,
-                            goal.getUser().getId(),
-                            goal.getUser().getFirstName() + " " + goal.getUser().getLastName()
+                            checkDtos,
+                            uId,
+                            uName.trim()
                     );
 
-
-                    // Set user info
-                    dto.setUserId(goal.getUser().getId());
-                    dto.setUserName(goal.getUser().getFirstName() + " " + goal.getUser().getLastName());
-
-                    return dto;
                 })
                 .toList();
     }
+
 
 
 }
