@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { completeProfile } from '../api/userApi';
 import { useNavigate } from 'react-router-dom';
 
-function CompleteProfile({ currentUser }) {
+function CompleteProfile({ currentUser, setCurrentUser }) {
   const navigate = useNavigate();
 
   // Local state for form fields
@@ -37,6 +37,7 @@ function CompleteProfile({ currentUser }) {
     try {
       const updatedUser = await completeProfile(currentUser.id, profileData);
       console.log('Profile updated:', updatedUser);
+      setCurrentUser(updatedUser);
       // Optionally, update currentUser in context or state
       navigate('/'); // go to home after completing profile
     } catch (err) {

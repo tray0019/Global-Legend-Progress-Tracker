@@ -58,7 +58,7 @@ function getCurrentMonthRange() {
 }
 
 /* ---------- MAIN PAGE ---------- */
-function Home() {
+function Home({ currentUser }) {
   const [goals, setGoals] = useState([]);
 
   // Multi-open system
@@ -528,6 +528,19 @@ function Home() {
   /* ---------- RENDER ---------- */
   return (
     <div className="app-container">
+      <div>
+        <h1>Welcome, {currentUser ? currentUser.firstName : 'Guest'}!</h1>
+        {currentUser && (
+          <div>
+            <p>Email: {currentUser.email}</p>
+            <p>
+              Full Name: {currentUser.firstName} {currentUser.lastName}
+            </p>
+            <p>Birth Date: {currentUser.birthDate}</p>
+            <p>Gender: {currentUser.gender}</p>
+          </div>
+        )}
+      </div>
       <h1>Goals</h1>
       <RankPanel progress={progress} />
       {totalGoals > 0 && (
