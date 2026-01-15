@@ -29,7 +29,7 @@ public class UserController {
     @PostMapping("/oauth-register")
     public UserResponse register(@RequestBody UserRegistrationRequest request,
                                  HttpSession session){
-        User user = userService.registerOAuthUser(request);
+        User user = userService.registerOrLoginOAuthUser(request);
 
         // store user in session
         session.setAttribute("currentUser", user);

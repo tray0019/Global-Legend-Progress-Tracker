@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -24,11 +25,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User registerOAuthUser(UserRegistrationRequest request){
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+    public User registerOrLoginOAuthUser(UserRegistrationRequest request) {
+        Optional<User> existing = userRepository.findByEmail(request.getEmail());
+        if (existing.isPresent()) {
+            return existing.get(); // log in existing user
         }
-
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -36,9 +37,9 @@ public class UserService {
         user.setProviderUserId(request.getProviderUserId());
         user.setProfileCompleted(false);
 
-        System.out.println("New OAuth user created: " + user.getEmail());
         return userRepository.save(user);
     }
+
 
     private void validateAge(LocalDate birthDate){
         int age = Period.between(birthDate, LocalDate.now()).getYears();
