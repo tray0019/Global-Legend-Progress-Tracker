@@ -36,4 +36,7 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     @Query("SELECT MAX(g.position) FROM Goal g WHERE g.user = :user")
     Integer findMaxPositionByUser(User user);
+
+    List<Goal> findAllByUserIsNullOrderByPositionAsc();
+
 }

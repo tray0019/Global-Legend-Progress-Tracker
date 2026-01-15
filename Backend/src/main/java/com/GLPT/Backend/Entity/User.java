@@ -16,8 +16,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = true) // was false
     private String firstName;
+
+    @Column(nullable = true) // was false
     private String lastName;
+
+
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)

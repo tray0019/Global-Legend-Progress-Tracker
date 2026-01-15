@@ -3,6 +3,7 @@ package com.GLPT.Backend.Controller;
 import com.GLPT.Backend.DTO.CompleteProfileRequest;
 import com.GLPT.Backend.DTO.UserRegistrationRequest;
 import com.GLPT.Backend.DTO.UserResponse;
+import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -10,8 +11,11 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = "http://localhost:3000/")
 public class UserController {
 
     @Autowired
@@ -65,5 +69,27 @@ public class UserController {
         );
 
     }
+
+    @GetMapping("/{id}")
+    public UserResponse getUserById(@PathVariable Long id) {
+        User user = userService.findById(id); // we'll add this in UserService
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getBirthDate(),
+                user.getGender(),
+                user.isProfileCompleted()
+        );
+    }
+
+    @GetMapping("/{id}/goals")
+    public List<Goal> getUserGoals(@PathVariable Long id) {
+        User user = userService.findById(id); // we'll add this method
+        return user.getGoals();
+    }
+
+
 
 }
