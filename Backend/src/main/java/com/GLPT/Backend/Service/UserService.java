@@ -86,13 +86,23 @@ public class UserService {
                                     )
                                     .toList();
 
-                    return new GoalWithEntriesDto(
+                    GoalWithEntriesDto dto = new GoalWithEntriesDto(
                             goal.getId(),
                             goal.getGoalTitle(),
-                            entryDtos
+                            entryDtos,
+                            goal.getUser().getId(),
+                            goal.getUser().getFirstName() + " " + goal.getUser().getLastName()
                     );
+
+
+                    // Set user info
+                    dto.setUserId(goal.getUser().getId());
+                    dto.setUserName(goal.getUser().getFirstName() + " " + goal.getUser().getLastName());
+
+                    return dto;
                 })
                 .toList();
     }
+
 
 }

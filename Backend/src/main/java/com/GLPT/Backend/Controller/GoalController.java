@@ -199,7 +199,8 @@ public class GoalController {
         return new GoalWithEntriesDto(
                 goal.getId(),
                 goal.getGoalTitle(),
-                entryDto
+                entryDto,goal.getUser().getId(),
+                goal.getUser().getFirstName() + " " + goal.getUser().getLastName()
         );
     }
 

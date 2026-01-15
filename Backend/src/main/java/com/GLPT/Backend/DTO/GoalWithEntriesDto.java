@@ -14,4 +14,8 @@ public class GoalWithEntriesDto {
     private String goalTitle;
     private List<EntryResponseDto> entries;
 
+    // just the info you need for the goal owner
+    private long userId;
+    private String userName;
+
 }
