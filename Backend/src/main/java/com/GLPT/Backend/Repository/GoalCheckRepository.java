@@ -27,4 +27,16 @@ public interface GoalCheckRepository extends JpaRepository<GoalCheck, Long> {
                 User user
         );
 
+        boolean existsByGoalIdAndCheckDateAndGoal_User(
+                Long goalId,
+                LocalDate date,
+                User user
+        );
+
+        List<GoalCheck> findByGoal_UserAndCheckDateBetween(
+                User user,
+                LocalDate from,
+                LocalDate to
+        );
+
 }

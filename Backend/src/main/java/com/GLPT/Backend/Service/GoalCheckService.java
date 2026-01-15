@@ -3,10 +3,13 @@ package com.GLPT.Backend.Service;
 import com.GLPT.Backend.DTO.GlobalContributionDto;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.GoalCheck;
+import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.GoalCheckRepository;
 import com.GLPT.Backend.Repository.GoalRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -60,6 +63,16 @@ public class GoalCheckService {
         return checkRepo.findByGoalAndCheckDateBetween(goal,from, to);
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    public List<GoalCheck> getChecksForUserBetween(
+            User user,
+            LocalDate from,
+            LocalDate to
+    ) {
+        return checkRepo.findByGoal_UserAndCheckDateBetween(user, from, to);
+    }
+
+
     public List<GlobalContributionDto> getGlobalContribution(LocalDate from, LocalDate to){
         List<GoalCheck> checks = checkRepo.findByCheckDateBetween(from,to);
 
@@ -104,8 +117,43 @@ public class GoalCheckService {
         }
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    @Transactional
+    public boolean toggleDoneTodayForUser(long goalId, User user) {
+        LocalDate today = LocalDate.now();
+
+        Goal goal = goalRepo.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"
+                ));
+
+        Optional<GoalCheck> existing =
+                checkRepo.findByGoalAndCheckDateAndGoal_User(goal, today, user);
+
+        if (existing.isPresent()) {
+            checkRepo.delete(existing.get());
+            return false;
+        }
+
+        GoalCheck check = new GoalCheck();
+        check.setGoal(goal);
+        check.setCheckDate(today);
+        checkRepo.save(check);
+        return true;
+    }
+
+
     public boolean isDoneToday(long goalId) {
         return checkRepo.existsByGoalIdAndCheckDate(goalId, LocalDate.now());
+    }
+
+    // ==== USER-SCOPE (Phase 2+) ====
+    public boolean isDoneTodayForUser(long goalId, User user) {
+        return checkRepo.existsByGoalIdAndCheckDateAndGoal_User(
+                goalId,
+                LocalDate.now(),
+                user
+        );
     }
 
 
