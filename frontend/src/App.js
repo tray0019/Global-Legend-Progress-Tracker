@@ -10,8 +10,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
+import { logout } from './services/auth';
+
 function AppContent({ currentUser, setCurrentUser }) {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout(); // remove token
+    setCurrentUser(null); // clear user
+    navigate('/login'); // go to login
+  };
 
   useEffect(() => {
     if (currentUser) {
@@ -37,7 +45,7 @@ function AppContent({ currentUser, setCurrentUser }) {
           path="/"
           element={
             <ProtectedRoute currentUser={currentUser}>
-              <Home currentUser={currentUser} />
+              <Home currentUser={currentUser} onLogout={handleLogout} />
             </ProtectedRoute>
           }
         />

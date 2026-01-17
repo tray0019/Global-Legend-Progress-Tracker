@@ -529,22 +529,9 @@ function Home({ currentUser, onLogout }) {
   return (
     <div className="app-container">
       <div>
-        <h1>Home</h1>
-
         <p>Logged in as: {currentUser.email}</p>
 
         <button onClick={onLogout}>Logout</button>
-      </div>
-      <div>
-        <h1>Welcome, {currentUser ? currentUser.firstName : 'Guest'}!</h1>
-        {currentUser && (
-          <div>
-            <p>Email: {currentUser.email}</p>
-            <p>
-              Full Name: {currentUser.firstName} {currentUser.lastName}
-            </p>
-          </div>
-        )}
       </div>
       <h1>Goals</h1>
       <RankPanel progress={progress} />
