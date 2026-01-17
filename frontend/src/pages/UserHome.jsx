@@ -1,51 +1,39 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from 'react';
-import { getGoals } from '../api/goalApi';
-import axios from 'axios';
+import { getUserGoals } from '../api/userGoalApi';
 
 function UserHome({ currentUser }) {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!currentUser) return; // wait until currentUser is loaded
+    if (!currentUser) return;
 
     const fetchGoals = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/users/${currentUser.id}/goals`, {
-          withCredentials: true,
-        });
-        setGoals(res.data);
-        setLoading(false);
+        const res = await getUserGoals(currentUser.id);
+        setGoals(res);
       } catch (err) {
-        console.error('Failed to fetch goals', err);
-        setError('Could not load goals');
+        console.error('Failed to load goals', err);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchGoals();
-  }, [currentUser]); // ✅ add currentUser to dependency
+  }, [currentUser]);
 
-  if (loading) return <p>Loading goals...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <p>Loading your goals...</p>;
 
   return (
     <div>
-      <h1>Welcome, {currentUser?.firstName}</h1>
-
+      <h1>Your Goals</h1>
       {goals.length === 0 ? (
-        <p>No goals yet. Create your first one!</p>
+        <p>No goals yet.</p>
       ) : (
         <ul>
           {goals.map((goal) => (
             <li key={goal.id}>
-              <strong>{goal.goalTitle}</strong>
-              <br />
-              Difficulty: {goal.difficulty}
-              <br />
-              Status: {goal.status}
+              {goal.goalTitle} – {goal.status}
             </li>
           ))}
         </ul>

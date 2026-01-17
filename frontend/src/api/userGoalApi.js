@@ -1,14 +1,16 @@
+// src/api/userGoalApi.js
 import axios from 'axios';
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
+  withCredentials: true, // 🔥 REQUIRED
 });
 
-export function getUserGoals() {
-  return api.get('/users/goals');
-}
+export const getUserGoals = async (userId) => {
+  const res = await api.get(`/users/${userId}/goals`);
+  return res.data;
+};
 
 export function createUserGoal(title) {
   return api.post('/users/goals', { goalTitle: title });
