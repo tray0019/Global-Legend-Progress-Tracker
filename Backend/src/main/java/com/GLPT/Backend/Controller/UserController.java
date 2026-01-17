@@ -10,13 +10,14 @@ import com.GLPT.Backend.Service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-@CrossOrigin(origins = "http://localhost:3000/")
 public class UserController {
 
     @Autowired
@@ -81,6 +82,32 @@ public class UserController {
     @GetMapping("/{userId}/goals")
     public List<GoalWithEntriesDto> getUserGoals(@PathVariable Long userId) {
         return userService.getUserGoalsWithEntries(userId);
+    }
+
+    @GetMapping("/me")
+    public UserResponse getCurrentUser(HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Not logged in"
+            );
+        }
+
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getBirthDate(),
+                user.getGender(),
+                user.isProfileCompleted()
+        );
+    }
+
+    @PostMapping("/logout")
+    public void logout(HttpSession session) {
+        session.invalidate();
     }
 
 
