@@ -58,7 +58,7 @@ function getCurrentMonthRange() {
 }
 
 /* ---------- MAIN PAGE ---------- */
-function Home({ currentUser }) {
+function Home({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
 
   // Multi-open system
@@ -528,6 +528,13 @@ function Home({ currentUser }) {
   /* ---------- RENDER ---------- */
   return (
     <div className="app-container">
+      <div>
+        <h1>Home</h1>
+
+        <p>Logged in as: {currentUser.email}</p>
+
+        <button onClick={onLogout}>Logout</button>
+      </div>
       <div>
         <h1>Welcome, {currentUser ? currentUser.firstName : 'Guest'}!</h1>
         {currentUser && (
