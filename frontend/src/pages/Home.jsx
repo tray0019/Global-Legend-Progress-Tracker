@@ -536,8 +536,6 @@ function Home({ currentUser }) {
             <p>
               Full Name: {currentUser.firstName} {currentUser.lastName}
             </p>
-            <p>Birth Date: {currentUser.birthDate}</p>
-            <p>Gender: {currentUser.gender}</p>
           </div>
         )}
       </div>

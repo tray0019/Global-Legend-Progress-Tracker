@@ -5,7 +5,6 @@ import Archived from './pages/Archived';
 import Achievements from './pages/Achievements';
 
 import TopNav from './components/TopNav';
-import RankTest from './components/RankTest';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
