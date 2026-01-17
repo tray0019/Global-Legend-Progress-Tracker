@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { getUserGoals } from '../api/userGoalApi';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { reorderGoals } from '../api/goalApi';
+import UserGoalCard from '../usercomponents/UserGoalCard';
 
 function UserHome({ currentUser }) {
   const [goals, setGoals] = useState([]);
@@ -22,22 +25,50 @@ function UserHome({ currentUser }) {
     fetchGoals();
   }, [currentUser]);
 
+  /* ---------- DRAG AND DROP SORTING ---------- */
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const newOrder = Array.from(goals);
+    const [moved] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, moved);
+
+    // 1️⃣ update UI immediately
+    setGoals(newOrder);
+
+    // 2️⃣ persist order
+    const payload = newOrder.map((goal, index) => ({
+      id: goal.id,
+      position: index,
+    }));
+
+    try {
+      await reorderGoals(payload);
+    } catch (err) {
+      console.error('Failed to persist goal order', err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
-    <div>
-      <h1>Your Goals</h1>
-      {goals.length === 0 ? (
-        <p>No goals yet.</p>
-      ) : (
+    <div className="app-container">
+      <div>
+        <p>Logged in as: {currentUser.email}</p>
+      </div>
+      <h1>User Goals</h1>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
         <ul>
           {goals.map((goal) => (
             <li key={goal.id}>
-              {goal.goalTitle} – {goal.status}
+              <UserGoalCard goal={goal} />
             </li>
           ))}
         </ul>
-      )}
+      </DragDropContext>
+
+      {goals.length === 0 ? <p>No goals yet.</p> : <ul></ul>}
     </div>
   );
 }
