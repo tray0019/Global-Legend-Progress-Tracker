@@ -6,6 +6,7 @@ import Achievements from './pages/Achievements';
 
 import TopNav from './components/TopNav';
 import ProtectedRoute from './components/ProtectedRoute';
+import UserHome from './pages/UserHome';
 
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
@@ -54,6 +55,16 @@ function AppContent({ currentUser, setCurrentUser }) {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute currentUser={currentUser}>
+              <UserHome currentUser={currentUser} />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/achievements"
           element={

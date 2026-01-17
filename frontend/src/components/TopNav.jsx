@@ -19,6 +19,9 @@ function TopNav() {
       <Link to="/archived" style={linkStyle('/archived')}>
         Archive
       </Link>
+      <Link to="/home" style={linkStyle('/home')}>
+        UserHome
+      </Link>
     </div>
   );
 }
