@@ -10,28 +10,33 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
-import { logout } from './services/auth';
+import { logout } from './api/userApi.js';
+
+// src/api/goalApi.js
+import axios from 'axios';
 
 function AppContent({ currentUser, setCurrentUser }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout(); // remove token
-    setCurrentUser(null); // clear user
-    navigate('/login'); // go to login
+  const handleLogout = async () => {
+    await logout();
+    setCurrentUser(null);
+    navigate('/login');
   };
 
   useEffect(() => {
-    if (currentUser) {
-      if (!currentUser.profileCompleted) {
-        navigate('/complete-profile');
-      } else {
-        navigate('/'); // home
+    const fetchSessionUser = async () => {
+      try {
+        const res = await axios.get('http://localhost:8080/users/me', { withCredentials: true });
+        setCurrentUser(res.data);
+      } catch (err) {
+        console.log('No session user found', err);
+        setCurrentUser(null);
       }
-    } else {
-      navigate('/login');
-    }
-  }, [currentUser, navigate]);
+    };
+
+    fetchSessionUser();
+  }, []);
 
   return (
     <>

@@ -61,3 +61,11 @@ export function completeGoal(goalId) {
 export function toggleAchievementGoal(goalId) {
   return api.put(`/goals/${goalId}/achievement/toggle`);
 }
+
+// src/api/goalApi.js
+export const getGoals = async () => {
+  const response = await axios.get(`${BASE_URL}/goals`, {
+    withCredentials: true, // VERY important for session
+  });
+  return response.data;
+};

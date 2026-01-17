@@ -24,6 +24,7 @@ function Login({ setCurrentUser }) {
     <div>
       <h1>Login / Sign-up</h1>
       <button onClick={handleGoogleLogin}>Continue with Google</button>
+      <button onClick={handleGoogleLogin}>Sign up with Google</button>
     </div>
   );
 }
