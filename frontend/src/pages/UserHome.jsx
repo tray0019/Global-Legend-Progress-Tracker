@@ -57,15 +57,28 @@ function UserHome({ currentUser }) {
         <p>Logged in as: {currentUser.email}</p>
       </div>
       <h1>User Goals</h1>
-
       <DragDropContext onDragEnd={handleDragEnd}>
-        <ul>
-          {goals.map((goal) => (
-            <li key={goal.id}>
-              <UserGoalCard goal={goal} />
-            </li>
-          ))}
-        </ul>
+        <Droppable droppableId="goals">
+          {(provided) => (
+            <ul className="goal-list" {...provided.droppableProps} ref={provided.innerRef}>
+              {goals.map((goal, index) => {
+                //const doneToday = goal.doneToday ?? doneTodayByGoal[goal.id] === true;
+
+                return (
+                  <Draggable key={goal.id} draggableId={String(goal.id)} index={index}>
+                    {(provided) => (
+                      <li ref={provided.innerRef} {...provided.draggableProps}>
+                        <UserGoalCard goal={goal} />
+                      </li>
+                    )}
+                  </Draggable>
+                );
+              })}
+
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
       </DragDropContext>
 
       {goals.length === 0 ? <p>No goals yet.</p> : <ul></ul>}
