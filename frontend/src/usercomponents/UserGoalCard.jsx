@@ -1,4 +1,4 @@
-function UserGoalCard({ goal }) {
+function UserGoalCard({ goal, dragHandleProps }) {
   return (
     <div className="goal-card">
       <div>
