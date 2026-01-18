@@ -61,10 +61,8 @@ function UserHome({ currentUser }) {
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="goals">
           {(provided) => (
-            <ul>
+            <ul className="goal-list">
               {goals.map((goal, index) => {
-                //
-
                 return (
                   <Draggable>
                     {(provided) => (
