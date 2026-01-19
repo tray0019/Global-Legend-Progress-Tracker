@@ -163,7 +163,7 @@ public class GoalController {
 
     /**
      *  -- View One Goal and its Progress EntryService
-
+     */
     @GetMapping("/goals/{goalId}")
     public GoalWithEntriesDto getGoal(@PathVariable long goalId){
         Goal goal =  service.viewGoal(goalId);
@@ -174,12 +174,26 @@ public class GoalController {
             entryDto.add(new EntryResponseDto(entry.getId(),entry.getDescription()));
         }
 
-        return new GoalWithEntriesDto(goal.getId(),goal.getGoalTitle(),entryDto);
-    }*/
+        // map checks
+        List<GoalCheckDto> checkDtos = goal.getChecks().stream()
+                .map(check -> new GoalCheckDto(check.getCheckDate()))
+                .toList();
+
+        // map user info
+        long uId = goal.getUser().getId();
+        String uName = (goal.getUser().getFirstName() != null ? goal.getUser().getFirstName() : "") +
+                " " +
+                (goal.getUser().getLastName() != null ? goal.getUser().getLastName() : "");
+
+
+        return new GoalWithEntriesDto(goal.getId(),goal.getGoalTitle(),entryDto,checkDtos,
+                uId,
+                uName.trim());
+    }
 
     // ==== USER-SCOPE (Phase 2+) ====
-    @GetMapping("/goals/{goalId}")
-    public GoalWithEntriesDto getGoal(
+    @GetMapping("/users/goals/{goalId}")
+    public GoalWithEntriesDto getUserGoal(
             @PathVariable long goalId,
             HttpSession session
     ) {
