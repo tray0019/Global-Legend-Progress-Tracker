@@ -40,6 +40,7 @@ public class GoalController {
     }
 
 
+    @Deprecated
     @PostMapping("/goals")
     public GoalResponseDto createGoal(
             @Valid @RequestBody GoalCreateDto dto,
