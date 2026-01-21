@@ -4,16 +4,24 @@ import com.GLPT.Backend.DTO.*;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Entity.User;
+import com.GLPT.Backend.Repository.GoalRepository;
+import com.GLPT.Backend.Repository.UserRepository;
+import com.GLPT.Backend.Service.GoalService;
 import com.GLPT.Backend.Service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @RestController
 @RequestMapping("/users")
@@ -21,19 +29,34 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    private final UserRepository userRepository;
+    private final GoalService goalService;
+    private final GoalRepository goalRepository;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService, UserRepository userRepository, GoalService goalService, GoalRepository goalRepository){
         this.userService = userService;
+        this.userRepository = userRepository;
+        this.goalService = goalService;
+        this.goalRepository = goalRepository;
     }
 
     @GetMapping("/me/goals")
     public List<GoalWithEntriesDto> getMyGoals(HttpSession session) {
         User user = (User) session.getAttribute("currentUser");
 
-        System.out.println("SESSION USER ID = " + (user != null ? user.getId() : "null"));
+        if (user == null) {
+            // TEMP: use first user in DB for testing
+            user = userRepository.findAll().stream().findFirst()
+                    .orElseThrow(() -> new RuntimeException("No users in DB"));
+            session.setAttribute("currentUser", user);
+        }
 
         return userService.getUserGoalsWithEntries(user.getId());
     }
+
+
+
+
 
 
 
