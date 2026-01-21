@@ -1,6 +1,7 @@
 // src/components/UserGoalCard.jsx
 import React, { useState, useEffect } from 'react';
 
+import UserEntryList from './UserEntryList';
 function UserGoalCard({
   goal,
   isOpen,
@@ -26,7 +27,7 @@ function UserGoalCard({
   doneToday,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [entryInputs, setEntryInputs] = useState({});
+  const [entryInputs, setEntryInputs] = useState({}); //
 
   // Sync entryInputs with selectedGoal.entries whenever it changes
   useEffect(() => {
@@ -209,68 +210,11 @@ function UserGoalCard({
 
           {/* ENTRY LIST */}
           {/* ENTRY LIST */}
-          {selectedGoal.entries?.length > 0 ? (
-            <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-              {selectedGoal.entries.map((entry) => (
-                <li
-                  key={entry.id}
-                  style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  {/* Show entry description */}
-                  <input
-                    type="text"
-                    value={entry.description || ''}
-                    readOnly
-                    style={{
-                      flex: 1,
-                      padding: '6px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #ccc',
-                    }}
-                  />
-
-                  {/* Delete button */}
-                  {onDeleteEntry && (
-                    <button
-                      onClick={() => onDeleteEntry(entry.id)}
-                      style={{ padding: '4px 6px', cursor: 'pointer' }}
-                    >
-                      🗑️
-                    </button>
-                  )}
-
-                  {/* Rename / edit button */}
-                  {onRenameEntry && (
-                    <button
-                      onClick={() => {
-                        const newText = prompt('Rename entry:', entry.description);
-                        if (newText) onRenameEntry(entry.id, newText);
-                      }}
-                      style={{ padding: '4px 6px', cursor: 'pointer' }}
-                    >
-                      ✏️
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No entries yet.</p>
-          )}
-
-          {/* NEW ENTRY */}
-          {onAddEntry && (
-            <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
-              <input
-                type="text"
-                value={newEntryDescription ?? ''}
-                onChange={(e) => onChangeNewEntry(goal.id, e.target.value)}
-                placeholder="Add new entry..."
-                style={{ flex: 1, padding: '4px' }}
-              />
-              <button onClick={() => onAddEntry(goal.id)}>Add</button>
-            </div>
-          )}
+          <UserEntryList
+            entries={selectedGoal.entries || []}
+            onDeleteEntry={onDeleteEntry}
+            onRenameEntry={onRenameEntry}
+          />
         </div>
       )}
     </div>
