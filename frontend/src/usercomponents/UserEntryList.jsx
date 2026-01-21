@@ -1,7 +1,7 @@
 // src/components/EntryList.jsx
 import React from 'react';
 
-function EntryList({ entries, onDeleteEntry, onRenameEntry }) {
+function UserEntryList({ entries, onDeleteEntry, onRenameEntry }) {
   if (!entries || entries.length === 0) {
     return <p>No entries yet.</p>;
   }
@@ -33,4 +33,4 @@ function EntryList({ entries, onDeleteEntry, onRenameEntry }) {
   );
 }
 
-export default EntryList;
+export default UserEntryList;

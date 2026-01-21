@@ -1,7 +1,9 @@
 // src/components/UserGoalCard.jsx
 import React, { useState, useEffect } from 'react';
-
 import UserEntryList from './UserEntryList';
+
+import UserGoalCheckCalendar from './UserGoalCheckCalendar';
+
 function UserGoalCard({
   goal,
   isOpen,
@@ -12,6 +14,7 @@ function UserGoalCard({
   onMarkDoneToday,
   onToggleArchive,
   onDifficultyChange,
+  checkDates,
   newEntryDescription,
   onChangeNewEntry,
   onAddEntry,
@@ -210,6 +213,13 @@ function UserGoalCard({
 
           {/* ENTRY LIST */}
           {/* ENTRY LIST */}
+
+          <UserGoalCheckCalendar
+            checkDates={checkDates}
+            month={viewedMonth?.month}
+            year={viewedMonth?.year}
+          />
+
           <UserEntryList
             entries={selectedGoal.entries || []}
             onDeleteEntry={onDeleteEntry}
