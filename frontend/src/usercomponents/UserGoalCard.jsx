@@ -1,7 +1,7 @@
 // src/components/UserGoalCard.jsx
 import React, { useState, useEffect } from 'react';
 import UserEntryList from './UserEntryList';
-
+import UserAddEntryForm from './UserAddEntryForm';
 import UserGoalCheckCalendar from './UserGoalCheckCalendar';
 
 function UserGoalCard({
@@ -30,25 +30,8 @@ function UserGoalCard({
   doneToday,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [entryInputs, setEntryInputs] = useState({}); //
-
-  // Sync entryInputs with selectedGoal.entries whenever it changes
-  useEffect(() => {
-    if (selectedGoal?.entries) {
-      const entriesMap = selectedGoal.entries.reduce((acc, entry) => {
-        acc[entry.id] = entry.text ?? '';
-        return acc;
-      }, {});
-      setEntryInputs(entriesMap);
-    }
-  }, [selectedGoal]);
 
   const handleMenuToggle = () => setMenuOpen((prev) => !prev);
-
-  const handleEntryChange = (entryId, value) => {
-    setEntryInputs((prev) => ({ ...prev, [entryId]: value }));
-  };
-
   const isDoneToday = doneToday === true;
 
   return (
@@ -224,6 +207,12 @@ function UserGoalCard({
             entries={selectedGoal.entries || []}
             onDeleteEntry={onDeleteEntry}
             onRenameEntry={onRenameEntry}
+          />
+
+          <UserAddEntryForm
+            value={newEntryDescription}
+            onChange={onChangeNewEntry}
+            onAddEntry={onAddEntry}
           />
         </div>
       )}
