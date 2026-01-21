@@ -169,6 +169,8 @@ public class GoalController {
     public GoalWithEntriesDto getGoal(@PathVariable long goalId){
         Goal goal =  service.viewGoal(goalId);
 
+        System.out.println(goal.getEntries().size());
+
         List<EntryResponseDto> entryDto = new ArrayList<>();
 
         for(ProgressEntry entry: goal.getEntries()){

@@ -81,6 +81,8 @@ public class UserController {
 
         Goal goal = userService.viewGoalForUser(goalId, user);
 
+        System.out.println(goal.getEntries().size());
+
         List<EntryResponseDto> entryDto = new ArrayList<>();
         for(ProgressEntry entry: goal.getEntries()){
             entryDto.add(new EntryResponseDto(entry.getId(),entry.getDescription()));
