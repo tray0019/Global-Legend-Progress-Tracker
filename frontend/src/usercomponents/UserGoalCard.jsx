@@ -1,5 +1,5 @@
-// src/components/GoalCard.jsx
-import React, { useState } from 'react';
+// src/components/UserGoalCard.jsx
+import React, { useState, useEffect } from 'react';
 
 function UserGoalCard({
   goal,
@@ -11,7 +11,6 @@ function UserGoalCard({
   onMarkDoneToday,
   onToggleArchive,
   onDifficultyChange,
-  checkDates,
   newEntryDescription,
   onChangeNewEntry,
   onAddEntry,
@@ -27,8 +26,25 @@ function UserGoalCard({
   doneToday,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [entryInputs, setEntryInputs] = useState({});
+
+  // Sync entryInputs with selectedGoal.entries whenever it changes
+  useEffect(() => {
+    if (selectedGoal?.entries) {
+      const entriesMap = selectedGoal.entries.reduce((acc, entry) => {
+        acc[entry.id] = entry.text ?? '';
+        return acc;
+      }, {});
+      setEntryInputs(entriesMap);
+    }
+  }, [selectedGoal]);
 
   const handleMenuToggle = () => setMenuOpen((prev) => !prev);
+
+  const handleEntryChange = (entryId, value) => {
+    setEntryInputs((prev) => ({ ...prev, [entryId]: value }));
+  };
+
   const isDoneToday = doneToday === true;
 
   return (
@@ -41,7 +57,7 @@ function UserGoalCard({
         marginBottom: '12px',
       }}
     >
-      {/* HEADER ROW */}
+      {/* HEADER */}
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: '0 0 8px 0' }}>
@@ -52,7 +68,9 @@ function UserGoalCard({
               </span>
             )}
           </h3>
+
           <button onClick={() => onView(goal.id)}>{isOpen ? 'Hide' : 'View'}</button>
+
           {!isArchived && onMarkDoneToday && (
             <button
               style={{ marginLeft: '10px' }}
@@ -66,7 +84,7 @@ function UserGoalCard({
           )}
         </div>
 
-        {/* 3-DOT MENU */}
+        {/* MENU */}
         <div style={{ position: 'relative' }}>
           <button
             onClick={handleMenuToggle}
@@ -89,7 +107,7 @@ function UserGoalCard({
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {!isAchievementPage && (
+                {!isAchievementPage && onRename && (
                   <button
                     onClick={() => {
                       onRename(goal.id);
@@ -100,7 +118,7 @@ function UserGoalCard({
                   </button>
                 )}
 
-                {!isAchievementPage && (
+                {!isAchievementPage && onDelete && (
                   <button
                     onClick={() => {
                       if (window.confirm('Are you sure you want to delete this goal?')) {
@@ -111,19 +129,12 @@ function UserGoalCard({
                     Delete
                   </button>
                 )}
-                {/* ACHIEVEMENT TOGGLE BUTTON */}
-                {!isArchived &&
-                  (!isAchievementPage ? (
-                    // Home page: show Mark/Unmark based on goal.achievement
-                    <button onClick={() => handleToggleAchievement(goal.id)}>
-                      {goal.achievement ? 'Unmark Achievement' : 'Mark Achievement'}
-                    </button>
-                  ) : (
-                    // Achievements page: show only Unmark Achievement
-                    <button onClick={() => handleToggleAchievement(goal.id)}>
-                      Unmark Achievement
-                    </button>
-                  ))}
+
+                {!isArchived && handleToggleAchievement && (
+                  <button onClick={() => handleToggleAchievement(goal.id)}>
+                    {goal.achievement ? 'Unmark Achievement' : 'Mark Achievement'}
+                  </button>
+                )}
 
                 {onToggleArchive && (
                   <button
@@ -161,6 +172,7 @@ function UserGoalCard({
         {!isArchived && dragHandleProps && (
           <span
             {...dragHandleProps}
+            className="drag-handle"
             style={{
               cursor: 'grab',
               padding: '6px 8px',
@@ -174,10 +186,10 @@ function UserGoalCard({
         )}
       </div>
 
-      {/* EXPANDED ENTRIES SECTION */}
+      {/* ENTRIES SECTION */}
       {isOpen && selectedGoal && (
         <div className="entries-section" style={{ marginTop: '12px' }}>
-          {/* --- MONTH NAVIGATION --- */}
+          {/* MONTH NAVIGATION */}
           <div
             style={{
               display: 'flex',
@@ -187,9 +199,78 @@ function UserGoalCard({
             }}
           >
             <button onClick={() => onPrevMonth(goal.id)}>◀</button>
-            <span>{`${viewedMonth?.year || new Date().getFullYear()}-${String((viewedMonth?.month || new Date().getMonth()) + 1).padStart(2, '0')}`}</span>
+            <span>
+              {`${viewedMonth?.year || new Date().getFullYear()}-${String(
+                (viewedMonth?.month || new Date().getMonth()) + 1,
+              ).padStart(2, '0')}`}
+            </span>
             <button onClick={() => onNextMonth(goal.id)}>▶</button>
           </div>
+
+          {/* ENTRY LIST */}
+          {/* ENTRY LIST */}
+          {selectedGoal.entries?.length > 0 ? (
+            <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+              {selectedGoal.entries.map((entry) => (
+                <li
+                  key={entry.id}
+                  style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  {/* Show entry description */}
+                  <input
+                    type="text"
+                    value={entry.description || ''}
+                    readOnly
+                    style={{
+                      flex: 1,
+                      padding: '6px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #ccc',
+                    }}
+                  />
+
+                  {/* Delete button */}
+                  {onDeleteEntry && (
+                    <button
+                      onClick={() => onDeleteEntry(entry.id)}
+                      style={{ padding: '4px 6px', cursor: 'pointer' }}
+                    >
+                      🗑️
+                    </button>
+                  )}
+
+                  {/* Rename / edit button */}
+                  {onRenameEntry && (
+                    <button
+                      onClick={() => {
+                        const newText = prompt('Rename entry:', entry.description);
+                        if (newText) onRenameEntry(entry.id, newText);
+                      }}
+                      style={{ padding: '4px 6px', cursor: 'pointer' }}
+                    >
+                      ✏️
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No entries yet.</p>
+          )}
+
+          {/* NEW ENTRY */}
+          {onAddEntry && (
+            <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
+              <input
+                type="text"
+                value={newEntryDescription ?? ''}
+                onChange={(e) => onChangeNewEntry(goal.id, e.target.value)}
+                placeholder="Add new entry..."
+                style={{ flex: 1, padding: '4px' }}
+              />
+              <button onClick={() => onAddEntry(goal.id)}>Add</button>
+            </div>
+          )}
         </div>
       )}
     </div>

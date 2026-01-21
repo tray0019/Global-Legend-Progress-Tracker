@@ -7,10 +7,18 @@ const api = axios.create({
   withCredentials: true, // 🔥 REQUIRED
 });
 
-export const getUserGoals = async (userId) => {
-  const res = await api.get(`/users/${userId}/goals`);
+export const getUserGoals = async () => {
+  const res = await api.get(`/users/me/goals`);
   return res.data;
 };
+
+export function getUserGoal(goalId) {
+  if (!goalId) {
+    console.error('getUserGoal called with invalid goalId:', goalId);
+    return;
+  }
+  return api.get(`/users/me/goals/${goalId}`);
+}
 
 export function createUserGoal(title) {
   return api.post('/users/goals', { goalTitle: title });

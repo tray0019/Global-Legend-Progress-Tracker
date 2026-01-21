@@ -563,8 +563,6 @@ function Home({ currentUser, onLogout }) {
                 //const doneToday = goal.doneToday ?? doneTodayByGoal[goal.id] === true;
                 const doneToday = doneTodayByGoal[goal.id] === true;
 
-                console.log('RENDER', goal.id, doneToday);
-
                 const isOpen = openGoals[goal.id] === true;
                 const selectedGoal = goalDetails[goal.id];
                 const checkDates = goalCheckDates[goal.id] || [];
