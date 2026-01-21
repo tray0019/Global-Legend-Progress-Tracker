@@ -1,10 +1,8 @@
 package com.GLPT.Backend.Controller;
 
-import com.GLPT.Backend.DTO.CompleteProfileRequest;
-import com.GLPT.Backend.DTO.GoalWithEntriesDto;
-import com.GLPT.Backend.DTO.UserRegistrationRequest;
-import com.GLPT.Backend.DTO.UserResponse;
+import com.GLPT.Backend.DTO.*;
 import com.GLPT.Backend.Entity.Goal;
+import com.GLPT.Backend.Entity.ProgressEntry;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Service.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,6 +25,62 @@ public class UserController {
     public UserController(UserService userService){
         this.userService = userService;
     }
+
+    @GetMapping("/me/goals")
+    public List<GoalWithEntriesDto> getMyGoals(HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+
+        System.out.println("SESSION USER ID = " + (user != null ? user.getId() : "null"));
+
+        return userService.getUserGoalsWithEntries(user.getId());
+    }
+
+
+
+
+//    @GetMapping("/{userId}/goals")
+//    public List<GoalWithEntriesDto> getUserGoals(@PathVariable Long userId) {
+//        return userService.getUserGoalsWithEntries(userId);
+//    }
+
+    @GetMapping("/me/goals/{goalId}")
+    public GoalWithEntriesDto getMyGoal(
+            @PathVariable long goalId,
+            HttpSession session
+    ) {
+
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Login required"
+            );
+        }
+
+        Goal goal = userService.viewGoalForUser(goalId, user);
+
+        List<EntryResponseDto> entryDto = new ArrayList<>();
+        for(ProgressEntry entry: goal.getEntries()){
+            entryDto.add(new EntryResponseDto(entry.getId(),entry.getDescription()));
+        }
+
+        // map checks
+        List<GoalCheckDto> checkDtos = goal.getChecks().stream()
+                .map(check -> new GoalCheckDto(check.getCheckDate()))
+                .toList();
+
+        // map user info
+        long uId = goal.getUser().getId();
+        String uName = (goal.getUser().getFirstName() != null ? goal.getUser().getFirstName() : "") +
+                " " +
+                (goal.getUser().getLastName() != null ? goal.getUser().getLastName() : "");
+
+
+        return new GoalWithEntriesDto(goal.getId(),goal.getGoalTitle(),entryDto,checkDtos,
+                uId,
+                uName.trim());
+    }
+
+
 
     @PostMapping("/oauth-register")
     public UserResponse register(@RequestBody UserRegistrationRequest request,
@@ -79,10 +134,6 @@ public class UserController {
         );
     }
 
-    @GetMapping("/{userId}/goals")
-    public List<GoalWithEntriesDto> getUserGoals(@PathVariable Long userId) {
-        return userService.getUserGoalsWithEntries(userId);
-    }
 
     @GetMapping("/me")
     public UserResponse getCurrentUser(HttpSession session) {

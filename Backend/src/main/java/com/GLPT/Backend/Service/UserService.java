@@ -1,11 +1,15 @@
 package com.GLPT.Backend.Service;
 
 import com.GLPT.Backend.DTO.*;
+import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.User;
+import com.GLPT.Backend.Repository.GoalRepository;
 import com.GLPT.Backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -15,14 +19,16 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final GoalRepository goalRepository;
 
     @Value("${app.minAge:13}")//This allows changing it without recompiling.
     private int MIN_AGE;
 
     @Autowired
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, GoalRepository goalRepository){
         this.userRepository = userRepository;
+        this.goalRepository = goalRepository;
     }
 
     public User registerOrLoginOAuthUser(UserRegistrationRequest request) {
@@ -104,6 +110,12 @@ public class UserService {
 
                 })
                 .toList();
+    }
+
+    public Goal viewGoalForUser(long goalId, User user) {
+        return goalRepository.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Not your goal"));
     }
 
 
