@@ -26,9 +26,14 @@ function AppContent({ currentUser, setCurrentUser }) {
   };
 
   useEffect(() => {
-    const fetchSessionUser = async () => {
+    const initSession = async () => {
       try {
+        // 1️⃣ Create session FIRST
+        await axios.post('http://localhost:8080/auth/dev-login', {}, { withCredentials: true });
+
+        // 2️⃣ THEN fetch session user
         const res = await axios.get('http://localhost:8080/users/me', { withCredentials: true });
+
         setCurrentUser(res.data);
       } catch (err) {
         console.log('No session user found', err);
@@ -36,7 +41,7 @@ function AppContent({ currentUser, setCurrentUser }) {
       }
     };
 
-    fetchSessionUser();
+    initSession();
   }, []);
 
   return (

@@ -20,6 +20,10 @@ export function getUserGoal(goalId) {
   return api.get(`/users/me/goals/${goalId}`);
 }
 
+export function getActiveGoals() {
+  return api.get('users/goals/active');
+}
+
 export function createUserGoal(title) {
   return api.post('/users/goals', { goalTitle: title });
 }

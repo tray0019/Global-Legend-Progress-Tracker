@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getUserGoals, getUserGoal } from '../api/userGoalApi';
+import { getUserGoals, getActiveGoals, getUserGoal } from '../api/userGoalApi';
 import { getGoalChecks } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderGoals } from '../api/goalApi';
@@ -14,6 +14,7 @@ function UserHome({ currentUser }) {
   const [goalDetails, setGoalDetails] = useState({});
   const [goalCheckDates, setGoalCheckDates] = useState({});
   const [viewedMonths, setViewedMonths] = useState({});
+  const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
 
   const loadingGoalLock = useRef({});
 
@@ -30,15 +31,84 @@ function UserHome({ currentUser }) {
     return { from, to };
   };
 
+  const goToPreviousMonth = (goalId) => {
+    const current = viewedMonths[goalId] || {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth(),
+    };
+
+    let year = current.year;
+    let month = current.month - 1;
+
+    if (month < 0) {
+      month = 11;
+      year -= 1;
+    }
+
+    // 1️⃣ Update state (PURE)
+    setViewedMonths((prev) => ({
+      ...prev,
+      [goalId]: { year, month },
+    }));
+
+    // 2️⃣ Build range
+    const from = `${year}-${pad2(month + 1)}-01`;
+    const to = `${year}-${pad2(month + 1)}-${pad2(new Date(year, month + 1, 0).getDate())}`;
+
+    // 3️⃣ Load checks (SIDE EFFECT — correct place)
+    if (!loadingGoalLock.current[goalId]) {
+      loadSelectedGoalAndChecks(goalId, { from, to });
+    }
+  };
+
+  const goToNextMonth = (goalId) => {
+    setViewedMonths((prev) => {
+      const current = prev[goalId] || {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth(),
+      };
+
+      let year = current.year;
+      let month = current.month + 1;
+
+      // If month > 11, roll over
+      if (month > 11) {
+        month = 0;
+        year += 1;
+      }
+
+      // 🔒 Prevent going beyond current month
+      const today = new Date();
+      if (
+        year > today.getFullYear() ||
+        (year === today.getFullYear() && month > today.getMonth())
+      ) {
+        // Already at current month or beyond → do nothing
+        return prev;
+      }
+
+      // Build range
+      const from = `${year}-${pad2(month + 1)}-01`;
+      const to = `${year}-${pad2(month + 1)}-${pad2(new Date(year, month + 1, 0).getDate())}`;
+
+      // Load checks
+      if (!loadingGoalLock.current[goalId]) {
+        loadSelectedGoalAndChecks(goalId, { from, to });
+      }
+
+      return { ...prev, [goalId]: { year, month } };
+    });
+  };
+
   // Load user goals
   useEffect(() => {
     if (!currentUser) return;
 
     const fetchGoals = async () => {
       try {
-        const res = await getUserGoals(currentUser.id);
+        const res = await getActiveGoals();
         console.log('API response:', res);
-        setGoals(res || []);
+        setGoals(res.data || []);
       } catch (err) {
         console.error('Failed to load goals', err);
         setGoals([]);
@@ -51,33 +121,34 @@ function UserHome({ currentUser }) {
   }, [currentUser]);
 
   // Load single goal + checkmarks
-  const loadSelectedGoalAndChecks = async (goalKey, monthRange = null) => {
-    if (!goalKey) return;
-    if (loadingGoalLock.current[goalKey]) return;
+  const loadSelectedGoalAndChecks = async (goalId, monthRange = null) => {
+    if (!goalId) return;
+    if (loadingGoalLock.current[goalId]) return;
 
-    loadingGoalLock.current[goalKey] = true;
+    loadingGoalLock.current[goalId] = true;
 
     try {
       if (!monthRange) monthRange = getCurrentMonthRange();
 
       const [goalRes, checksRes] = await Promise.all([
-        getUserGoal(goalKey),
-        getGoalChecks(goalKey, monthRange.from, monthRange.to),
+        getUserGoal(goalId),
+        getGoalChecks(goalId, monthRange.from, monthRange.to),
       ]);
 
       setGoalDetails((prev) => ({
         ...prev,
-        [goalKey]: goalRes.data,
+        [goalId]: goalRes.data,
       }));
 
       setGoalCheckDates((prev) => ({
         ...prev,
-        [goalKey]: checksRes.data.map((item) => item.date),
+        [goalId]: checksRes.data.map((item) => item.date),
       }));
     } catch (err) {
       console.error('Error loading goal details:', err);
     } finally {
-      loadingGoalLock.current[goalKey] = false;
+      setIsLoadingGoalDetails(false);
+      loadingGoalLock.current[goalId] = false;
     }
   };
 
@@ -155,6 +226,10 @@ function UserHome({ currentUser }) {
                           isOpen={isOpen}
                           onView={() => handleView(goal)}
                           dragHandleProps={provided.dragHandleProps}
+                          checkDates={goalCheckDates[goal.id] || []}
+                          viewedMonth={viewedMonths[goal.id]}
+                          onPrevMonth={goToPreviousMonth}
+                          onNextMonth={goToNextMonth}
                         />
                       </li>
                     )}
