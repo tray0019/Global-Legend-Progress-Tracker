@@ -64,12 +64,13 @@ public class GoalCheckService {
     }
 
     // ==== USER-SCOPE (Phase 2+) ====
-    public List<GoalCheck> getChecksForUserBetween(
+    public List<GoalCheck> getChecksForUserAndGoalBetween(
+            long goalId,
             User user,
             LocalDate from,
             LocalDate to
     ) {
-        return checkRepo.findByGoal_UserAndCheckDateBetween(user, from, to);
+        return checkRepo.findByGoal_IdAndGoal_UserAndCheckDateBetween(goalId,user, from, to);
     }
 
 

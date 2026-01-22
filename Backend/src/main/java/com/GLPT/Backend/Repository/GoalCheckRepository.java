@@ -33,10 +33,12 @@ public interface GoalCheckRepository extends JpaRepository<GoalCheck, Long> {
                 User user
         );
 
-        List<GoalCheck> findByGoal_UserAndCheckDateBetween(
+        List<GoalCheck> findByGoal_IdAndGoal_UserAndCheckDateBetween(
+                long goalId,
                 User user,
                 LocalDate from,
                 LocalDate to
         );
+
 
 }

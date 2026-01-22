@@ -88,13 +88,13 @@ public class GoalCheckController {
     ) {
         User user = requireUser(session);
 
-        List<GoalCheck> checks =
-                goalService.getChecksForUserBetween(user, from, to);
-
-        return checks.stream()
+        return goalService
+                .getChecksForUserAndGoalBetween(goalId,user, from, to)
+                .stream()
                 .map(c -> new GoalCheckDto(c.getCheckDate()))
                 .toList();
     }
+
 
 
     @GetMapping("/calendar/contributions")
