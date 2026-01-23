@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getUserGoals, getActiveGoals, getUserGoal } from '../api/userGoalApi';
-import { getGoalChecks } from '../api/userGoalCheckApi';
+import { createUserGoal, getActiveGoals, getUserGoal } from '../api/userGoalApi';
+import { getGoalChecks, getGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderGoals } from '../api/goalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
 import UserGlobalYearCalendar from '../usercomponents/UserGlobalYearCalendar';
 import { getGlobalContributions } from '../api/userGoalCheckApi';
+import UserAddGoalForm from '../usercomponents/UserAddGoalForm';
 
 function UserHome({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
@@ -18,6 +19,8 @@ function UserHome({ currentUser, onLogout }) {
   const [viewedMonths, setViewedMonths] = useState({});
   const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
   const [globalContributions, setGlobalContributions] = useState([]);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(false);
+  const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
 
   const loadingGoalLock = useRef({});
 
@@ -228,6 +231,40 @@ function UserHome({ currentUser, onLogout }) {
     }
   };
 
+  const loadDoneTodayStatuses = async (goals) => {
+    const result = {};
+    for (const goal of goals) {
+      const res = await getGoalDoneToday(goal.id);
+      result[goal.id] = res.data.doneToday;
+    }
+    setDoneTodayByGoal(result);
+  };
+
+  const loadGoals = async () => {
+    try {
+      setIsLoadingGoals(true);
+
+      const res = await getActiveGoals();
+      const newGoals = res.data;
+      console.log('Active goals from backend:', res.data); // <--- check this
+      setGoals(res.data);
+      await loadDoneTodayStatuses(newGoals);
+    } catch (err) {
+      console.error('Error loading goals:', err);
+    } finally {
+      setIsLoadingGoals(false);
+    }
+  };
+
+  const handleAddGoal = async (title) => {
+    try {
+      await createUserGoal(title);
+      await loadGoals();
+    } catch (err) {
+      console.error('Error creating goal:', err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -237,6 +274,7 @@ function UserHome({ currentUser, onLogout }) {
       <h1>User Goals</h1>
 
       <UserGlobalYearCalendar contributions={globalContributions} />
+      <UserAddGoalForm onAdd={handleAddGoal} />
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="goals">
