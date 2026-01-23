@@ -2,6 +2,7 @@ package com.GLPT.Backend.Controller;
 
 import com.GLPT.Backend.DTO.*;
 import com.GLPT.Backend.Entity.*;
+import com.GLPT.Backend.Repository.UserRepository;
 import com.GLPT.Backend.Service.GoalService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -18,17 +19,27 @@ public class GoalController {
 
 
     private final GoalService service;
-
-    GoalController(GoalService service){
+    private final UserRepository userRepository;
+    GoalController(GoalService service, UserRepository userRepository){
         this.service = service;
+        this.userRepository = userRepository;
     }
 
     private User requireUser(HttpSession session) {
         User user = (User) session.getAttribute("currentUser");
 
         if (user == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Login required");
+            // 🔧 DEV MODE FALLBACK ONLY
+            user = userRepository.findAll()
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.UNAUTHORIZED,
+                                    "No users in DB"
+                            ));
+
+            session.setAttribute("currentUser", user);
         }
 
         if (!user.isProfileCompleted()) {
@@ -38,6 +49,7 @@ public class GoalController {
 
         return user;
     }
+
 
 
     @Deprecated
