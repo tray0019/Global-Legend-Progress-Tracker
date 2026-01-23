@@ -104,6 +104,18 @@ public class GoalCheckController {
         return goalService.getGlobalContribution(from,to);
     }
 
+    // ==== USER-SCOPE (Phase 2+) ====
+    @GetMapping("/users/calendar/contributions")
+    public List<GlobalContributionDto> getUserContributions(
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to,
+            HttpSession session
+    ) {
+        User user = requireUser(session);
+        return goalService.getUserContribution(user, from, to);
+    }
+
+
     @PostMapping("/goals/{goalId}/checks/today/toggle")
     public GoalTodayStatusDto toggleToday(@PathVariable long goalId){
         boolean done = goalService.toggleDoneToday(goalId);

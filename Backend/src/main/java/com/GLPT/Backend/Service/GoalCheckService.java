@@ -101,6 +101,35 @@ public class GoalCheckService {
 
     }
 
+    // USER-SCOPE
+
+    public List<GlobalContributionDto> getUserContribution(
+            User user,
+            LocalDate from,
+            LocalDate to
+    ) {
+        List<GoalCheck> checks =
+                checkRepo.findByGoal_UserAndCheckDateBetween(user, from, to);
+
+        Map<LocalDate, Integer> counter = new HashMap<>();
+
+        for (GoalCheck check : checks) {
+            LocalDate date = check.getCheckDate();
+            counter.put(date, counter.getOrDefault(date, 0) + 1);
+        }
+
+        List<GlobalContributionDto> result = new ArrayList<>();
+
+        for (Map.Entry<LocalDate, Integer> entry : counter.entrySet()) {
+            result.add(
+                    new GlobalContributionDto(entry.getKey(), entry.getValue())
+            );
+        }
+
+        return result;
+    }
+
+
     @Transactional
     public boolean toggleDoneToday(long goalId){
         LocalDate today = LocalDate.now();

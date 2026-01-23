@@ -40,5 +40,12 @@ public interface GoalCheckRepository extends JpaRepository<GoalCheck, Long> {
                 LocalDate to
         );
 
+        List<GoalCheck> findByGoal_UserAndCheckDateBetween(
+                User user,
+                LocalDate from,
+                LocalDate to
+        );
+
+
 
 }
