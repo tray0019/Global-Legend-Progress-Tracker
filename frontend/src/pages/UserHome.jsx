@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderGoals } from '../api/goalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
 import UserGlobalYearCalendar from '../usercomponents/UserGlobalYearCalendar';
+import { getGlobalContributions } from '../api/userGoalCheckApi';
 
 function UserHome({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
@@ -124,6 +125,9 @@ function UserHome({ currentUser, onLogout }) {
         const res = await getActiveGoals();
         console.log('API response:', res);
         setGoals(res.data || []);
+
+        // 5️⃣ Load global contributions
+        await loadGlobalContributions();
       } catch (err) {
         console.error('Failed to load goals', err);
         setGoals([]);
@@ -134,6 +138,16 @@ function UserHome({ currentUser, onLogout }) {
 
     fetchGoals();
   }, [currentUser]);
+
+  const loadGlobalContributions = async () => {
+    try {
+      const range = getLastYearRange();
+      const res = await getGlobalContributions(range.from, range.to);
+      setGlobalContributions(res.data);
+    } catch (err) {
+      console.error('Error loading contributions:', err);
+    }
+  };
 
   // Load single goal + checkmarks
   const loadSelectedGoalAndChecks = async (goalId, monthRange = null) => {
