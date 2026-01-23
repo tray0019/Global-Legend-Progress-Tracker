@@ -12,11 +12,9 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
 import { logout } from './api/userApi.js';
-
-// src/api/goalApi.js
 import axios from 'axios';
 
-function AppContent({ currentUser, setCurrentUser }) {
+function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -25,24 +23,34 @@ function AppContent({ currentUser, setCurrentUser }) {
     navigate('/login');
   };
 
+  // 🔒 SESSION BOOTSTRAP (runs ONCE)
   useEffect(() => {
-    const initSession = async () => {
+    const bootstrapSession = async () => {
       try {
-        // 1️⃣ Create session FIRST
+        // 1️⃣ recreate session after backend restart (DEV ONLY)
         await axios.post('http://localhost:8080/auth/dev-login', {}, { withCredentials: true });
 
-        // 2️⃣ THEN fetch session user
+        // 2️⃣ confirm authenticated session
         const res = await axios.get('http://localhost:8080/users/me', { withCredentials: true });
 
         setCurrentUser(res.data);
+        console.log('Session restored:', res.data.email);
       } catch (err) {
-        console.log('No session user found', err);
+        console.log('No session user found');
         setCurrentUser(null);
+      } finally {
+        // 🔓 allow app to render
+        setSessionReady(true);
       }
     };
 
-    initSession();
+    bootstrapSession();
   }, []);
+
+  // ⛔ HARD BLOCK until session is ready
+  if (!sessionReady) {
+    return <p>Initializing session...</p>;
+  }
 
   return (
     <>
@@ -78,6 +86,7 @@ function AppContent({ currentUser, setCurrentUser }) {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/archived"
           element={
@@ -93,10 +102,16 @@ function AppContent({ currentUser, setCurrentUser }) {
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [sessionReady, setSessionReady] = useState(false);
 
   return (
     <BrowserRouter>
-      <AppContent currentUser={currentUser} setCurrentUser={setCurrentUser} />
+      <AppContent
+        currentUser={currentUser}
+        setCurrentUser={setCurrentUser}
+        sessionReady={sessionReady}
+        setSessionReady={setSessionReady}
+      />
     </BrowserRouter>
   );
 }
