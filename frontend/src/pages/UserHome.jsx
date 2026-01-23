@@ -4,8 +4,9 @@ import { getGoalChecks } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderGoals } from '../api/goalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
+import UserGlobalYearCalendar from '../usercomponents/UserGlobalYearCalendar';
 
-function UserHome({ currentUser }) {
+function UserHome({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,11 +16,25 @@ function UserHome({ currentUser }) {
   const [goalCheckDates, setGoalCheckDates] = useState({});
   const [viewedMonths, setViewedMonths] = useState({});
   const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
+  const [globalContributions, setGlobalContributions] = useState([]);
 
   const loadingGoalLock = useRef({});
 
   // Helper: pad month/day with 0
   const pad2 = (num) => (num < 10 ? '0' + num : String(num));
+
+  function getLastYearRange() {
+    const today = new Date();
+
+    const to = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+    const past = new Date();
+    past.setDate(past.getDate() - 364);
+
+    const from = `${past.getFullYear()}-${pad2(past.getMonth() + 1)}-${pad2(past.getDate())}`;
+
+    return { from, to };
+  }
 
   const getCurrentMonthRange = () => {
     const now = new Date();
@@ -204,7 +219,10 @@ function UserHome({ currentUser }) {
   return (
     <div className="app-container">
       <p>Logged in as: {currentUser.email}</p>
+      <button onClick={onLogout}>Logout</button>
       <h1>User Goals</h1>
+
+      <UserGlobalYearCalendar contributions={globalContributions} />
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="goals">
