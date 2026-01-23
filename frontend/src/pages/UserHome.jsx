@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { createUserGoal, getActiveGoals, getUserGoal } from '../api/userGoalApi';
+import { createUserGoal, getActiveGoals, getUserGoal, deleteUserGoal } from '../api/userGoalApi';
 import { getGoalChecks, getGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderGoals } from '../api/goalApi';
@@ -265,6 +265,35 @@ function UserHome({ currentUser, onLogout }) {
     }
   };
 
+  const handleDeleteGoal = async (goalId) => {
+    try {
+      await deleteUserGoal(goalId);
+
+      // Clean up states
+      setOpenGoals((prev) => {
+        const copy = { ...prev };
+        delete copy[goalId];
+        return copy;
+      });
+
+      setGoalDetails((prev) => {
+        const copy = { ...prev };
+        delete copy[goalId];
+        return copy;
+      });
+
+      setGoalCheckDates((prev) => {
+        const copy = { ...prev };
+        delete copy[goalId];
+        return copy;
+      });
+
+      await loadGoals();
+    } catch (err) {
+      console.error('Error deleting goal:', err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -300,6 +329,7 @@ function UserHome({ currentUser, onLogout }) {
                           viewedMonth={viewedMonths[goal.id]}
                           onPrevMonth={goToPreviousMonth}
                           onNextMonth={goToNextMonth}
+                          onDelete={handleDeleteGoal}
                         />
                       </li>
                     )}
