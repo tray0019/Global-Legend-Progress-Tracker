@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { createUserGoal, getActiveGoals, getUserGoal, deleteUserGoal } from '../api/userGoalApi';
 import {
-  getGoalChecks,
-  getGoalDoneToday,
-  toggleGoalDoneToday,
+  createUserGoal,
+  getActiveGoals,
+  getUserGoal,
+  deleteUserGoal,
   completeGoal,
-} from '../api/userGoalCheckApi';
+} from '../api/userGoalApi';
+import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderUserGoals } from '../api/userGoalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
@@ -459,6 +460,7 @@ function UserHome({ currentUser, onLogout }) {
             <ul className="goal-list" ref={provided.innerRef} {...provided.droppableProps}>
               {goals.map((goal, index) => {
                 const goalKey = goal.id ?? goal._id ?? goal.goalId;
+                const doneToday = doneTodayByGoal[goal.id] === true;
                 if (!goalKey) return null;
 
                 const isOpen = openGoals[goalKey] === true;
@@ -487,6 +489,7 @@ function UserHome({ currentUser, onLogout }) {
                             handleRenameEntry(goal.id, entryId, text)
                           }
                           onComplete={handleCompleteGoal}
+                          doneToday={doneToday}
                         />
                       </li>
                     )}

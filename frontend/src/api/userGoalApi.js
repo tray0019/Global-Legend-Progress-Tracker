@@ -39,3 +39,7 @@ export function deleteUserGoal(goalId) {
 export function reorderUserGoals(positions) {
   return api.put('/users/goals/reorder', positions);
 }
+
+export function completeGoal(goalId) {
+  return api.put(`users/goals/${goalId}/complete`);
+}
