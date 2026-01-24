@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createUserGoal, getActiveGoals, getUserGoal, deleteUserGoal } from '../api/userGoalApi';
 import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { reorderGoals } from '../api/goalApi';
+import { reorderUserGoals } from '../api/userGoalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
 import UserGlobalYearCalendar from '../usercomponents/UserGlobalYearCalendar';
 import { getGlobalContributions } from '../api/userGoalCheckApi';
@@ -207,7 +207,7 @@ function UserHome({ currentUser, onLogout }) {
         id: goal.id, // Make sure this matches your backend's expected ID
         position: index,
       }));
-      await reorderGoals(payload);
+      await reorderUserGoals(payload);
     } catch (err) {
       console.error('Failed to persist goal order', err);
     }
