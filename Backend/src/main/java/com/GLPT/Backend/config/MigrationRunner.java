@@ -2,7 +2,9 @@ package com.GLPT.Backend;
 
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.User;
+import com.GLPT.Backend.Entity.UserProgress;
 import com.GLPT.Backend.Repository.GoalRepository;
+import com.GLPT.Backend.Repository.UserProgressRepository;
 import com.GLPT.Backend.Repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +18,10 @@ public class MigrationRunner implements CommandLineRunner {
 
     @Autowired
     private GoalRepository goalRepository;
-
+    @Autowired
+    private UserProgressRepository userProgressRepository;
     @Autowired
     private UserRepository userRepository;
-
-    public MigrationRunner(UserRepository userRepository, GoalRepository goalRepository) {
-        this.userRepository = userRepository;
-        this.goalRepository = goalRepository;
-    }
 
     @Transactional
     @Override
@@ -32,6 +30,14 @@ public class MigrationRunner implements CommandLineRunner {
 
         List<Goal> legacyGoals = goalRepository.findAll();
         System.out.println("Found " + legacyGoals.size() + " legacy goals");
+
+        UserProgress progress = userProgressRepository.findTopByOrderByIdAsc();
+
+        if (progress.getUser() == null) {
+            progress.setUser(user);
+            userProgressRepository.save(progress);
+            System.out.println("UserProgress linked to user");
+        }
 
         for (Goal goal : legacyGoals) {
             goal.setUser(user);
