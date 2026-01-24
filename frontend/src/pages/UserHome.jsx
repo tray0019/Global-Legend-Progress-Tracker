@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createUserGoal, getActiveGoals, getUserGoal, deleteUserGoal } from '../api/userGoalApi';
-import { getGoalChecks, getGoalDoneToday } from '../api/userGoalCheckApi';
+import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderGoals } from '../api/goalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
 import UserGlobalYearCalendar from '../usercomponents/UserGlobalYearCalendar';
 import { getGlobalContributions } from '../api/userGoalCheckApi';
 import UserAddGoalForm from '../usercomponents/UserAddGoalForm';
+import { getProgress, addXP, removeXP } from '../api/userRankApi';
+import UserRankPanel from '../components/rank/UserRankPanel'; // adjust path if needed
 
 function UserHome({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
@@ -21,6 +23,7 @@ function UserHome({ currentUser, onLogout }) {
   const [globalContributions, setGlobalContributions] = useState([]);
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
+  const [progress, setProgress] = useState(null);
 
   const loadingGoalLock = useRef({});
 
@@ -127,8 +130,13 @@ function UserHome({ currentUser, onLogout }) {
       try {
         const res = await getActiveGoals();
         console.log('API response:', res);
+        const loadedGoals = res.data;
         setGoals(res.data || []);
 
+        // 2️⃣ Load done-today status
+        await loadDoneTodayStatuses(loadedGoals);
+        const progressRes = await getProgress();
+        setProgress(progressRes.data);
         // 5️⃣ Load global contributions
         await loadGlobalContributions();
       } catch (err) {
@@ -207,7 +215,7 @@ function UserHome({ currentUser, onLogout }) {
 
   // View/Hide goal
   const handleView = async (goal) => {
-    const goalKey = goal.id ?? goal._id ?? goal.goalId;
+    const goalKey = goal.id;
     if (!goalKey) return;
 
     const isOpen = openGoals[goalKey] === true;
@@ -294,6 +302,66 @@ function UserHome({ currentUser, onLogout }) {
     }
   };
 
+  const handleMarkDoneToday = async (goalId, difficulty) => {
+    try {
+      const res = await toggleGoalDoneToday(goalId);
+      const doneToday = res.data.doneToday;
+
+      const wasDone = doneTodayByGoal[goalId] ?? false;
+
+      // Update button state
+      setDoneTodayByGoal((prev) => {
+        const updated = { ...prev, [goalId]: doneToday };
+        console.log('UPDATED doneTodayByGoal:', updated);
+        return updated;
+      });
+
+      // Optimistic calendar update
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+      setGoalCheckDates((prev) => {
+        const existing = Array.isArray(prev[goalId]) ? prev[goalId] : [];
+
+        if (doneToday && !existing.includes(todayStr)) {
+          return { ...prev, [goalId]: [...existing, todayStr] };
+        }
+
+        if (!doneToday) {
+          return { ...prev, [goalId]: existing.filter((d) => d !== todayStr) };
+        }
+
+        return prev;
+      });
+
+      console.log('doneTodayByGoal:', doneTodayByGoal);
+      console.log('goal.doneToday:', doneToday);
+
+      // Backend XP update and live progress refresh
+      if ((doneToday && !wasDone) || (!doneToday && wasDone)) {
+        if (doneToday) await addXP(difficulty);
+        else await removeXP(difficulty);
+
+        const progressRes = await getProgress();
+        setProgress(progressRes.data);
+      }
+
+      // Update global calendar
+      await loadGlobalContributions();
+    } catch (err) {
+      console.error('Error toggle done today:', err);
+    }
+  };
+
+  const totalGoals = goals.length;
+  const completedTodayCount = Object.values(doneTodayByGoal).filter(Boolean).length;
+  const summaryText =
+    completedTodayCount === 0
+      ? ''
+      : completedTodayCount === totalGoals
+        ? '🎉 You completed all your goals today!'
+        : `You completed ${completedTodayCount} of your daily goals today! Great Job - keep going!`;
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -301,6 +369,21 @@ function UserHome({ currentUser, onLogout }) {
       <p>Logged in as: {currentUser.email}</p>
       <button onClick={onLogout}>Logout</button>
       <h1>User Goals</h1>
+
+      <UserRankPanel progress={progress} />
+      {totalGoals > 0 && (
+        <div
+          style={{
+            marginBottom: '16px',
+            padding: '12px',
+            background: '#f3f4f6',
+            borderRadius: '8px',
+            fontWeight: '500',
+          }}
+        >
+          {summaryText}
+        </div>
+      )}
 
       <UserGlobalYearCalendar contributions={globalContributions} />
       <UserAddGoalForm onAdd={handleAddGoal} />
@@ -325,11 +408,12 @@ function UserHome({ currentUser, onLogout }) {
                           isOpen={isOpen}
                           onView={() => handleView(goal)}
                           dragHandleProps={provided.dragHandleProps}
-                          checkDates={goalCheckDates[goal.id] || []}
-                          viewedMonth={viewedMonths[goal.id]}
+                          checkDates={goalCheckDates[goalKey] || []}
+                          viewedMonth={viewedMonths[goalKey]}
                           onPrevMonth={goToPreviousMonth}
                           onNextMonth={goToNextMonth}
                           onDelete={handleDeleteGoal}
+                          onMarkDoneToday={handleMarkDoneToday}
                         />
                       </li>
                     )}

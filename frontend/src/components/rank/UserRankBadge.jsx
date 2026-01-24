@@ -1,4 +1,4 @@
-function RankBadge({ rank }) {
+function UserRankBadge({ rank }) {
   return (
     <div
       style={{
@@ -14,4 +14,4 @@ function RankBadge({ rank }) {
   );
 }
 
-export default RankBadge;
+export default UserRankBadge;

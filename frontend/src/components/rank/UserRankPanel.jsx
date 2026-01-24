@@ -1,5 +1,5 @@
-import RankBadge from './RankBadge';
-import RankProgressBar from './RankProgressBar';
+import UserRankBadge from './UserRankBadge';
+import UserRankProgressBar from './UserRankProgressBar';
 
 function RankPanel({ progress }) {
   if (!progress) return <div>No progress found.</div>;
@@ -16,7 +16,7 @@ function RankPanel({ progress }) {
       }}
     >
       {/* Rank Badge */}
-      <RankBadge rank={progress.currentRank} />
+      <UserRankBadge rank={progress.currentRank} />
 
       {/* Total XP */}
       <div style={{ marginTop: '8px' }}>Total XP: {progress.totalXP}</div>
@@ -48,7 +48,7 @@ function RankPanel({ progress }) {
       {/* Progress to next rank */}
       <div style={{ marginTop: '12px' }}>
         Progress to next rank:
-        <RankProgressBar rank={progress.currentRank} totalXP={progress.totalXP} />
+        <UserRankProgressBar rank={progress.currentRank} totalXP={progress.totalXP} />
       </div>
     </div>
   );
