@@ -21,18 +21,6 @@ public class UserProgressController {
         this.progressService = progressService;
     }
 
-    @GetMapping
-    public UserProgressResponse getResponse(){
-        UserProgress progress = progressService.getProgressWithDecayCheck();
-
-        return new UserProgressResponse(
-                progress.getTotalXP(),
-                progress.getDailyXP(),
-                progress.getCurrentRank(),
-                progress.getLastActivityDate()
-        );
-    }
-
     private User requireUser(HttpSession session) {
         User user = (User) session.getAttribute("currentUser");
 
@@ -49,6 +37,34 @@ public class UserProgressController {
         return user;
     }
 
+
+    @GetMapping
+    public UserProgressResponse getResponse(){
+        UserProgress progress = progressService.getProgressWithDecayCheck();
+
+        return new UserProgressResponse(
+                progress.getTotalXP(),
+                progress.getDailyXP(),
+                progress.getCurrentRank(),
+                progress.getLastActivityDate()
+        );
+    }
+
+    //User-scope
+    @GetMapping("/users")
+    public UserProgressResponse getUserResponse(HttpSession session){
+        User user = requireUser(session);
+        UserProgress progress = progressService.getProgressWithDecayCheckForUser(user);
+
+        return new UserProgressResponse(
+                progress.getTotalXP(),
+                progress.getDailyXP(),
+                progress.getCurrentRank(),
+                progress.getLastActivityDate()
+        );
+    }
+
+
     @PostMapping("/xp")
     public ResponseEntity<UserProgress> addXP(@RequestParam int difficulty) {
         progressService.addXP(difficulty);
@@ -58,7 +74,7 @@ public class UserProgressController {
 
     //USER-SCOPE
     @PostMapping("/user/xp")
-    public ResponseEntity<UserProgress> addXP(@RequestParam int difficulty, HttpSession session) {
+    public ResponseEntity<UserProgress> addUserXP(@RequestParam int difficulty, HttpSession session) {
         progressService.addXP(difficulty);
         User user = requireUser(session);
         UserProgress updated = progressService.getProgressWithDecayCheckForUser(user);
@@ -74,7 +90,7 @@ public class UserProgressController {
 
     //User-scope
     @PostMapping("/user/xp/remove")
-    public ResponseEntity<UserProgress> removeXP(@RequestParam int difficulty, HttpSession session) {
+    public ResponseEntity<UserProgress> removeUserXP(@RequestParam int difficulty, HttpSession session) {
         User user = requireUser(session);
         progressService.removeXPForUser(difficulty,user);
         UserProgress updated = progressService.getProgressWithDecayCheckForUser(user);
