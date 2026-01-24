@@ -7,23 +7,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export const getUserGoals = async (userId) => {
-  const res = await api.get(`/users/${userId}/goals`);
-  return res.data;
-};
-
-export function createUserGoal(title) {
-  return api.post('/users/goals', { goalTitle: title });
+export function addEntry(goalId, description) {
+  return api.post(`users/goals/${goalId}/entries`, { description });
 }
 
-export function renameUserGoal(goalId, newTitle) {
-  return api.put(`/users/goals/${goalId}`, null, { params: { newTitle } });
+export function renameEntry(entryId, newDescription) {
+  return api.put(`users/entries/${entryId}`, { description: newDescription });
 }
 
-export function deleteUserGoal(goalId) {
-  return api.delete(`/users/goals/${goalId}`);
-}
-
-export function reorderUserGoals(positions) {
-  return api.put('/users/goals/reorder', positions);
+export function deleteEntry(entryId) {
+  return api.delete(`users/entries/${entryId}`);
 }

@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createUserGoal, getActiveGoals, getUserGoal, deleteUserGoal } from '../api/userGoalApi';
-import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
+import {
+  getGoalChecks,
+  getGoalDoneToday,
+  toggleGoalDoneToday,
+  completeGoal,
+} from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { reorderUserGoals } from '../api/userGoalApi';
 import UserGoalCard from '../usercomponents/UserGoalCard';
@@ -9,6 +14,7 @@ import { getGlobalContributions } from '../api/userGoalCheckApi';
 import UserAddGoalForm from '../usercomponents/UserAddGoalForm';
 import { getProgress, addXP, removeXP } from '../api/userRankApi';
 import UserRankPanel from '../components/rank/UserRankPanel'; // adjust path if needed
+import { addEntry, deleteEntry, renameEntry } from '../api/userEntryApi';
 
 function UserHome({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
@@ -24,6 +30,7 @@ function UserHome({ currentUser, onLogout }) {
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
   const [progress, setProgress] = useState(null);
+  const [entryInputs, setEntryInputs] = useState({});
 
   const loadingGoalLock = useRef({});
 
@@ -362,6 +369,64 @@ function UserHome({ currentUser, onLogout }) {
         ? '🎉 You completed all your goals today!'
         : `You completed ${completedTodayCount} of your daily goals today! Great Job - keep going!`;
 
+  const handleAddEntry = async (goalId) => {
+    const text = entryInputs[goalId]?.trim();
+    if (!text) return;
+
+    try {
+      await addEntry(goalId, text);
+
+      // clear only this goal’s input
+      setEntryInputs((prev) => ({
+        ...prev,
+        [goalId]: '',
+      }));
+
+      await loadSelectedGoalAndChecks(goalId);
+    } catch (err) {
+      console.error('Error adding entry:', err);
+    }
+  };
+  const handleChangeEntryInput = (goalId, text) => {
+    setEntryInputs((prev) => ({
+      ...prev,
+      [goalId]: text,
+    }));
+  };
+
+  const handleDeleteEntry = async (goalId, entryId) => {
+    try {
+      await deleteEntry(entryId);
+      await loadSelectedGoalAndChecks(goalId);
+    } catch (err) {
+      console.error('Error deleting entry:', err);
+    }
+  };
+
+  const handleRenameEntry = async (goalId, entryId, currentDesc) => {
+    const newText = window.prompt('Edit entry:', currentDesc);
+    if (!newText) return;
+
+    try {
+      await renameEntry(entryId, newText.trim());
+      await loadSelectedGoalAndChecks(goalId);
+    } catch (err) {
+      console.error('Error renaming entry:', err);
+    }
+  };
+
+  const handleCompleteGoal = async (goalId, difficulty) => {
+    const confirmComplete = window.confirm('Mark this goal as completed?');
+    if (!confirmComplete) return;
+
+    try {
+      await completeGoal(goalId); // move to achievements
+      await loadGoals();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -414,6 +479,14 @@ function UserHome({ currentUser, onLogout }) {
                           onNextMonth={goToNextMonth}
                           onDelete={handleDeleteGoal}
                           onMarkDoneToday={handleMarkDoneToday}
+                          newEntryDescription={entryInputs[goal.id] || ''}
+                          onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
+                          onAddEntry={() => handleAddEntry(goal.id)}
+                          onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)}
+                          onRenameEntry={(entryId, text) =>
+                            handleRenameEntry(goal.id, entryId, text)
+                          }
+                          onComplete={handleCompleteGoal}
                         />
                       </li>
                     )}
