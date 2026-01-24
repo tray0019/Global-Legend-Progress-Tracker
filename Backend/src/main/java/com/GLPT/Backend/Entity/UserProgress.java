@@ -46,5 +46,6 @@ public class UserProgress {
     }
 
     @OneToOne
+    @JoinColumn(name="user_id", nullable = true)
     User user;
 }

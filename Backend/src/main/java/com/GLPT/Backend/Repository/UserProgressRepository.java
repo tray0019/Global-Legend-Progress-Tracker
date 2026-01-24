@@ -11,5 +11,6 @@ import java.util.Optional;
 public interface UserProgressRepository extends JpaRepository<UserProgress, Long> {
     UserProgress findTopByOrderByIdAsc();
     Optional<UserProgress> findByUser(User user);
+    public Optional<UserProgress> findByUserId(Long userId);
 
 }

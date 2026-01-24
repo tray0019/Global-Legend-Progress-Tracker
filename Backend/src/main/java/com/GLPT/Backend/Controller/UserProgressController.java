@@ -51,7 +51,7 @@ public class UserProgressController {
     }
 
     //User-scope
-    @GetMapping("/users")
+    @GetMapping("/user")
     public UserProgressResponse getUserResponse(HttpSession session){
         User user = requireUser(session);
         UserProgress progress = progressService.getProgressWithDecayCheckForUser(user);
@@ -75,8 +75,9 @@ public class UserProgressController {
     //USER-SCOPE
     @PostMapping("/user/xp")
     public ResponseEntity<UserProgress> addUserXP(@RequestParam int difficulty, HttpSession session) {
-        progressService.addXP(difficulty);
+
         User user = requireUser(session);
+        progressService.addXPForUser(difficulty,user);
         UserProgress updated = progressService.getProgressWithDecayCheckForUser(user);
         return ResponseEntity.ok(updated);  // ✅ return updated progress as JSON
     }
