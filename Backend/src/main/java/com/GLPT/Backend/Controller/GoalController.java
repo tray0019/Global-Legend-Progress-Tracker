@@ -545,7 +545,20 @@ public class GoalController {
     }
 
     // ==== USER-SCOPE (Phase 2+) ====
+    @PutMapping("/users/goals/{goalId}/achievement/toggle")
+    public GoalResponseDto toggleUserAchievement(@PathVariable long goalId, HttpSession session) {
+        User user = requireUser(session);
+        Goal goal = service.toggleAchievementForUser(goalId,user);
 
+        return new GoalResponseDto(
+                goal.getId(),
+                goal.getGoalTitle(),
+                goal.getDifficulty().getValue(),
+                goal.getPosition(),
+                goal.getStatus(),
+                goal.getStatus() == GoalStatus.ARCHIVED
+        );
+    }
 
 
 
