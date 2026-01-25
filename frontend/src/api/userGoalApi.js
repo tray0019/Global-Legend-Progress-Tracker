@@ -55,3 +55,11 @@ export function toggleArchiveGoal(goalId) {
 export function getArchiveGoals() {
   return api.get('users/goals/archived');
 }
+
+export function getAchievements() {
+  return api.get('users/goals/achievements');
+}
+
+export function toggleAchievementGoal(goalId) {
+  return api.put(`users/goals/${goalId}/achievement/toggle`);
+}

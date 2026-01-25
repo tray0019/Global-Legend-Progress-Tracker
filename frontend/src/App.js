@@ -3,7 +3,7 @@ import CompleteProfile from './pages/CompleteProfile';
 import Home from './pages/Home';
 import UserArchived from './pages/UserArchived';
 import Archived from './pages/UserArchived';
-import Achievements from './pages/Achievements';
+import UserAchievements from './pages/UserAchievements';
 
 import TopNav from './components/TopNav';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -83,7 +83,7 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
           path="/achievements"
           element={
             <ProtectedRoute currentUser={currentUser}>
-              <Achievements />
+              <UserAchievements />
             </ProtectedRoute>
           }
         />
