@@ -8,6 +8,7 @@ import {
   updateGoalDifficulty,
   toggleArchiveGoal,
   toggleAchievementGoal,
+  renameUserGoal,
 } from '../api/userGoalApi';
 import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -462,6 +463,22 @@ function UserHome({ currentUser, onLogout }) {
     }
   };
 
+  const handleRenameGoal = async (goalId) => {
+    const newTitle = window.prompt('Enter new title:');
+    if (!newTitle) return;
+
+    try {
+      await renameUserGoal(goalId, newTitle.trim());
+      await loadGoals();
+
+      if (openGoals[goalId]) {
+        await loadSelectedGoalAndChecks(goalId);
+      }
+    } catch (err) {
+      console.error('Error renaming goal:', err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -493,7 +510,7 @@ function UserHome({ currentUser, onLogout }) {
           {(provided) => (
             <ul className="goal-list" ref={provided.innerRef} {...provided.droppableProps}>
               {goals.map((goal, index) => {
-                const goalKey = goal.id ?? goal._id ?? goal.goalId;
+                const goalKey = goal.id;
                 const doneToday = doneTodayByGoal[goal.id] === true;
                 if (!goalKey) return null;
 
@@ -529,6 +546,7 @@ function UserHome({ currentUser, onLogout }) {
                           onToggleArchive={handleToggleArchive}
                           onToggleAchievement={() => handleToggleAchievement(goal.id)}
                           handleToggleAchievement={handleToggleAchievement}
+                          onRename={handleRenameGoal}
                         />
                       </li>
                     )}

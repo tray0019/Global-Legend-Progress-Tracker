@@ -580,17 +580,17 @@ function Home({ currentUser, onLogout }) {
                           isOpen={isOpen} //
                           selectedGoal={selectedGoal} //
                           onView={handleView} //
-                          onDelete={handleDeleteGoal}
-                          onRename={handleRenameGoal}
-                          onToggleArchive={handleToggleArchive}
+                          onDelete={handleDeleteGoal} //
+                          onRename={handleRenameGoal} //
+                          onToggleArchive={handleToggleArchive} //
                           onMarkDoneToday={handleMarkDoneToday} //
                           checkDates={goalCheckDates[goal.id] || []} //
                           newEntryDescription={entryInputs[goal.id] || ''} //
                           onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)} //
                           onAddEntry={() => handleAddEntry(goal.id)} //
                           onComplete={handleCompleteGoal} // achievement
-                          onToggleAchievement={() => handleToggleAchievement(goal.id)}
-                          handleToggleAchievement={handleToggleAchievement}
+                          onToggleAchievement={() => handleToggleAchievement(goal.id)} //
+                          handleToggleAchievement={handleToggleAchievement} //
                           onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)} //
                           onRenameEntry={(entryId, text) =>
                             handleRenameEntry(goal.id, entryId, text)

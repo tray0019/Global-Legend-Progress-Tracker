@@ -117,11 +117,19 @@ function UserGoalCard({
                   </button>
                 )}
 
-                {!isArchived && handleToggleAchievement && (
-                  <button onClick={() => handleToggleAchievement(goal.id)}>
-                    {goal.achievement ? 'Unmark Achievement' : 'Mark Achievement'}
-                  </button>
-                )}
+                {/* ACHIEVEMENT TOGGLE BUTTON */}
+                {!isArchived &&
+                  (!isAchievementPage ? (
+                    // Home page: show Mark/Unmark based on goal.achievement
+                    <button onClick={() => handleToggleAchievement(goal.id)}>
+                      {goal.achievement ? 'Unmark Achievement' : 'Mark Achievement'}
+                    </button>
+                  ) : (
+                    // Achievements page: show only Unmark Achievement
+                    <button onClick={() => handleToggleAchievement(goal.id)}>
+                      Unmark Achievement
+                    </button>
+                  ))}
 
                 {onToggleArchive && (
                   <button

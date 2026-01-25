@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import UserArchived from './pages/UserArchived';
 import Archived from './pages/UserArchived';
 import UserAchievements from './pages/UserAchievements';
+import Achievements from './pages/Achievements';
 
 import TopNav from './components/TopNav';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -92,7 +93,7 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
           path="/archived"
           element={
             <ProtectedRoute currentUser={currentUser}>
-              <Archived />
+              <UserArchived />
             </ProtectedRoute>
           }
         />
