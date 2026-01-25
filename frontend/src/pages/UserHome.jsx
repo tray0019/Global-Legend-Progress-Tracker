@@ -5,6 +5,7 @@ import {
   getUserGoal,
   deleteUserGoal,
   completeGoal,
+  updateGoalDifficulty,
 } from '../api/userGoalApi';
 import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -428,6 +429,17 @@ function UserHome({ currentUser, onLogout }) {
     }
   };
 
+  const handleDiffcultyChange = async (goalId, newDifficulty) => {
+    try {
+      await updateGoalDifficulty(goalId, newDifficulty);
+      setGoals((prev) =>
+        prev.map((g) => (g.id === goalId ? { ...g, difficulty: newDifficulty } : g)),
+      );
+    } catch (err) {
+      console.error('Failed to update difficulty', err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -490,6 +502,7 @@ function UserHome({ currentUser, onLogout }) {
                           }
                           onComplete={handleCompleteGoal}
                           doneToday={doneToday}
+                          onDifficultyChange={handleDiffcultyChange}
                         />
                       </li>
                     )}

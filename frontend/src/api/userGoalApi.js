@@ -43,3 +43,7 @@ export function reorderUserGoals(positions) {
 export function completeGoal(goalId) {
   return api.put(`users/goals/${goalId}/complete`);
 }
+
+export function updateGoalDifficulty(goalId, difficulty) {
+  return api.patch(`users/goals/${goalId}/difficulty`, { difficulty });
+}
