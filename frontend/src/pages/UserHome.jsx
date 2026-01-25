@@ -7,6 +7,7 @@ import {
   completeGoal,
   updateGoalDifficulty,
   toggleArchiveGoal,
+  toggleAchievementGoal,
 } from '../api/userGoalApi';
 import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -34,6 +35,7 @@ function UserHome({ currentUser, onLogout }) {
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
   const [progress, setProgress] = useState(null);
   const [entryInputs, setEntryInputs] = useState({});
+  const [achievements, setAchievements] = useState([]);
 
   const loadingGoalLock = useRef({});
 
@@ -446,6 +448,20 @@ function UserHome({ currentUser, onLogout }) {
     setGoals((prevGoals) => prevGoals.filter((g) => g.id !== goalId)); // remove from Home list
   };
 
+  const handleToggleAchievement = async (goalId) => {
+    try {
+      const res = await toggleAchievementGoal(goalId); // backend updates
+
+      // 1️⃣ Remove from Home goals
+      setGoals((prev) => prev.filter((g) => g.id !== goalId));
+
+      // 2️⃣ Add to achievements (optional)
+      setAchievements((prev) => [...prev, res.data]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -511,6 +527,8 @@ function UserHome({ currentUser, onLogout }) {
                           onDifficultyChange={handleDiffcultyChange}
                           isArchived={false}
                           onToggleArchive={handleToggleArchive}
+                          onToggleAchievement={() => handleToggleAchievement(goal.id)}
+                          handleToggleAchievement={handleToggleAchievement}
                         />
                       </li>
                     )}
