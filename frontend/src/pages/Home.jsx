@@ -576,7 +576,7 @@ function Home({ currentUser, onLogout }) {
                           goal={goal} //
                           doneToday={doneToday} //
                           isArchived={false} //
-                          isAchievementPage={false}
+                          isAchievementPage={false} //
                           isOpen={isOpen} //
                           selectedGoal={selectedGoal} //
                           onView={handleView} //

@@ -148,6 +148,23 @@ function UserHome({ currentUser, onLogout }) {
 
         // 2️⃣ Load done-today status
         await loadDoneTodayStatuses(loadedGoals);
+
+        // 3️⃣ Restore openGoals from localStorage
+        const saved = localStorage.getItem('homeOpenGoals');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const validOpenGoals = {};
+          for (const goal of loadedGoals) {
+            if (parsed[goal.id]) validOpenGoals[goal.id] = true;
+          }
+          setOpenGoals(validOpenGoals);
+
+          // 4️⃣ Load details for already-open goals
+          for (const goalId of Object.keys(validOpenGoals)) {
+            if (validOpenGoals[goalId]) await loadSelectedGoalAndChecks(goalId);
+          }
+        }
+
         const progressRes = await getProgress();
         setProgress(progressRes.data);
         // 5️⃣ Load global contributions
@@ -505,6 +522,8 @@ function UserHome({ currentUser, onLogout }) {
       <UserGlobalYearCalendar contributions={globalContributions} />
       <UserAddGoalForm onAdd={handleAddGoal} />
 
+      {isLoadingGoals && <p>Loading goals...</p>}
+
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="goals">
           {(provided) => (
@@ -543,6 +562,7 @@ function UserHome({ currentUser, onLogout }) {
                           doneToday={doneToday}
                           onDifficultyChange={handleDiffcultyChange}
                           isArchived={false}
+                          isAchievementPage={false}
                           onToggleArchive={handleToggleArchive}
                           onToggleAchievement={() => handleToggleAchievement(goal.id)}
                           handleToggleAchievement={handleToggleAchievement}
@@ -560,6 +580,7 @@ function UserHome({ currentUser, onLogout }) {
       </DragDropContext>
 
       {goals.length === 0 && <p>No goals yet.</p>}
+      {isLoadingGoalDetails && <p>Loading goal details...</p>}
     </div>
   );
 }
