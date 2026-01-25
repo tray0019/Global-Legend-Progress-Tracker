@@ -435,6 +435,27 @@ public class GoalController {
 
     // ==== USER-SCOPE (Phase 2+) ====
 
+    @PatchMapping("users/goals/{goalId}/difficulty")
+    public GoalResponseDto updateUserDifficulty(
+            @PathVariable long goalId,
+            @RequestBody GoalDifficultyDto dto,
+            HttpSession session){
+
+        User user = requireUser(session);
+
+        Difficulty difficultyEnum = Difficulty.fromValue(dto.getDifficulty());
+        Goal goal = service.updateDifficultyForUser(goalId, (difficultyEnum),user);
+
+        return new GoalResponseDto(
+                goal.getId(),
+                goal.getGoalTitle(),
+                goal.getDifficulty().getValue(),
+                goal.getPosition(),
+                goal.getStatus(),
+                goal.getStatus() == GoalStatus.ACTIVE
+        );
+    }
+
     @PatchMapping("/goals/{goalId}/complete")
     public GoalResponseDto completeGoal(@PathVariable long goalId) {
         Goal goal = service.completeGoal(goalId);
