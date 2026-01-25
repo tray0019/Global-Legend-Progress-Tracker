@@ -47,3 +47,11 @@ export function completeGoal(goalId) {
 export function updateGoalDifficulty(goalId, difficulty) {
   return api.patch(`users/goals/${goalId}/difficulty`, { difficulty });
 }
+
+export function toggleArchiveGoal(goalId) {
+  return api.put(`users/goals/${goalId}/archived/toggle`);
+}
+
+export function getArchiveGoals() {
+  return api.get('users/goals/archived');
+}

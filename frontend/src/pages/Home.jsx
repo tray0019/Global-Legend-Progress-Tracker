@@ -572,10 +572,10 @@ function Home({ currentUser, onLogout }) {
                     {(provided) => (
                       <li ref={provided.innerRef} {...provided.draggableProps}>
                         <GoalCard
-                          onDifficultyChange={handleDiffcultyChange}
+                          onDifficultyChange={handleDiffcultyChange} //
                           goal={goal} //
                           doneToday={doneToday} //
-                          isArchived={false}
+                          isArchived={false} //
                           isAchievementPage={false}
                           isOpen={isOpen} //
                           selectedGoal={selectedGoal} //

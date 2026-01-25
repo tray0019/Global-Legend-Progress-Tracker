@@ -1,7 +1,8 @@
 import Login from './pages/Login';
 import CompleteProfile from './pages/CompleteProfile';
 import Home from './pages/Home';
-import Archived from './pages/Archived';
+import UserArchived from './pages/UserArchived';
+import Archived from './pages/UserArchived';
 import Achievements from './pages/Achievements';
 
 import TopNav from './components/TopNav';

@@ -6,6 +6,7 @@ import {
   deleteUserGoal,
   completeGoal,
   updateGoalDifficulty,
+  toggleArchiveGoal,
 } from '../api/userGoalApi';
 import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -440,6 +441,11 @@ function UserHome({ currentUser, onLogout }) {
     }
   };
 
+  const handleToggleArchive = async (goalId) => {
+    await toggleArchiveGoal(goalId); // archive in backend
+    setGoals((prevGoals) => prevGoals.filter((g) => g.id !== goalId)); // remove from Home list
+  };
+
   if (loading) return <p>Loading your goals...</p>;
 
   return (
@@ -503,6 +509,8 @@ function UserHome({ currentUser, onLogout }) {
                           onComplete={handleCompleteGoal}
                           doneToday={doneToday}
                           onDifficultyChange={handleDiffcultyChange}
+                          isArchived={false}
+                          onToggleArchive={handleToggleArchive}
                         />
                       </li>
                     )}
