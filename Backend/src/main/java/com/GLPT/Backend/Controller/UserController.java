@@ -161,14 +161,17 @@ public class UserController {
 
 
     @GetMapping("/me")
-    public UserResponse getCurrentUser(HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-
-        if (user == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Not logged in"
-            );
+    public UserResponse getCurrentUser(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in");
         }
+
+        // Google stores the email in an attribute called "email"
+        String email = principal.getAttribute("email");
+
+        // Fetch the user from YOUR database using the email from Google
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in database"));
 
         return new UserResponse(
                 user.getId(),
@@ -180,7 +183,6 @@ public class UserController {
                 user.isProfileCompleted()
         );
     }
-
     @PostMapping("/logout")
     public void logout(HttpSession session) {
         session.invalidate();
