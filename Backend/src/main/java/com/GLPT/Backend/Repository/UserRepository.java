@@ -4,6 +4,7 @@ import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """)
     List<Goal> findGoalsWithEntriesByUserId(Long userId);
 
-
+    @Query("SELECT u FROM User u WHERE LOWER(u.firstName) LIKE LOWER(concat('%', :query, '%')) OR LOWER(u.lastName) LIKE LOWER(concat('%', :query, '%'))")
+    List<User> searchUsers(@Param("query") String query);
 
 }
