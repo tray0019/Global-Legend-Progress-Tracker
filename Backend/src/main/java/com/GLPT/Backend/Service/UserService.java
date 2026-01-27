@@ -5,6 +5,7 @@ import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.GoalRepository;
 import com.GLPT.Backend.Repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import java.time.Period;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -126,13 +129,41 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public List<UserSearchDTO> searchByUsername(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        return userRepository.searchUsersByName(name.trim());
+    public List<UserSearchDTO> searchByUsername(String query, User currentUser) {
+        // 1. Get results from DB (everyone isFollowing = false by default)
+        List<UserSearchDTO> results = userRepository.searchUsersByName(query);
+
+        // 2. Get IDs of people you follow
+        Set<Long> followingIds = currentUser.getFollowing().stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        // 3. Map to new DTOs with the CORRECT boolean
+        return results.stream()
+                .map(user -> new UserSearchDTO(
+                        user.id(),
+                        user.firstName(),
+                        user.lastName(),
+                        user.currentRank(),
+                        user.totalXP(),
+                        followingIds.contains(user.id()) // Check if you actually follow them
+                ))
+                .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void toggleFollow(User currentUser, Long targetId) {
+        User targetUser = userRepository.findById(targetId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        if (currentUser.getFollowing().contains(targetUser)) {
+            currentUser.getFollowing().remove(targetUser);
+        } else {
+            currentUser.getFollowing().add(targetUser);
+        }
+
+        userRepository.save(currentUser);
+    }
 
 
 

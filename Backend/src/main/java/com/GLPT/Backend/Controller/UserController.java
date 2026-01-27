@@ -192,9 +192,34 @@ public class UserController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<UserSearchDTO>> searchUsers(@RequestParam String query) {
-        List<UserSearchDTO> results = userService.searchByUsername(query);
+    public ResponseEntity<List<UserSearchDTO>> searchUsers(
+            @RequestParam String query,
+            @AuthenticationPrincipal OAuth2User principal // Injects the Google User
+    ) {
+        // 1. Get the email from the Google Auth token
+        String email = principal.getAttribute("email");
+
+        // 2. Find the User entity (so we can check their "following" list)
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 3. NOW call the service with BOTH arguments
+        List<UserSearchDTO> results = userService.searchByUsername(query, currentUser);
+
         return ResponseEntity.ok(results);
+    }
+
+    @PostMapping("/follow/{targetId}")
+    public ResponseEntity<String> toggleFollow(
+            @PathVariable Long targetId,
+            @AuthenticationPrincipal OAuth2User principal
+    ) {
+        String email = principal.getAttribute("email");
+        User currentUser = userRepository.findByEmail(email).orElseThrow();
+
+        userService.toggleFollow(currentUser, targetId);
+
+        return ResponseEntity.ok("Follow status updated");
     }
 
 }

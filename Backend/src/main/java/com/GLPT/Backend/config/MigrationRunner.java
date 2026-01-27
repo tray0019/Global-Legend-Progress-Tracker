@@ -13,46 +13,66 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-public class MigrationRunner implements CommandLineRunner {
 
-    @Autowired
-    private GoalRepository goalRepository;
-    @Autowired
-    private UserProgressRepository userProgressRepository;
-    @Autowired
-    private UserRepository userRepository;
+/******
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * Atten fukingtion RUSTOMM DO NOT UNCOMMENT THIS!!
+ *
+ * VERY RISKY
+ *
+ *
+ *
+ *
+ *
+ */
 
-    @Transactional
-    @Override
-    public void run(String... args) throws Exception {
-        User user = userRepository.findByEmail("tray0019@gmail.com").orElseThrow();
-
-        List<Goal> legacyGoals = goalRepository.findAll();
-        System.out.println("Found " + legacyGoals.size() + " legacy goals");
-
-        UserProgress progress = userProgressRepository.findTopByOrderByIdAsc();
-
-        if (progress.getUser() == null) {
-            progress.setUser(user);
-            userProgressRepository.save(progress);
-            System.out.println("UserProgress linked to user");
-        }
-
-        for (Goal goal : legacyGoals) {
-            goal.setUser(user);
-
-            // Safe now because session is open
-            if (goal.getEntries() != null) {
-                goal.getEntries().forEach(entry -> entry.setGoal(goal));
-            }
-            if (goal.getChecks() != null) {
-                goal.getChecks().forEach(check -> check.setGoal(goal));
-            }
-
-            goalRepository.save(goal);
-        }
-
-        System.out.println("Migration complete!");
-    }
-}
+//deleted component
+//public class MigrationRunner implements CommandLineRunner {
+//
+//    @Autowired
+//    private GoalRepository goalRepository;
+//    @Autowired
+//    private UserProgressRepository userProgressRepository;
+//    @Autowired
+//    private UserRepository userRepository;
+//
+//    @Transactional
+//    @Override
+//    public void run(String... args) throws Exception {
+//        User user = userRepository.findByEmail("tray0019@gmail.com").orElseThrow();
+//
+//        List<Goal> legacyGoals = goalRepository.findAll();
+//        System.out.println("Found " + legacyGoals.size() + " legacy goals");
+//
+//        UserProgress progress = userProgressRepository.findTopByOrderByIdAsc();
+//
+//        if (progress.getUser() == null) {
+//            progress.setUser(user);
+//            userProgressRepository.save(progress);
+//            System.out.println("UserProgress linked to user");
+//        }
+//
+//        for (Goal goal : legacyGoals) {
+//            goal.setUser(user);
+//
+//            // Safe now because session is open
+//            if (goal.getEntries() != null) {
+//                goal.getEntries().forEach(entry -> entry.setGoal(goal));
+//            }
+//            if (goal.getChecks() != null) {
+//                goal.getChecks().forEach(check -> check.setGoal(goal));
+//            }
+//
+//            goalRepository.save(goal);
+//        }
+//
+//        System.out.println("Migration complete!");
+//    }
+//}
