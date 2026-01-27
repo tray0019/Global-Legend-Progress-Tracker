@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -190,5 +191,10 @@ public class UserController {
 
 
 
+    @GetMapping("/search")
+    public ResponseEntity<List<UserSearchDTO>> searchUsers(@RequestParam String query) {
+        List<UserSearchDTO> results = userService.searchByUsername(query);
+        return ResponseEntity.ok(results);
+    }
 
 }

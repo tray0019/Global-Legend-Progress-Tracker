@@ -1,5 +1,6 @@
 package com.GLPT.Backend.Repository;
 
+import com.GLPT.Backend.DTO.UserSearchDTO;
 import com.GLPT.Backend.Entity.Goal;
 import com.GLPT.Backend.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,5 +25,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE LOWER(u.firstName) LIKE LOWER(concat('%', :query, '%')) OR LOWER(u.lastName) LIKE LOWER(concat('%', :query, '%'))")
     List<User> searchUsers(@Param("query") String query);
+
+    @Query("SELECT new com.GLPT.Backend.DTO.UserSearchDTO(u.id, u.firstName, u.lastName, p.currentRank, p.totalXP) " +
+            "FROM User u JOIN UserProgress p ON u.id = p.user.id " +
+            "WHERE LOWER(u.firstName) LIKE LOWER(concat('%', :query, '%')) " +
+            "OR LOWER(u.lastName) LIKE LOWER(concat('%', :query, '%'))")
+    List<UserSearchDTO> searchUsersByName(@Param("query") String query);
 
 }
