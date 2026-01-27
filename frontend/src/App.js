@@ -16,8 +16,7 @@ import React, { useState, useEffect } from 'react';
 import { logout } from './api/userApi.js';
 import axios from 'axios';
 import { Navigate } from 'react-router-dom';
-
-// ... imports ...
+import Leaderboard from './pages/Leaderboard'; // Adjust path if it's in components
 
 function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady }) {
   const navigate = useNavigate();
@@ -65,6 +64,15 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute currentUser={currentUser}>
+              <Leaderboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/home"
           element={
@@ -77,7 +85,7 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
           path="/achievements"
           element={
             <ProtectedRoute currentUser={currentUser}>
-              <UserAchievements />
+              <UserAchievements currentUser={currentUser} />
             </ProtectedRoute>
           }
         />
@@ -85,7 +93,7 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
           path="/archived"
           element={
             <ProtectedRoute currentUser={currentUser}>
-              <UserArchived />
+              <UserArchived currentUser={currentUser} />
             </ProtectedRoute>
           }
         />

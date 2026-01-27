@@ -22,6 +22,9 @@ function TopNav() {
       <Link to="/home" style={linkStyle('/home')}>
         UserHome
       </Link>
+      <Link to="/Leaderboard" style={linkStyle('/Leaderboard')}>
+        Leaderboard
+      </Link>
     </div>
   );
 }

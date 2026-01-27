@@ -1,0 +1,94 @@
+.leaderboard-page {
+  background-color: #ffffff; /* Bright background as requested */
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.staircase-wrapper {
+  display: flex;
+  flex-direction: column; /* Vertical stack */
+  width: fit-content;
+  margin-top: 50px;
+}
+
+.stair-segment {
+  /* This creates the Vertical line (Riser) and Horizontal line (Tread) */
+  border-left: 4px solid #333;
+  border-top: 4px solid #333;
+
+  /* Each step moves further to the right */
+  /* We use a negative margin-top so the vertical lines "touch" */
+  margin-top: -4px;
+  padding: 20px 40px;
+  min-width: 300px;
+}
+
+/* Offset logic: Each rank moves right to create the stair effect */
+.rank-bronze {
+  margin-left: 0px;
+}
+.rank-silver {
+  margin-left: 100px;
+}
+.rank-gold {
+  margin-left: 200px;
+}
+.rank-platinum {
+  margin-left: 300px;
+}
+.rank-diamond {
+  margin-left: 400px;
+}
+.rank-master {
+  margin-left: 500px;
+}
+.rank-challenger {
+  margin-left: 600px;
+}
+
+/* Styling the content on top of the step */
+.rank-name {
+  display: block;
+  font-weight: 900;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-entry {
+  display: flex;
+  justify-content: space-between;
+  background: #f0f2f5;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-family: sans-serif;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.p-name {
+  font-weight: 600;
+  color: #333;
+}
+.p-xp {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+/* Optional: Color the lines based on rank */
+.rank-challenger {
+  border-color: #f1c40f !important;
+}
+.rank-gold {
+  border-color: #d4af37 !important;
+}
+.rank-silver {
+  border-color: #bdc3c7 !important;
+}
