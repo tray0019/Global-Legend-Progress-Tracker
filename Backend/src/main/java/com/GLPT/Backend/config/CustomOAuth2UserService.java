@@ -20,13 +20,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String email = oAuth2User.getAttribute("email");
 
-        // If user doesn't exist, create a new one in the DB
         userRepository.findByEmail(email).orElseGet(() -> {
             User newUser = new User();
             newUser.setEmail(email);
             newUser.setFirstName(oAuth2User.getAttribute("given_name"));
             newUser.setLastName(oAuth2User.getAttribute("family_name"));
             newUser.setProfileCompleted(false);
+
+            // ADD THESE TWO LINES
+            newUser.setProvider("GOOGLE");
+            newUser.setProviderUserId(oAuth2User.getAttribute("sub")); // Unique ID from Google
+
             return userRepository.save(newUser);
         });
 
