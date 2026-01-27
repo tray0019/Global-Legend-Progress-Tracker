@@ -1,84 +1,72 @@
-// src/pages/Home.jsx
-import { useEffect, useState, useRef } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+//
 
-import AddGoalForm from '../components/AddGoalForm';
-import GoalCard from '../components/GoalCard';
-import GlobalYearCalendar from '../components/GlobalYearCalendar';
-import { reorderGoals } from '../api/goalApi';
-import { getGoalDoneToday } from '../api/goalCheckApi';
-import '../styles.css';
-import { getActiveGoals, completeGoal } from '../api/goalApi';
-import { getProgress, addXP, removeXP } from '../api/rankApi';
-
-// At the top of your file
-import RankPanel from '../components/rank/RankPanel'; // adjust path if needed
-
+import React, { useEffect, useState, useRef } from 'react';
 import {
-  getAllGoals,
-  getGoalById,
-  createGoal,
-  renameGoal,
-  deleteGoal,
-  toggleArchiveGoal,
+  createUserGoal,
+  getActiveGoals,
+  getUserGoal,
+  deleteUserGoal,
+  completeGoal,
   updateGoalDifficulty,
+  toggleArchiveGoal,
   toggleAchievementGoal,
-} from '../api/goalApi';
-import { addEntry, deleteEntry, renameEntry } from '../api/entryApi';
-import { getGoalChecks, toggleGoalDoneToday, getGlobalContributions } from '../api/goalCheckApi';
+  renameUserGoal,
+} from '../api/userGoalApi';
+import { getGoalChecks, getGoalDoneToday, toggleGoalDoneToday } from '../api/userGoalCheckApi';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { reorderUserGoals } from '../api/userGoalApi';
+import UserGoalCard from '../usercomponents/UserGoalCard';
+import UserGlobalYearCalendar from '../usercomponents/UserGlobalYearCalendar';
+import { getGlobalContributions } from '../api/userGoalCheckApi';
+import UserAddGoalForm from '../usercomponents/UserAddGoalForm';
+import { getProgress, addXP, removeXP } from '../api/userRankApi';
+import UserRankPanel from '../components/rank/UserRankPanel'; // adjust path if needed
+import { addEntry, deleteEntry, renameEntry } from '../api/userEntryApi';
 
-/* ---------- DATE HELPERS ---------- */
-function pad2(number) {
-  return number < 10 ? '0' + number : String(number);
-}
-
-function getLastYearRange() {
-  const today = new Date();
-
-  const to = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
-
-  const past = new Date();
-  past.setDate(past.getDate() - 364);
-
-  const from = `${past.getFullYear()}-${pad2(past.getMonth() + 1)}-${pad2(past.getDate())}`;
-
-  return { from, to };
-}
-
-function getCurrentMonthRange() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  const from = `${year}-${pad2(month + 1)}-01`;
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const to = `${year}-${pad2(month + 1)}-${pad2(lastDay)}`;
-
-  return { from, to };
-}
-
-/* ---------- MAIN PAGE ---------- */
 function Home({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Multi-open system
+  // Per-goal state (legacy style)
   const [openGoals, setOpenGoals] = useState({});
   const [goalDetails, setGoalDetails] = useState({});
   const [goalCheckDates, setGoalCheckDates] = useState({});
-
-  const [entryInputs, setEntryInputs] = useState({});
-
-  const [globalContributions, setGlobalContributions] = useState([]);
-
-  const [isLoadingGoals, setIsLoadingGoals] = useState(false);
+  const [viewedMonths, setViewedMonths] = useState({});
   const [isLoadingGoalDetails, setIsLoadingGoalDetails] = useState(false);
-
+  const [globalContributions, setGlobalContributions] = useState([]);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(false);
   const [doneTodayByGoal, setDoneTodayByGoal] = useState({});
+  const [progress, setProgress] = useState(null);
+  const [entryInputs, setEntryInputs] = useState({});
   const [achievements, setAchievements] = useState([]);
 
-  const [progress, setProgress] = useState(null);
-  const [viewedMonths, setViewedMonths] = useState({});
   const loadingGoalLock = useRef({});
+
+  // Helper: pad month/day with 0
+  const pad2 = (num) => (num < 10 ? '0' + num : String(num));
+
+  function getLastYearRange() {
+    const today = new Date();
+
+    const to = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+    const past = new Date();
+    past.setDate(past.getDate() - 364);
+
+    const from = `${past.getFullYear()}-${pad2(past.getMonth() + 1)}-${pad2(past.getDate())}`;
+
+    return { from, to };
+  }
+
+  const getCurrentMonthRange = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const from = `${year}-${pad2(month + 1)}-01`;
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const to = `${year}-${pad2(month + 1)}-${pad2(lastDay)}`;
+    return { from, to };
+  };
 
   const goToPreviousMonth = (goalId) => {
     const current = viewedMonths[goalId] || {
@@ -149,19 +137,16 @@ function Home({ currentUser, onLogout }) {
     });
   };
 
-  const handleToggleArchive = async (goalId) => {
-    await toggleArchiveGoal(goalId); // archive in backend
-    setGoals((prevGoals) => prevGoals.filter((g) => g.id !== goalId)); // remove from Home list
-  };
-
-  /* ---------- LOAD ALL GOALS ---------- */
+  // Load user goals
   useEffect(() => {
-    const fetchData = async () => {
+    if (!currentUser) return;
+
+    const fetchGoals = async () => {
       try {
-        // 1️⃣ Load goals first
         const res = await getActiveGoals();
+        console.log('API response:', res);
         const loadedGoals = res.data;
-        setGoals(loadedGoals);
+        setGoals(res.data || []);
 
         // 2️⃣ Load done-today status
         await loadDoneTodayStatuses(loadedGoals);
@@ -182,28 +167,117 @@ function Home({ currentUser, onLogout }) {
           }
         }
 
-        // 5️⃣ Load global contributions
-        await loadGlobalContributions();
-
         const progressRes = await getProgress();
         setProgress(progressRes.data);
+        // 5️⃣ Load global contributions
+        await loadGlobalContributions();
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load goals', err);
+        setGoals([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchGoals();
+  }, [currentUser]);
 
-  const handleDiffcultyChange = async (goalId, newDifficulty) => {
+  const loadGlobalContributions = async () => {
     try {
-      await updateGoalDifficulty(goalId, newDifficulty);
-      setGoals((prev) =>
-        prev.map((g) => (g.id === goalId ? { ...g, difficulty: newDifficulty } : g)),
-      );
+      const range = getLastYearRange();
+      const res = await getGlobalContributions(range.from, range.to);
+      setGlobalContributions(res.data);
     } catch (err) {
-      console.error('Failed to update difficulty', err);
+      console.error('Error loading contributions:', err);
     }
+  };
+
+  // Load single goal + checkmarks
+  const loadSelectedGoalAndChecks = async (goalId, monthRange = null) => {
+    if (!goalId) return;
+    if (loadingGoalLock.current[goalId]) return;
+
+    loadingGoalLock.current[goalId] = true;
+
+    try {
+      if (!monthRange) monthRange = getCurrentMonthRange();
+
+      const [goalRes, checksRes] = await Promise.all([
+        getUserGoal(goalId),
+        getGoalChecks(goalId, monthRange.from, monthRange.to),
+      ]);
+
+      setGoalDetails((prev) => ({
+        ...prev,
+        [goalId]: goalRes.data,
+      }));
+
+      setGoalCheckDates((prev) => ({
+        ...prev,
+        [goalId]: checksRes.data.map((item) => item.date),
+      }));
+    } catch (err) {
+      console.error('Error loading goal details:', err);
+    } finally {
+      setIsLoadingGoalDetails(false);
+      loadingGoalLock.current[goalId] = false;
+    }
+  };
+
+  // Drag-and-drop
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const newOrder = Array.from(goals);
+    const [moved] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, moved);
+
+    setGoals(newOrder);
+
+    try {
+      const payload = newOrder.map((goal, index) => ({
+        id: goal.id, // Make sure this matches your backend's expected ID
+        position: index,
+      }));
+      await reorderUserGoals(payload);
+    } catch (err) {
+      console.error('Failed to persist goal order', err);
+    }
+  };
+
+  // View/Hide goal
+  const handleView = async (goal) => {
+    const goalKey = goal.id;
+    if (!goalKey) return;
+
+    const isOpen = openGoals[goalKey] === true;
+    setOpenGoals((prev) => {
+      const updated = { ...prev, [goalKey]: !isOpen };
+      localStorage.setItem('homeOpenGoals', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (!isOpen) {
+      // Initialize viewed month (only once)
+      setViewedMonths((prev) => ({
+        ...prev,
+        [goalKey]: prev[goalKey] ?? {
+          month: new Date().getMonth(),
+          year: new Date().getFullYear(),
+        },
+      }));
+
+      await loadSelectedGoalAndChecks(goalKey);
+    }
+  };
+
+  const loadDoneTodayStatuses = async (goals) => {
+    const result = {};
+    for (const goal of goals) {
+      const res = await getGoalDoneToday(goal.id);
+      result[goal.id] = res.data.doneToday;
+    }
+    setDoneTodayByGoal(result);
   };
 
   const loadGoals = async () => {
@@ -222,76 +296,9 @@ function Home({ currentUser, onLogout }) {
     }
   };
 
-  const loadDoneTodayStatuses = async (goals) => {
-    const result = {};
-    for (const goal of goals) {
-      const res = await getGoalDoneToday(goal.id);
-      result[goal.id] = res.data.doneToday;
-    }
-    setDoneTodayByGoal(result);
-  };
-
-  /* ---------- LOAD ONE GOAL DETAILS + CHECKMARKS ---------- */
-  const loadSelectedGoalAndChecks = async (goalId, monthRange = null) => {
-    if (loadingGoalLock.current[goalId]) return;
-    loadingGoalLock.current[goalId] = true;
-
-    setIsLoadingGoalDetails(true);
-
-    try {
-      if (!monthRange) monthRange = getCurrentMonthRange();
-
-      const [goalRes, checksRes] = await Promise.all([
-        getGoalById(goalId), // entries
-        getGoalChecks(goalId, monthRange.from, monthRange.to), // checkmarks
-      ]);
-
-      setGoalDetails((prev) => ({
-        ...prev,
-        [goalId]: goalRes.data, // make sure entries are updated
-      }));
-
-      setGoalCheckDates((prev) => ({
-        ...prev,
-        [goalId]: checksRes.data.map((item) => item.date),
-      }));
-    } catch (err) {
-      console.error('Error loading goal details:', err);
-    } finally {
-      setIsLoadingGoalDetails(false);
-      loadingGoalLock.current[goalId] = false;
-    }
-  };
-
-  /* ---------- VIEW / HIDE GOAL CARD ---------- */
-  /* ---------- VIEW / HIDE GOAL CARD ---------- */
-  const handleView = async (goalId) => {
-    const isOpen = openGoals[goalId] === true;
-    const newOpenGoals = { ...openGoals, [goalId]: !isOpen };
-    setOpenGoals(newOpenGoals);
-
-    // Save to localStorage for persistence
-    localStorage.setItem('homeOpenGoals', JSON.stringify(newOpenGoals));
-
-    if (!isOpen) {
-      // ✅ STEP 2.1: initialize month for this goal (only once)
-      setViewedMonths((prev) => ({
-        ...prev,
-        [goalId]: prev[goalId] ?? {
-          month: new Date().getMonth(),
-          year: new Date().getFullYear(),
-        },
-      }));
-
-      // If opening, load details
-      await loadSelectedGoalAndChecks(goalId);
-    }
-  };
-
-  /* ---------- CRUD: GOALS ---------- */
   const handleAddGoal = async (title) => {
     try {
-      await createGoal(title);
+      await createUserGoal(title);
       await loadGoals();
     } catch (err) {
       console.error('Error creating goal:', err);
@@ -300,7 +307,7 @@ function Home({ currentUser, onLogout }) {
 
   const handleDeleteGoal = async (goalId) => {
     try {
-      await deleteGoal(goalId);
+      await deleteUserGoal(goalId);
 
       // Clean up states
       setOpenGoals((prev) => {
@@ -327,23 +334,66 @@ function Home({ currentUser, onLogout }) {
     }
   };
 
-  const handleRenameGoal = async (goalId) => {
-    const newTitle = window.prompt('Enter new title:');
-    if (!newTitle) return;
-
+  const handleMarkDoneToday = async (goalId, difficulty) => {
     try {
-      await renameGoal(goalId, newTitle.trim());
-      await loadGoals();
+      const res = await toggleGoalDoneToday(goalId);
+      const doneToday = res.data.doneToday;
 
-      if (openGoals[goalId]) {
-        await loadSelectedGoalAndChecks(goalId);
+      const wasDone = doneTodayByGoal[goalId] ?? false;
+
+      // Update button state
+      setDoneTodayByGoal((prev) => {
+        const updated = { ...prev, [goalId]: doneToday };
+        console.log('UPDATED doneTodayByGoal:', updated);
+        return updated;
+      });
+
+      // Optimistic calendar update
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+      setGoalCheckDates((prev) => {
+        const existing = Array.isArray(prev[goalId]) ? prev[goalId] : [];
+
+        if (doneToday && !existing.includes(todayStr)) {
+          return { ...prev, [goalId]: [...existing, todayStr] };
+        }
+
+        if (!doneToday) {
+          return { ...prev, [goalId]: existing.filter((d) => d !== todayStr) };
+        }
+
+        return prev;
+      });
+
+      console.log('doneTodayByGoal:', doneTodayByGoal);
+      console.log('goal.doneToday:', doneToday);
+
+      // Backend XP update and live progress refresh
+      if ((doneToday && !wasDone) || (!doneToday && wasDone)) {
+        if (doneToday) await addXP(difficulty);
+        else await removeXP(difficulty);
+
+        const progressRes = await getProgress();
+        setProgress(progressRes.data);
       }
+
+      // Update global calendar
+      await loadGlobalContributions();
     } catch (err) {
-      console.error('Error renaming goal:', err);
+      console.error('Error toggle done today:', err);
     }
   };
 
-  /* ---------- CRUD: ENTRIES ---------- */
+  const totalGoals = goals.length;
+  const completedTodayCount = Object.values(doneTodayByGoal).filter(Boolean).length;
+  const summaryText =
+    completedTodayCount === 0
+      ? ''
+      : completedTodayCount === totalGoals
+        ? '🎉 You completed all your goals today!'
+        : `You completed ${completedTodayCount} of your daily goals today! Great Job - keep going!`;
+
   const handleAddEntry = async (goalId) => {
     const text = entryInputs[goalId]?.trim();
     if (!text) return;
@@ -390,105 +440,6 @@ function Home({ currentUser, onLogout }) {
     }
   };
 
-  function calculateXP(difficulty) {
-    switch (difficulty) {
-      case 1:
-        return 10;
-      case 2:
-        return 25;
-      case 3:
-        return 50;
-      default:
-        return 10;
-    }
-  }
-
-  /* ---------- MARK DONE TODAY ---------- */
-  const handleMarkDoneToday = async (goalId, difficulty) => {
-    try {
-      const res = await toggleGoalDoneToday(goalId);
-      const doneToday = res.data.doneToday;
-
-      const wasDone = doneTodayByGoal[goalId] === true;
-
-      // Update button state
-      setDoneTodayByGoal((prev) => ({
-        ...prev,
-        [goalId]: doneToday,
-      }));
-
-      // Optimistic calendar update
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
-
-      setGoalCheckDates((prev) => {
-        const existing = Array.isArray(prev[goalId]) ? prev[goalId] : [];
-
-        if (doneToday && !existing.includes(todayStr)) {
-          return { ...prev, [goalId]: [...existing, todayStr] };
-        }
-
-        if (!doneToday) {
-          return { ...prev, [goalId]: existing.filter((d) => d !== todayStr) };
-        }
-
-        return prev;
-      });
-
-      console.log('doneTodayByGoal:', doneTodayByGoal);
-      console.log('goal.doneToday:', doneToday);
-
-      // Backend XP update and live progress refresh
-      if ((doneToday && !wasDone) || (!doneToday && wasDone)) {
-        if (doneToday) await addXP(difficulty);
-        else await removeXP(difficulty);
-
-        const progressRes = await getProgress();
-        setProgress(progressRes.data);
-      }
-
-      // Update global calendar
-      await loadGlobalContributions();
-    } catch (err) {
-      console.error('Error toggle done today:', err);
-    }
-  };
-
-  /* ---------- LOAD GLOBAL CONTRIBUTIONS ---------- */
-  const loadGlobalContributions = async () => {
-    try {
-      const range = getLastYearRange();
-      const res = await getGlobalContributions(range.from, range.to);
-      setGlobalContributions(res.data);
-    } catch (err) {
-      console.error('Error loading contributions:', err);
-    }
-  };
-
-  /* ---------- DRAG AND DROP SORTING ---------- */
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
-
-    const newOrder = Array.from(goals);
-    const [moved] = newOrder.splice(result.source.index, 1);
-    newOrder.splice(result.destination.index, 0, moved);
-
-    // 1️⃣ update UI immediately
-    setGoals(newOrder);
-
-    // 2️⃣ persist order
-    const payload = newOrder.map((goal, index) => ({
-      id: goal.id,
-      position: index,
-    }));
-
-    try {
-      await reorderGoals(payload);
-    } catch (err) {
-      console.error('Failed to persist goal order', err);
-    }
-  };
-
   const handleCompleteGoal = async (goalId, difficulty) => {
     const confirmComplete = window.confirm('Mark this goal as completed?');
     if (!confirmComplete) return;
@@ -499,6 +450,22 @@ function Home({ currentUser, onLogout }) {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDiffcultyChange = async (goalId, newDifficulty) => {
+    try {
+      await updateGoalDifficulty(goalId, newDifficulty);
+      setGoals((prev) =>
+        prev.map((g) => (g.id === goalId ? { ...g, difficulty: newDifficulty } : g)),
+      );
+    } catch (err) {
+      console.error('Failed to update difficulty', err);
+    }
+  };
+
+  const handleToggleArchive = async (goalId) => {
+    await toggleArchiveGoal(goalId); // archive in backend
+    setGoals((prevGoals) => prevGoals.filter((g) => g.id !== goalId)); // remove from Home list
   };
 
   const handleToggleAchievement = async (goalId) => {
@@ -515,26 +482,31 @@ function Home({ currentUser, onLogout }) {
     }
   };
 
-  const totalGoals = goals.length;
-  const completedTodayCount = Object.values(doneTodayByGoal).filter(Boolean).length;
+  const handleRenameGoal = async (goalId) => {
+    const newTitle = window.prompt('Enter new title:');
+    if (!newTitle) return;
 
-  const summaryText =
-    completedTodayCount === 0
-      ? ''
-      : completedTodayCount === totalGoals
-        ? '🎉 You completed all your goals today!'
-        : `You completed ${completedTodayCount} of your daily goals today! Great Job - keep going!`;
+    try {
+      await renameUserGoal(goalId, newTitle.trim());
+      await loadGoals();
 
-  /* ---------- RENDER ---------- */
+      if (openGoals[goalId]) {
+        await loadSelectedGoalAndChecks(goalId);
+      }
+    } catch (err) {
+      console.error('Error renaming goal:', err);
+    }
+  };
+
+  if (loading) return <p>Loading your goals...</p>;
+
   return (
     <div className="app-container">
-      <div>
-        <p>Logged in as: {currentUser.email}</p>
+      <p>Logged in as: {currentUser.email}</p>
+      <button onClick={onLogout}>Logout</button>
+      <h1>User Goals</h1>
 
-        <button onClick={onLogout}>Logout</button>
-      </div>
-      <h1>Goals</h1>
-      <RankPanel progress={progress} />
+      <UserRankPanel progress={progress} />
       {totalGoals > 0 && (
         <div
           style={{
@@ -549,69 +521,67 @@ function Home({ currentUser, onLogout }) {
         </div>
       )}
 
-      <GlobalYearCalendar contributions={globalContributions} />
-
-      <AddGoalForm onAdd={handleAddGoal} />
+      <UserGlobalYearCalendar contributions={globalContributions} />
+      <UserAddGoalForm onAdd={handleAddGoal} />
 
       {isLoadingGoals && <p>Loading goals...</p>}
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="goals">
           {(provided) => (
-            <ul className="goal-list" {...provided.droppableProps} ref={provided.innerRef}>
+            <ul className="goal-list" ref={provided.innerRef} {...provided.droppableProps}>
               {goals.map((goal, index) => {
-                //const doneToday = goal.doneToday ?? doneTodayByGoal[goal.id] === true;
+                const goalKey = goal.id;
                 const doneToday = doneTodayByGoal[goal.id] === true;
+                if (!goalKey) return null;
 
-                const isOpen = openGoals[goal.id] === true;
-                const selectedGoal = goalDetails[goal.id];
-                const checkDates = goalCheckDates[goal.id] || [];
+                const isOpen = openGoals[goalKey] === true;
 
                 return (
-                  <Draggable key={goal.id} draggableId={String(goal.id)} index={index}>
+                  <Draggable key={goalKey} draggableId={String(goalKey)} index={index}>
                     {(provided) => (
                       <li ref={provided.innerRef} {...provided.draggableProps}>
-                        <GoalCard
-                          onDifficultyChange={handleDiffcultyChange} //
-                          goal={goal} //
-                          doneToday={doneToday} //
-                          isArchived={false} //
-                          isAchievementPage={false} //
-                          isOpen={isOpen} //
-                          selectedGoal={selectedGoal} //
-                          onView={handleView} //
-                          onDelete={handleDeleteGoal} //
-                          onRename={handleRenameGoal} //
-                          onToggleArchive={handleToggleArchive} //
-                          onMarkDoneToday={handleMarkDoneToday} //
-                          checkDates={goalCheckDates[goal.id] || []} //
-                          newEntryDescription={entryInputs[goal.id] || ''} //
-                          onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)} //
-                          onAddEntry={() => handleAddEntry(goal.id)} //
-                          onComplete={handleCompleteGoal} // achievement
-                          onToggleAchievement={() => handleToggleAchievement(goal.id)} //
-                          handleToggleAchievement={handleToggleAchievement} //
-                          onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)} //
+                        <UserGoalCard
+                          goal={goal}
+                          selectedGoal={goalDetails[goalKey]}
+                          isOpen={isOpen}
+                          onView={() => handleView(goal)}
+                          dragHandleProps={provided.dragHandleProps}
+                          checkDates={goalCheckDates[goalKey] || []}
+                          viewedMonth={viewedMonths[goalKey]}
+                          onPrevMonth={goToPreviousMonth}
+                          onNextMonth={goToNextMonth}
+                          onDelete={handleDeleteGoal}
+                          onMarkDoneToday={handleMarkDoneToday}
+                          newEntryDescription={entryInputs[goal.id] || ''}
+                          onChangeNewEntry={(text) => handleChangeEntryInput(goal.id, text)}
+                          onAddEntry={() => handleAddEntry(goal.id)}
+                          onDeleteEntry={(entryId) => handleDeleteEntry(goal.id, entryId)}
                           onRenameEntry={(entryId, text) =>
                             handleRenameEntry(goal.id, entryId, text)
-                          } //
-                          dragHandleProps={provided.dragHandleProps} //
-                          viewedMonth={viewedMonths[goal.id]} //
-                          onPrevMonth={goToPreviousMonth} //
-                          onNextMonth={goToNextMonth} //
+                          }
+                          onComplete={handleCompleteGoal}
+                          doneToday={doneToday}
+                          onDifficultyChange={handleDiffcultyChange}
+                          isArchived={false}
+                          isAchievementPage={false}
+                          onToggleArchive={handleToggleArchive}
+                          onToggleAchievement={() => handleToggleAchievement(goal.id)}
+                          handleToggleAchievement={handleToggleAchievement}
+                          onRename={handleRenameGoal}
                         />
                       </li>
                     )}
                   </Draggable>
                 );
               })}
-
               {provided.placeholder}
             </ul>
           )}
         </Droppable>
       </DragDropContext>
 
+      {goals.length === 0 && <p>No goals yet.</p>}
       {isLoadingGoalDetails && <p>Loading goal details...</p>}
     </div>
   );

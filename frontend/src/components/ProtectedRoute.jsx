@@ -1,13 +1,19 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-function ProtectedRoute({ currentUser, children }) {
+const ProtectedRoute = ({ currentUser, children }) => {
+  // 1. If not logged in, go to Login page
   if (!currentUser) {
-    // If not logged in, redirect to login page
     return <Navigate to="/login" replace />;
   }
 
+  // 2. If logged in but profile is incomplete, force them to complete it
+  if (!currentUser.profileCompleted) {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
+  // 3. Otherwise, let them in
   return children;
-}
+};
 
 export default ProtectedRoute;
