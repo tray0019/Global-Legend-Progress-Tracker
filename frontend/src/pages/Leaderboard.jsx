@@ -16,6 +16,7 @@ const Leaderboard = () => {
       .catch((err) => console.error(err));
   }, []);
 
+  console.log(players);
   return (
     <div className="leaderboard-page">
       <h2 className="title">Leaderboard</h2>
@@ -33,13 +34,20 @@ const Leaderboard = () => {
                   <span className="rank-name">{rank}</span>
                   <div className="player-list">
                     {playersInRank.map((player, pIdx) => (
-                      <div key={pIdx} className="player-entry">
+                      <div key={player.id} className="player-entry">
                         {/* 2. Changed 'user' to 'player' to match the map variable */}
-                        <Link to={`/profile/${player.id}`} className="p-link">
-                          <span className="p-name">
-                            {player.firstName} {player.lastName}
-                          </span>
-                        </Link>
+                        {playersInRank.map((player, pIdx) => {
+                          console.log(
+                            `Generating link for ${player.firstName}: /profile/${player.id}`,
+                          );
+                          return (
+                            <div key={player.id} className="player-entry">
+                              <Link to={`/profile/${player.id}`} className="p-link">
+                                {player.firstName}
+                              </Link>
+                            </div>
+                          );
+                        })}
                         <span className="p-xp">{player.totalXP} XP</span>
                       </div>
                     ))}

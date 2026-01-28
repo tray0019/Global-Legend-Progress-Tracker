@@ -19,8 +19,6 @@ import { Navigate } from 'react-router-dom';
 import Leaderboard from './pages/Leaderboard'; // Adjust path if it's in components
 
 function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady }) {
-  <TopNav currentUser={currentUser} setCurrentUser={setCurrentUser} />;
-
   useEffect(() => {
     const bootstrapSession = async () => {
       try {
@@ -39,7 +37,7 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
 
   return (
     <>
-      <TopNav currentUser={currentUser} />
+      <TopNav currentUser={currentUser} setCurrentUser={setCurrentUser} />
       <Routes>
         <Route path="/login" element={<Login />} />
 

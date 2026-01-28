@@ -3,31 +3,37 @@ import { useParams } from 'react-router-dom';
 import api from '../api/userApi'; // Your axios instance
 
 const PublicProfile = () => {
-  const { userId } = useParams(); // Gets the ID from the URL
+  const { userId } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Inside PublicProfile.jsx
+  console.log('RENDER - Current Path Param userId:', userId);
+
   useEffect(() => {
-    console.log('1. UseEffect Triggered with userId:', userId);
+    // 1. Log for debugging
+    console.log('Effect check - ID is:', userId);
+
+    // 2. Only fetch if we have a valid ID string
     if (userId && userId !== 'undefined') {
       fetchProfile();
     } else {
-      console.log('1a. UserId is missing or undefined string!');
+      // 3. If ID is gone, stop the loading spinner so we don't hang
+      setLoading(false);
     }
-  }, [userId]);
+  }, [userId]); // This dependency is crucial!
 
   const fetchProfile = async () => {
-    console.log('2. fetchProfile started for:', userId);
+    // 2. IMPORTANT: Reset profile and set loading to true
+    // so the UI doesn't try to show '3' while loading '2'
+    setProfile(null);
+    setLoading(true);
+
     try {
-      setLoading(true);
       const response = await api.get(`/users/profile/${userId}`);
-      console.log('3. API Success! Data:', response.data);
       setProfile(response.data);
     } catch (error) {
-      console.error('3. API Error:', error.response || error);
+      console.error('Error fetching profile', error);
     } finally {
-      console.log('4. fetchProfile finished (finally)');
       setLoading(false);
     }
   };
@@ -43,6 +49,15 @@ const PublicProfile = () => {
     }
   };
 
+  // 4. THE UI GUARD: If there's no ID yet, show nothing or a tiny spinner
+  if (!userId || userId === 'undefined') {
+    return <div className="profile-container">Searching for user...</div>;
+  }
+
+  if (loading) return <div className="profile-container">Loading profile...</div>;
+
+  if (!profile) return <div className="profile-container">User not found.</div>;
+
   if (loading) return <div>Loading...</div>;
   if (loading) return <div>Loading Profile Data...</div>;
   if (!profile) return <div>User not found or data is empty.</div>; // Add this!
@@ -50,6 +65,19 @@ const PublicProfile = () => {
   return (
     <div className="profile-container">
       {/* 1. Header Section */}
+      {/* Inside the Public Goals List section */}
+      <div className="goals-list">
+        {profile.goals && profile.goals.length > 0 ? (
+          profile.goals.map((goal) => (
+            <div key={goal.id} className="goal-card-readonly">
+              <h4>{goal.title}</h4>
+              <p>Consistency: {goal.checkDates.length} checks</p>
+            </div>
+          ))
+        ) : (
+          <p className="no-goals-text">This user hasn't set any public goals yet.</p>
+        )}
+      </div>
       <div className="profile-header">
         <h1>
           {profile.firstName} {profile.lastName}
