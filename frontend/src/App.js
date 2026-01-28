@@ -7,6 +7,8 @@ import UserAchievements from './pages/UserAchievements';
 import PublicProfile from './pages/PublicProfile';
 
 import TopNav from './components/TopNav';
+import GoalTrackerApp from './components/test';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import UserHome from './pages/UserHome';
 
@@ -94,6 +96,15 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
           element={
             <ProtectedRoute currentUser={currentUser}>
               <UserArchived currentUser={currentUser} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/test"
+          element={
+            <ProtectedRoute currentUser={currentUser}>
+              <GoalTrackerApp currentUser={currentUser} />
             </ProtectedRoute>
           }
         />

@@ -1,105 +1,135 @@
-// src/components/GoalCard.jsx
-import React from 'react';
-import EntryList from './EntryList';
-import AddEntryForm from './AddEntryForm';
-import GoalCheckCalendar from './GoalCheckCalendar';
+import { Link, useLocation } from 'react-router-dom';
+import api from '../api/userApi';
 
-function GoalCard({
-  goal,
-  isOpen,
-  selectedGoal,
-  onView,
-  onDelete,
-  onRename,
-  onMarkDoneToday,
-  checkDates,
-  newEntryDescription,
-  onChangeNewEntry,
-  onAddEntry,
-  onDeleteEntry,
-  onRenameEntry,
-  dragHandleProps,
-  onToggleArchive,
-  isArchived,
-}) {
-  console.log('typeof onToggleArchive:', typeof onToggleArchive, onToggleArchive);
+function TopNav({ currentUser, setCurrentUser }) {
+  const location = useLocation();
+
+  const handleLogout = async () => {
+    await api.post('/logout');
+    setCurrentUser(null);
+    window.location.href = '/login';
+  };
+
+  const linkStyle = (path) => ({
+    position: 'relative',
+    marginRight: 24,
+    paddingBottom: 4,
+    fontWeight: location.pathname === path ? 600 : 500,
+    color: location.pathname === path ? '#007bff' : '#555',
+    textDecoration: 'none',
+    transition: 'color 0.2s ease',
+  });
+
+  const linkHoverStyle = {
+    cursor: 'pointer',
+    color: '#007bff',
+  };
+
+  if (!currentUser) return null;
 
   return (
-    <div>
-      {/* HEADER ROW: title + actions + DRAG HANDLE ON RIGHT */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {/* LEFT SIDE: title + buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-          <h3 style={{ margin: '0 0 8px 0' }}>{goal.goalTitle}</h3>
+    <nav
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '12px 24px',
+        background: '#fff',
+        borderRadius: 12,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        marginBottom: 24,
+      }}
+    >
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <Link
+          to={`/profile/${currentUser?.id}`}
+          style={linkStyle(`/profile/${currentUser.id}`)}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#007bff')}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color =
+              location.pathname === `/profile/${currentUser.id}` ? '#007bff' : '#555')
+          }
+        >
+          My Profile
+        </Link>
 
-          <div>
-            <button onClick={() => onView(goal.id)}>{isOpen ? 'Hide' : 'View'}</button>
+        <Link
+          to="/"
+          style={linkStyle('/')}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#007bff')}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color = location.pathname === '/' ? '#007bff' : '#555')
+          }
+        >
+          Goals
+        </Link>
 
-            <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to delete this goal?')) {
-                  onDelete(goal.id);
-                }
-              }}
-            >
-              Delete
-            </button>
+        <Link
+          to="/leaderboard"
+          style={linkStyle('/leaderboard')}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#007bff')}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color =
+              location.pathname === '/leaderboard' ? '#007bff' : '#555')
+          }
+        >
+          Leaderboard
+        </Link>
 
-            <button onClick={() => onRename(goal.id)}>Rename</button>
+        <Link
+          to="/achievements"
+          style={linkStyle('/achievements')}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#007bff')}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color =
+              location.pathname === '/achievements' ? '#007bff' : '#555')
+          }
+        >
+          Achievements
+        </Link>
 
-            {onToggleArchive && (
-              <button onClick={() => onToggleArchive(goal.id)}>
-                {isArchived ? 'Restore' : 'Archive'}
-              </button>
-            )}
+        <Link
+          to="/archived"
+          style={linkStyle('/archived')}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#007bff')}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color = location.pathname === '/archived' ? '#007bff' : '#555')
+          }
+        >
+          Archive
+        </Link>
 
-            {!isArchived && onMarkDoneToday && (
-              <button onClick={() => onMarkDoneToday(goal.id)}>
-                {goal.doneToday ? 'Done today ✅' : 'Mark done'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT SIDE DRAG HANDLE */}
-
-        {!isArchived && (
-          <span
-            className="goal-card-handle"
-            {...(dragHandleProps || {})}
-            style={{
-              cursor: 'grab',
-              padding: '6px 8px',
-              fontSize: '22px',
-              userSelect: 'none',
-              marginLeft: 'auto',
-            }}
-          >
-            ⠿
-          </span>
-        )}
+        <Link
+          to="/test"
+          style={linkStyle('/test')}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#007bff')}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color = location.pathname === '/test' ? '#007bff' : '#555')
+          }
+        >
+          Test
+        </Link>
       </div>
 
-      {/* EXPANDED ENTRIES SECTION */}
-      {isOpen && selectedGoal && (
-        <div className="entries-section">
-          <GoalCheckCalendar checkDates={checkDates} />
-
-          <EntryList
-            entries={selectedGoal.entries || []}
-            onDeleteEntry={onDeleteEntry}
-            onRenameEntry={onRenameEntry}
-          />
-
-          <AddEntryForm
-            value={newEntryDescription}
-            onChange={onChangeNewEntry}
-            onAddEntry={onAddEntry}
-          />
-        </div>
-      )}
-    </div>
+      <button
+        onClick={handleLogout}
+        style={{
+          marginLeft: 'auto',
+          padding: '6px 16px',
+          borderRadius: 8,
+          border: 'none',
+          background: '#ff4d4f',
+          color: '#fff',
+          fontWeight: 600,
+          cursor: 'pointer',
+          transition: 'background 0.2s ease',
+        }}
+        onMouseOver={(e) => (e.currentTarget.style.background = '#e04444')}
+        onMouseOut={(e) => (e.currentTarget.style.background = '#ff4d4f')}
+      >
+        Logout
+      </button>
+    </nav>
   );
 }
 
-export default GoalCard;
+export default TopNav;

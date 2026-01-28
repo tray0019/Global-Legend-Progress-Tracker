@@ -41,6 +41,9 @@ function TopNav({ currentUser, setCurrentUser }) {
       <Link to="/archived" style={linkStyle('/archived')}>
         Archive
       </Link>
+      <Link to="/test" style={linkStyle('/test')}>
+        Test View
+      </Link>
       <button onClick={handleLogout} style={{ marginLeft: 'auto' }}>
         Logout
       </button>
