@@ -19,7 +19,7 @@ public class UserProgress {
     private int totalXP = 0;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private Rank currentRank = Rank.BRONZE;
 
     @Column(nullable = false)
