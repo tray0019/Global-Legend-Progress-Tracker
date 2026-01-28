@@ -22,6 +22,19 @@ public class UserProgressService {
     private static final int DECAY_START_DAYS = 25;
     private static final int DECAY_INTERVAL_DAYS = 14;
 
+    private UserProgress getOrCreateProgress(User user) {
+        return repository.findByUser(user)
+                .orElseGet(() -> {
+                    UserProgress newProgress = new UserProgress();
+                    newProgress.setUser(user);
+                    newProgress.setTotalXP(0);
+                    newProgress.setDailyXP(0);
+                    newProgress.setCurrentRank(Rank.UNRANKED); // Use your new starting rank!
+                    newProgress.setLastActivityDate(LocalDate.now());
+                    return repository.save(newProgress);
+                });
+    }
+
     public void addXP(int difficulty){
         UserProgress progress = repository.findTopByOrderByIdAsc();
 
@@ -49,8 +62,7 @@ public class UserProgressService {
 
     // ==== USER-SCOPE (Phase 2+) ====
     public void addXPForUser(int difficulty, User user) {
-        UserProgress progress = repository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("UserProgress not found"));
+        UserProgress progress = getOrCreateProgress(user);
 
         resetDailyXPIfNewDay(progress);
 
@@ -164,16 +176,8 @@ public class UserProgressService {
     // ==== USER-SCOPE (Phase 2+) ====
     public UserProgress getProgressWithDecayCheckForUser(User user) {
         // 1. Try to find existing progress, if not found, CREATE a new one!
-        UserProgress progress = repository.findByUser(user)
-                .orElseGet(() -> {
-                    UserProgress newProgress = new UserProgress();
-                    newProgress.setUser(user);
-                    newProgress.setTotalXP(0);
-                    newProgress.setDailyXP(0);
-                    newProgress.setCurrentRank(Rank.BRONZE); // Or your lowest rank
-                    newProgress.setLastActivityDate(LocalDate.now());
-                    return repository.save(newProgress);
-                });
+        UserProgress progress = getOrCreateProgress(user);
+
 
         // 2. Now that we definitely have a progress object, run your checks
         resetDailyXPIfNewDay(progress);
@@ -202,8 +206,7 @@ public class UserProgressService {
 
     // ==== USER-SCOPE (Phase 2+) ====
     public void removeXPForUser(int difficulty, User user) {
-        UserProgress progress = repository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("UserProgress not found"));
+        UserProgress progress = getOrCreateProgress(user);
 
         int xpToSubtract = calculateXP(difficulty);
 
