@@ -163,9 +163,19 @@ public class UserProgressService {
 
     // ==== USER-SCOPE (Phase 2+) ====
     public UserProgress getProgressWithDecayCheckForUser(User user) {
+        // 1. Try to find existing progress, if not found, CREATE a new one!
         UserProgress progress = repository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("UserProgress not found"));
+                .orElseGet(() -> {
+                    UserProgress newProgress = new UserProgress();
+                    newProgress.setUser(user);
+                    newProgress.setTotalXP(0);
+                    newProgress.setDailyXP(0);
+                    newProgress.setCurrentRank(Rank.BRONZE); // Or your lowest rank
+                    newProgress.setLastActivityDate(LocalDate.now());
+                    return repository.save(newProgress);
+                });
 
+        // 2. Now that we definitely have a progress object, run your checks
         resetDailyXPIfNewDay(progress);
         applyRankDecayIfNeeded(progress);
 
