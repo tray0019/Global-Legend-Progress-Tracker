@@ -2,8 +2,10 @@ package com.GLPT.Backend.Service;
 
 import com.GLPT.Backend.Entity.User;
 import com.GLPT.Backend.Repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class FollowService {
@@ -14,6 +16,7 @@ public class FollowService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void toggleFollow(Long currentUserId, Long targetUserId) {
         User me = userRepository.findById(currentUserId).orElseThrow();
         User target = userRepository.findById(targetUserId).orElseThrow();
@@ -44,5 +47,15 @@ public class FollowService {
         User targetUser = userRepository.findById(targetUserId).orElseThrow();
         currentUser.getFollowing().remove(targetUser);
         userRepository.save(currentUser);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Integer> getFollowStats(User user) {
+        // Re-fetch the user within a transaction to ensure collections are accessible
+        User managedUser = userRepository.findById(user.getId()).orElseThrow();
+        return Map.of(
+                "followersCount", managedUser.getFollowers().size(),
+                "followingCount", managedUser.getFollowing().size()
+        );
     }
 }
