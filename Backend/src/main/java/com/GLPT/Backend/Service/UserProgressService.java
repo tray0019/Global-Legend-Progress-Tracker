@@ -91,7 +91,7 @@ public class UserProgressService {
         if(totalXP >= 800) return Rank.SILVER;
         if(totalXP >= 200) return Rank.BRONZE;
         System.out.print("Total XP:"+totalXP);
-        return null;
+        return Rank.UNRANKED;
     }
 
     private void resetDailyXPIfNewDay(UserProgress progress){
