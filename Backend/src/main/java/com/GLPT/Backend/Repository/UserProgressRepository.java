@@ -16,7 +16,7 @@ public interface UserProgressRepository extends JpaRepository<UserProgress, Long
     Optional<UserProgress> findByUser(User user);
     public Optional<UserProgress> findByUserId(Long userId);
 
-    @Query("SELECT new com.GLPT.Backend.DTO.LeaderboardUserDTO(p.user.firstName, p.user.lastName, p.totalXP, p.currentRank) " +
+    @Query("SELECT new com.GLPT.Backend.DTO.LeaderboardUserDTO(p.id,p.user.firstName, p.user.lastName, p.totalXP, p.currentRank) " +
             "FROM UserProgress p " +
             "ORDER BY p.totalXP DESC")
     List<LeaderboardUserDTO> getGlobalLeaderboard();

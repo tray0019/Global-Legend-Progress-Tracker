@@ -1,5 +1,6 @@
 package com.GLPT.Backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -59,7 +60,8 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    // Add these to your User Entity
+
+    @JsonIgnore // stops the infinite loop
     @ManyToMany
     @JoinTable(
             name = "user_following",
@@ -68,8 +70,8 @@ public class User {
     )
     private Set<User> following = new HashSet<>();
 
+    @JsonIgnore // stops the infinite loop
     @ManyToMany(mappedBy = "following")
     private Set<User> followers = new HashSet<>();
-
 }
 
