@@ -21,6 +21,9 @@ import { getProgress, addXP, removeXP } from '../api/userRankApi';
 import UserRankPanel from '../components/rank/UserRankPanel'; // adjust path if needed
 import { addEntry, deleteEntry, renameEntry } from '../api/userEntryApi';
 
+import FollowButton from '../components/FollowButton';
+import UserSearch from '../usercomponents/UserSearch';
+
 function Home({ currentUser, onLogout }) {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -502,6 +505,11 @@ function Home({ currentUser, onLogout }) {
     <div className="app-container">
       <p>Logged in as: {currentUser.email}</p>
       <button onClick={onLogout}>Logout</button>
+      {/* INSERT SEARCH HERE */}
+
+      <div className="social-search-header" style={{ marginBottom: '20px' }}>
+        <UserSearch />
+      </div>
       <h1>User Goals</h1>
 
       <UserRankPanel progress={progress} />

@@ -1,7 +1,3 @@
-import React from 'react';
-import { oauthRegister } from '../api/userApi';
-import { useNavigate } from 'react-router-dom';
-
 function Login() {
   const handleGoogleLogin = () => {
     // Redirect the browser directly to the Spring Boot OAuth endpoint
@@ -9,11 +5,17 @@ function Login() {
   };
 
   return (
-    <div>
+    <div className="login-container">
       <h1>Login / Sign-up</h1>
-      {/* Both buttons now trigger the actual Google flow */}
-      <button onClick={handleGoogleLogin}>Continue with Google</button>
-      <button onClick={handleGoogleLogin}>Sign up with Google</button>
+      <p>Join the community and track your goals!</p>
+
+      <button onClick={handleGoogleLogin} className="google-btn">
+        Continue with Google
+      </button>
+
+      <button onClick={handleGoogleLogin} className="google-btn-secondary">
+        Sign up with Google
+      </button>
     </div>
   );
 }

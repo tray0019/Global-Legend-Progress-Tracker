@@ -31,3 +31,5 @@ export const completeProfile = async (userId, profileData) => {
 };
 
 export const logout = () => api.post('/logout');
+
+export default api;

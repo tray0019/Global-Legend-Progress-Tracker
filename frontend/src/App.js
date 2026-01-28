@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import UserArchived from './pages/UserArchived';
 import Archived from './pages/UserArchived';
 import UserAchievements from './pages/UserAchievements';
-import Achievements from './pages/Achievements';
+import PublicProfile from './pages/PublicProfile';
 
 import TopNav from './components/TopNav';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -19,7 +19,7 @@ import { Navigate } from 'react-router-dom';
 import Leaderboard from './pages/Leaderboard'; // Adjust path if it's in components
 
 function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady }) {
-  const navigate = useNavigate();
+  <TopNav currentUser={currentUser} setCurrentUser={setCurrentUser} />;
 
   useEffect(() => {
     const bootstrapSession = async () => {
@@ -64,6 +64,8 @@ function AppContent({ currentUser, setCurrentUser, sessionReady, setSessionReady
             </ProtectedRoute>
           }
         />
+
+        <Route path="/profile/:userId" element={<PublicProfile />} />
 
         <Route
           path="/leaderboard"

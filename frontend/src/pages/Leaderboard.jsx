@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'; // 1. Added this import
 import axios from 'axios';
 import '../Leaderboard.css';
 
-const Leaderboard = (currentUser) => {
+const Leaderboard = () => {
+  // Note: Removed currentUser if not using it for logic
   const [players, setPlayers] = useState([]);
 
-  // Define the order from bottom to top
   const rankOrder = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER', 'CHALLENGER'];
 
   useEffect(() => {
@@ -20,11 +21,10 @@ const Leaderboard = (currentUser) => {
       <h2 className="title">Leaderboard</h2>
 
       <div className="staircase-wrapper">
-        {/* .reverse() so Challenger is at the top of the code, but we use flex-direction: column-reverse */}
         {rankOrder
           .slice(0)
           .reverse()
-          .map((rank, index) => {
+          .map((rank) => {
             const playersInRank = players.filter((p) => p.currentRank === rank);
 
             return (
@@ -34,7 +34,12 @@ const Leaderboard = (currentUser) => {
                   <div className="player-list">
                     {playersInRank.map((player, pIdx) => (
                       <div key={pIdx} className="player-entry">
-                        <span className="p-name">{player.firstName}</span>
+                        {/* 2. Changed 'user' to 'player' to match the map variable */}
+                        <Link to={`/profile/${player.id}`} className="p-link">
+                          <span className="p-name">
+                            {player.firstName} {player.lastName}
+                          </span>
+                        </Link>
                         <span className="p-xp">{player.totalXP} XP</span>
                       </div>
                     ))}
