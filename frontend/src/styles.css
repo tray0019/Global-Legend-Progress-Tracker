@@ -54,3 +54,41 @@
 .add-entry-form button {
   margin-top: 8px;
 }
+
+/* Layout Organization */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Consistent vertical spacing between all sections */
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Specific Section Styling */
+.social-search-header {
+  order: 1; /* Ensures search stays at top */
+}
+
+h1 {
+  order: 2;
+  text-align: center;
+}
+
+.UserRankPanel {
+  order: 3;
+}
+
+.UserGlobalYearCalendar {
+  order: 4;
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.goal-list {
+  order: 6;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

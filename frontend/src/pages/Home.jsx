@@ -504,13 +504,12 @@ function Home({ currentUser, onLogout }) {
   return (
     <div className="app-container">
       <p>Logged in as: {currentUser.email}</p>
-      <button onClick={onLogout}>Logout</button>
       {/* INSERT SEARCH HERE */}
 
       <div className="social-search-header" style={{ marginBottom: '20px' }}>
         <UserSearch />
       </div>
-      <h1>User Goals</h1>
+      <h1>Goals</h1>
 
       <UserRankPanel progress={progress} />
       {totalGoals > 0 && (
